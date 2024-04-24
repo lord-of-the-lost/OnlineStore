@@ -2,9 +2,20 @@ package com.example.onlinestore.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.onlinestore.R
+
+val inter = FontFamily(
+    Font(R.font.inter, FontWeight.Normal),
+)
+
+val plusJakartaSans = FontFamily(
+    Font(R.font.plus_jakarta_sans_extra_bold)
+)
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(

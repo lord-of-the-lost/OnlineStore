@@ -9,14 +9,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.onboarding.OnboardingScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -24,8 +23,20 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
     val navController = rememberNavController()
     Scaffold(
         Modifier
-        .background(Color.White),
-        bottomBar = { BottomNavigationBar(navController) }
+            .background(Color.White),
+        bottomBar = {
+            if (navController.currentBackStackEntryAsState().value?.destination?.route in listOf(
+                    Screen.Home.route,
+                    Screen.WishList.route,
+                    Screen.Account.route,
+                    Screen.Manager.route,
+                    Screen.AddProduct.route
+                )
+            ) {
+                BottomNavigationBar(navController)
+            }
+        }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -35,7 +46,12 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
         ) {
             NavHost(navController, startDestination = Screen.Onboarding.route) {
                 composable(Screen.Onboarding.route) {
-                    SampleScreen()
+                    OnboardingScreen(
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.White),
+                        navController
+                    )
                 }
                 composable(Screen.WishList.route) {
                     SampleScreen()
