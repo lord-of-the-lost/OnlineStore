@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
+import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -61,7 +62,7 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
                     SampleScreen()
                 }
                 composable(Screen.Manager.route) {
-                    SampleScreen()
+                    ManagerScreen()
                 }
                 composable(Screen.Account.route) {
                     SampleScreen()
