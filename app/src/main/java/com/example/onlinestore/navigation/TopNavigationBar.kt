@@ -159,10 +159,4 @@ fun SearchBar(
     }
 }
 
-@Preview
-@Composable
-fun SearchBarPreview() {
-    SearchBar("Penis", {})
-}
-
 

@@ -2,7 +2,6 @@ package com.example.onlinestore.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.onlinestore.R
@@ -54,9 +53,9 @@ sealed class Screen(
         val actionIcon: Int?
     ) :
         Screen(broute, bTitle) {
-        object Home : BottomNavigation("home", "Home", R.drawable.ic_home, Color(0xFF67C4A7),R.drawable.buy)
+        object Home : BottomNavigation("home", "Home", R.drawable.ic_home, Color(0xFF67C4A7), R.drawable.buy)
         object WishList :
-            BottomNavigation("wish_list", "Wishlist", R.drawable.ic_wishlist, Color(0xFF67C4A7),R.drawable.buy)
+            BottomNavigation("wish_list", "Wishlist", R.drawable.ic_wishlist, Color(0xFF67C4A7), R.drawable.buy)
 
         object Manager :
             BottomNavigation("manager", "Manager", R.drawable.ic_manager, Color(0xFF67C4A7),null)
