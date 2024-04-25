@@ -125,7 +125,6 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
             text = headTexts[headTextIndex],
             style = TextStyle(
                 fontFamily = plusJakartaSans,
-                //fontWeight = FontWeight(100),
                 fontSize = 29.sp,
                 lineHeight = 45.sp,
                 color = Color.Black,
