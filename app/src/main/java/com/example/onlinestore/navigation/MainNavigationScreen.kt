@@ -15,6 +15,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -72,7 +73,10 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
                     SampleScreen()
                 }
                 composable(Screen.DetailProductScreen.route) {
-                    SampleScreen()
+                    DetailScreen(Modifier
+                        .fillMaxSize()
+                        .background(Color.White),
+                        navController)
                 }
                 composable(Screen.Authorization.route) {
                     SampleScreen()
