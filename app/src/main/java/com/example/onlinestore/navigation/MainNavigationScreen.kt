@@ -27,6 +27,7 @@ import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.search_screen.SearchScreen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -97,7 +98,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             RegistrationScreen(navController)
         }
         composable(Screen.topNavigationBar.SearchResultScreen.tRoute) {
-            SampleScreen()
+            SearchScreen()
         }
         composable(Screen.topNavigationBar.Cart.tRoute) {
             SampleScreen()
