@@ -21,29 +21,21 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-
-
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.ImeOptions
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -58,7 +50,6 @@ fun LoginScreen(controller:NavController) {
         color = Color.White,
         modifier = Modifier.fillMaxSize()
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,19 +72,7 @@ fun LoginScreen(controller:NavController) {
                     .padding(top = 30.dp),
                 contentAlignment = Alignment.TopCenter,
             ) {
-                Button(
-                    {
-                        TODO()
-                    },
-                    modifier = Modifier
-                        .height(56.dp)
-                        .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorResource(R.color.Green_Sheen),
-                    )
-                ) {
-                    Text("Войти", color = Color.White, fontSize = 16.sp)
-                }
+                CustomButton("Войти")
 
             }
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -119,6 +98,24 @@ fun LoginScreen(controller:NavController) {
         }
     }
 
+}
+
+
+@Composable
+fun CustomButton(text:String){
+    Button(
+        {
+            TODO()
+        },
+        modifier = Modifier
+            .height(56.dp)
+            .fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = colorResource(R.color.Green_Sheen),
+        )
+    ) {
+        Text(text, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+    }
 }
 
 @Composable
@@ -151,7 +148,8 @@ fun TextField(
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions {
             focusManager.clearFocus()
-        }
+        },
+        singleLine = true
     )
 
 }
