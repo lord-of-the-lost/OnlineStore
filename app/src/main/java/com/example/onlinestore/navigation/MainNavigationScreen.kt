@@ -44,7 +44,9 @@ fun MainNavigationScreen() {
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            TopNavigationBar(title, { controller.navigateUp() }, controller)
+            if (title != "Home") {
+                TopNavigationBar(title, { controller.navigateUp() }, controller)
+            }
         },
         bottomBar = {
             bottomScreen.forEach { screen ->
@@ -70,7 +72,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             SampleScreen()
         }
         composable(Screen.BottomNavigation.WishList.broute) {
-           SampleScreen()
+            SampleScreen()
         }
         composable(Screen.BottomNavigation.Home.broute) {
            SampleScreen()

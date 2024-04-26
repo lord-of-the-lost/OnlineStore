@@ -12,4 +12,6 @@
     <color name="background_textField">#FBFBFB</color>
     <color name="label_blueColor">#4589df</color>
     <color name="backgroung_textField2">#f6f8fe</color>
+    <color name="buttonBorder">#f0f2f1</color>
+
 </resources>

@@ -13,7 +13,9 @@ class ProductViewModelTest : ViewModel() {
 
     private val _productState = mutableStateOf(ProductState())
     val productState:State<ProductState> = _productState
-
+   init {
+       fetch()
+   }
 
     fun fetch(){
         viewModelScope.launch {
