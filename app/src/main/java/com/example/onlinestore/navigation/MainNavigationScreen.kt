@@ -20,11 +20,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
-
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
+import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
+import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
+import com.example.onlinestore.views.SampleScreen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -61,7 +63,7 @@ fun MainNavigationScreen() {
 fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: PaddingValues) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.BottomNavigation.Home.broute, modifier = Modifier.padding(dp)
+        startDestination = Screen.topNavigationBar.Registration.route, modifier = Modifier.padding(dp)
     ) {
 
         composable(Screen.topNavigationBar.Onboarding.tRoute) {
@@ -89,10 +91,10 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             SampleScreen()
         }
         composable(Screen.topNavigationBar.Authorization.tRoute) {
-            SampleScreen()
+            LoginScreen(navController)
         }
         composable(Screen.topNavigationBar.Registration.tRoute) {
-            SampleScreen()
+            RegistrationScreen(navController)
         }
         composable(Screen.topNavigationBar.SearchResultScreen.tRoute) {
             SampleScreen()
