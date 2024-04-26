@@ -2,9 +2,11 @@ package com.example.onlinestore.navigation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -12,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,29 +30,20 @@ fun BottomNavigationBar(navController: NavController) {
         backgroundColor = Color.White,
         modifier = Modifier
             .height(96.dp)
-            .bottomBorder(
-                BorderStroke(
-                    width = 1.dp,
-                    color = Color(0xFFACAFC3)
-                )
-            ),
+
     ) {
         val currentRoute = currentRoute(navController)
-        listOf(
-            Screen.Home,
-            Screen.WishList,
-            Screen.Manager,
-            Screen.Account
-        ).forEach { screen ->
+        bottomScreen.forEach { screen ->
             val isSelected = currentRoute == screen.route
             BottomNavigationItem(
                 icon = {
-                    Box(
-                        contentAlignment = Alignment.TopCenter,
-                        modifier = Modifier.padding(bottom = 20.dp)
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        screen.iconResourceId?.let { painterResource(id = it) }?.let { icon ->
-                            (if (isSelected) screen.activeColor else Color(0xFFACAFC3))?.let {
+                        screen.icon.let { painterResource(id = it) }.let { icon ->
+                            (if (isSelected) screen.color else Color(0xFFACAFC3)).let {
                                 Icon(
                                     painter = icon,
                                     contentDescription = null,
@@ -58,7 +52,9 @@ fun BottomNavigationBar(navController: NavController) {
                                 )
                             }
                         }
+                        Text(screen.bTitle)
                     }
+
                 },
                 selected = isSelected,
                 onClick = {

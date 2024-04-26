@@ -186,7 +186,7 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                 onClick = {
                     pagerScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
                     if (descriptionHeadTextIndex == 2) {
-                        navController.navigate(Screen.Registration.route)
+                        navController.navigate(Screen.topNavigationBar.Registration.route)
                     }
                 }) {
                 Icon(
