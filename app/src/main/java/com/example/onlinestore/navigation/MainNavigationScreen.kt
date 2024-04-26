@@ -1,7 +1,10 @@
 package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -11,13 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.views.HomeScreen.MainScreen
+
 import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.detail.DetailScreen
+import com.example.onlinestore.views.manager_screen.ManagerScreen
+import com.example.onlinestore.views.onboarding.OnboardingScreen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -27,13 +34,13 @@ fun MainNavigationScreen() {
     val controller: NavController = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val ScaffoldState = rememberScaffoldState()
+    val scaffoldState = rememberScaffoldState()
 
     var title = topScreens.firstOrNull() { it.route == currentRoute }?.title
         ?: bottomScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
 
     Scaffold(
-        scaffoldState = ScaffoldState,
+        scaffoldState = scaffoldState,
         topBar = {
             TopNavigationBar(title, { controller.navigateUp() }, controller)
         },
@@ -42,7 +49,9 @@ fun MainNavigationScreen() {
                 if (currentRoute == screen.broute)
                     BottomNavigationBar(controller)
             }
+
         }
+
     ) {
         Navigation(controller, viewModel, it)
     }
@@ -62,7 +71,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
            SampleScreen()
         }
         composable(Screen.BottomNavigation.Home.broute) {
-            MainScreen(navController)
+           SampleScreen()
         }
         composable(Screen.BottomNavigation.Manager.broute) {
             SampleScreen()
