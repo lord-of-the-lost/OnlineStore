@@ -65,7 +65,7 @@ fun MainNavigationScreen() {
 fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: PaddingValues) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.topNavigationBar.Registration.route, modifier = Modifier.padding(dp)
+        startDestination = Screen.BottomNavigation.Home.broute, modifier = Modifier.padding(dp)
     ) {
 
         composable(Screen.topNavigationBar.Onboarding.tRoute) {
