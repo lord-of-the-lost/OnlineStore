@@ -6,12 +6,12 @@ import retrofit2.create
 import retrofit2.http.GET
 
 interface ApiServiceTest {
-    @GET("products")
+    @GET("/products")
     suspend fun getAllProduct(): Product
 }
 
 var retrofit = Retrofit.Builder()
-    .baseUrl("https://api.escuelajs.co/api/v1/")
+    .baseUrl("https://api.escuelajs.co/api/v1")
     .addConverterFactory(GsonConverterFactory.create())
     .build()
 
