@@ -17,6 +17,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -71,12 +75,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(controller: NavController) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.White,
-
-        ) {
-
         var viewModel: ProductViewModelTest = viewModel()
         val viewState by viewModel.productState
         Column(
@@ -180,23 +178,17 @@ fun MainScreen(controller: NavController) {
 
     }
 
-}
+
 @Composable
 fun ProductItem2(list: Product?) {
+    LazyVerticalGrid(columns = GridCells.Fixed(2),state = rememberLazyGridState()) {
+        list?.let {
+            items(list){items ->
+                CardItem(items)
 
-    Card(modifier = Modifier
-        .size(200.dp, 250.dp)) {
-        Column(modifier = Modifier.fillMaxSize()) {
-
-                Text(list?.get(0)?.title.toString())
-                Text(list?.get(0)?.description.toString())
-                Text(list?.get(0)?.price.toString())
-                AsyncImage(list?.get(0)?.images?.get(0), "")
-
-
-
-
+            }
         }
+
     }
 }
 @Composable
@@ -215,8 +207,8 @@ fun CategoryButtonItem(image: Int) {
 fun SearchBar2(
     controller: NavController
 ) {
-    var focusManager = LocalFocusManager.current
-    var interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
+    val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = "",
         onValueChange = {},
@@ -227,7 +219,7 @@ fun SearchBar2(
             .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
             .onFocusEvent {
                 if (it.isFocused) {
-                    controller.navigate(Screen.topNavigationBar.Cart.route)
+                    controller.navigate(Screen.topNavigationBar.SearchResultScreen.tRoute)
                     focusManager.clearFocus()
                 }
             },

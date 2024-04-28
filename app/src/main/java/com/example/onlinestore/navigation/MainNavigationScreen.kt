@@ -26,6 +26,7 @@ import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
+import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 
@@ -76,7 +77,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             SampleScreen()
         }
         composable(Screen.BottomNavigation.Home.broute) {
-           SampleScreen()
+           MainScreen(controller = navController)
         }
         composable(Screen.BottomNavigation.Manager.broute) {
             SampleScreen()
