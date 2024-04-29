@@ -14,4 +14,7 @@
     <color name="backgroung_textField2">#f6f8fe</color>
     <color name="red_search">#D65B5B</color>
     <color name="gray_search">#393F42</color>
+    <color name="buttonBorder">#f0f2f1</color>
+    <color name="CardColor">#FAFAFC</color>
+
 </resources>

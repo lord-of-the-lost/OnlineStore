@@ -1,10 +1,16 @@
 package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -14,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -22,11 +27,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
-import com.example.onlinestore.views.manager_screen.ManagerScreen
-import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
-import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.HomeScreen.MainScreen
+import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
 import com.example.onlinestore.views.search_screen.SearchScreen
 
 
@@ -45,7 +49,9 @@ fun MainNavigationScreen() {
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            TopNavigationBar(title, { controller.navigateUp() }, controller)
+            if (title != "Home") {
+                TopNavigationBar(title, { controller.navigateUp() }, controller)
+            }
         },
         bottomBar = {
             bottomScreen.forEach { screen ->
@@ -64,17 +70,22 @@ fun MainNavigationScreen() {
 fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: PaddingValues) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.topNavigationBar.Registration.route, modifier = Modifier.padding(dp)
+        startDestination = Screen.BottomNavigation.Home.broute, modifier = Modifier.padding(dp),
+        enterTransition = { EnterTransition.None},
+        exitTransition = { ExitTransition.None}
     ) {
 
         composable(Screen.topNavigationBar.Onboarding.tRoute) {
             SampleScreen()
         }
         composable(Screen.BottomNavigation.WishList.broute) {
-           SampleScreen()
+            SampleScreen()
         }
         composable(Screen.BottomNavigation.Home.broute) {
-           SampleScreen()
+            MainScreen(navController, navigateToDetail = {
+                navController.currentBackStackEntry?.savedStateHandle?.set("key", it)
+                navController.navigate(Screen.topNavigationBar.DetailProductScreen.tRoute)
+            })
         }
         composable(Screen.BottomNavigation.Manager.broute) {
             SampleScreen()
@@ -88,8 +99,26 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
         composable(Screen.topNavigationBar.TermsConditions.tRoute) {
             SampleScreen()
         }
-        composable(Screen.topNavigationBar.DetailProductScreen.tRoute) {
-            SampleScreen()
+        composable(Screen.topNavigationBar.DetailProductScreen.tRoute, enterTransition = {
+            fadeIn(
+                animationSpec = tween(300, easing = LinearEasing)
+            ) + slideIntoContainer(
+                animationSpec = tween(300, easing = EaseIn),
+                towards = AnimatedContentTransitionScope.SlideDirection.Start
+            )
+        },
+            exitTransition = {
+                fadeOut(
+                    animationSpec = tween(3000, easing = LinearEasing)
+                ) + slideOutOfContainer(
+                    animationSpec = tween(3000, easing = EaseOut),
+                    towards = AnimatedContentTransitionScope.SlideDirection.End
+                )
+            }) {
+            val product =
+                navController.previousBackStackEntry?.savedStateHandle?.get<ProductItem>("key")
+                    ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)
+            DetailScreen(modifier = Modifier, navController = navController, product)
         }
         composable(Screen.topNavigationBar.Authorization.tRoute) {
             LoginScreen(navController)
