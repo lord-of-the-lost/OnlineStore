@@ -165,7 +165,7 @@ fun MainScreen(controller: NavController) {
                 }
 
                 else -> {
-                    ProductItem2(viewModel.productState.value.list)
+                    ProductItem2(viewModel.productState.value.list,controller)
 
                 }
 
@@ -180,11 +180,11 @@ fun MainScreen(controller: NavController) {
 
 
 @Composable
-fun ProductItem2(list: Product?) {
+fun ProductItem2(list: Product?,controller: NavController) {
     LazyVerticalGrid(columns = GridCells.Fixed(2),state = rememberLazyGridState()) {
         list?.let {
             items(list){items ->
-                CardItem(items)
+                CardItem(items,controller)
 
             }
         }
