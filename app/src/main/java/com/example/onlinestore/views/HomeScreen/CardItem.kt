@@ -36,17 +36,16 @@ import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardItem(productItem: ProductItem, controller: NavController) {
+fun CardItem(
+    productItem: ProductItem,
+    navigateToDetail: (ProductItem) -> Unit,) {
     val pagerState = rememberPagerState(pageCount = { productItem.images.size })
 
     Card(
         modifier = Modifier
             .fillMaxSize()
             .padding(3.dp)
-            .size(170.dp, 217.dp)
-            .clickable {
-                controller.navigate(Screen.topNavigationBar.DetailProductScreen.tRoute)
-            },
+            .size(170.dp, 217.dp),
         colors = CardDefaults.cardColors(colorResource(id = R.color.CardColor)),
     ) {
         Column(
@@ -57,6 +56,9 @@ fun CardItem(productItem: ProductItem, controller: NavController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.5f)
+                    .clickable {
+                        navigateToDetail(productItem)
+                    }
             ) {
                 var image = productItem.images
                 HorizontalPager(state = pagerState) {
@@ -107,14 +109,4 @@ fun CardItem(productItem: ProductItem, controller: NavController) {
 
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CardItemPreview() {
-    var context = LocalContext.current
-    CardItem(
-        productItem = ProductItem(1, "Monitor", 1988, "qweqw", emptyList(), "q"),
-        controller = NavController(context = context)
-    )
 }

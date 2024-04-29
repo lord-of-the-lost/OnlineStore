@@ -1,15 +1,18 @@
 package com.example.onlinestore.views.HomeScreen.networkTest
 
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class ProductItem(
     @SerializedName("id")
     var id: Int? = null,
     @SerializedName("title")
     var title: String? = null,
     @SerializedName("price")
-    var price: Int?  = null,
+    var price: Int? = null,
     @SerializedName("description")
     var description: String? = null,
     @SerializedName("images")
@@ -21,4 +24,4 @@ data class ProductItem(
     @SerializedName("category")
     var category: Category? = Category()
 
-)
+) : Parcelable

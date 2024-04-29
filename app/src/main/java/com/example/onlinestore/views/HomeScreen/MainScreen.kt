@@ -27,7 +27,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.IconButton
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -54,27 +53,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.onlinestore.R
 import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.views.HomeScreen.networkTest.Product
+import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen(controller: NavController) {
+fun MainScreen(controller: NavController,
+               navigateToDetail:(ProductItem)->Unit) {
         var viewModel: ProductViewModelTest = viewModel()
         val viewState by viewModel.productState
         Column(
@@ -165,7 +162,7 @@ fun MainScreen(controller: NavController) {
                 }
 
                 else -> {
-                    ProductItem2(viewModel.productState.value.list,controller)
+                    ProductItem2(viewModel.productState.value.list,controller,navigateToDetail)
 
                 }
 
@@ -180,11 +177,11 @@ fun MainScreen(controller: NavController) {
 
 
 @Composable
-fun ProductItem2(list: Product?,controller: NavController) {
+fun ProductItem2(list: Product?,controller: NavController,navigateToDetail: (ProductItem) -> Unit) {
     LazyVerticalGrid(columns = GridCells.Fixed(2),state = rememberLazyGridState()) {
         list?.let {
             items(list){items ->
-                CardItem(items,controller)
+                CardItem(items,navigateToDetail)
 
             }
         }
@@ -349,11 +346,4 @@ fun TextFieldDropDownMenu() {
         }
     }
 
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun MainScreenPreview() {
-    MainScreen(NavController(LocalContext.current))
 }
