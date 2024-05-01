@@ -17,4 +17,5 @@
     <color name="gray_border">#F0F2F1</color>
     <color name="buttonBorder">#f0f2f1</color>
     <color name="CardColor">#FAFAFC</color>
+    <color name="custom_grey">#FFF3F4F6</color>
 </resources>

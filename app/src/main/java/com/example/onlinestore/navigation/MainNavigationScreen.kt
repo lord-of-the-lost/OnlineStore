@@ -36,6 +36,7 @@ import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
 import com.example.onlinestore.views.manager_screen.ManagerScreen
+import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 
 
@@ -103,7 +104,7 @@ fun Navigation(
             ManagerScreen()
         }
         composable(Screen.BottomNavigation.Account.broute) {
-            SampleScreen()
+            ProfileScreen()
         }
         composable(Screen.topNavigationBar.AddProduct.tRoute) {
             AddProduct()
