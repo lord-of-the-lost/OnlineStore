@@ -12,7 +12,7 @@ data class ProductObject(
     @ColumnInfo("title") val title: String,
     @ColumnInfo("price") val price: Int,
     @ColumnInfo("description") val description: String,
-    @ColumnInfo("images") val images: MutableList<String>,
+    @ColumnInfo("images") val images: List<String>,
     @ColumnInfo("creationAt") val creationAt: String,
     @ColumnInfo("updatedAt") val updatedAt: String,
     @ColumnInfo("category") val category: CategoryModel
