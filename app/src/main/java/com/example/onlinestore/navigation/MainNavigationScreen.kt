@@ -30,6 +30,8 @@ import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
+import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
@@ -104,7 +106,7 @@ fun Navigation(
             SampleScreen()
         }
         composable(Screen.topNavigationBar.AddProduct.tRoute) {
-            SampleScreen()
+            AddProduct()
         }
         composable(Screen.topNavigationBar.TermsConditions.tRoute) {
             SampleScreen()
