@@ -89,6 +89,7 @@ fun LoginScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                 }
+
                 authState.success -> {
                     controller.navigate(Screen.BottomNavigation.Home.broute)
                 }
@@ -149,7 +150,10 @@ fun TextField(
             Text(placeholder, color = colorResource(R.color.Grey))
         },
         trailingIcon = {
-            Icon(painter = painterResource(R.drawable.eye), "", tint = colorResource(R.color.Grey))
+            Icon(
+                painter = painterResource(R.drawable.eye), "",
+                tint = colorResource(R.color.Grey)
+            )
         },
         modifier = Modifier
             .fillMaxWidth()

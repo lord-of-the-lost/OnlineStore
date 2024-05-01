@@ -30,8 +30,10 @@ import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
+import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
+import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 
 
@@ -69,12 +71,18 @@ fun MainNavigationScreen() {
 }
 
 @Composable
-fun Navigation(navController: NavController, viewModel: StoreViewModel, authViewModel: AuthViewModel, dp: PaddingValues) {
+fun Navigation(
+    navController: NavController,
+    viewModel: StoreViewModel,
+    authViewModel: AuthViewModel,
+    dp: PaddingValues
+) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.topNavigationBar.Registration.route, modifier = Modifier.padding(dp),
-        enterTransition = { EnterTransition.None},
-        exitTransition = { ExitTransition.None}
+        startDestination = Screen.topNavigationBar.Registration.route,
+        modifier = Modifier.padding(dp),
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
     ) {
 
         composable(Screen.topNavigationBar.Onboarding.tRoute) {
@@ -90,7 +98,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, authView
             })
         }
         composable(Screen.BottomNavigation.Manager.broute) {
-            SampleScreen()
+            ManagerScreen()
         }
         composable(Screen.BottomNavigation.Account.broute) {
             SampleScreen()
@@ -132,7 +140,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, authView
             SearchScreen()
         }
         composable(Screen.topNavigationBar.Cart.tRoute) {
-            SampleScreen()
+            CartScreen()
         }
     }
 }
