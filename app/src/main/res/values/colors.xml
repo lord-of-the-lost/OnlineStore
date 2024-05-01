@@ -14,4 +14,5 @@
     <color name="backgroung_textField2">#f6f8fe</color>
     <color name="red_search">#D65B5B</color>
     <color name="gray_search">#393F42</color>
+    <color name="gray_border">#F0F2F1</color>
 </resources>

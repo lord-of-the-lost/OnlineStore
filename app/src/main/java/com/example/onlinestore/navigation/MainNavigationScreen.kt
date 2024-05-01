@@ -27,6 +27,7 @@ import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.search_screen.SearchScreen
 
 
@@ -83,7 +84,7 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             SampleScreen()
         }
         composable(Screen.topNavigationBar.AddProduct.tRoute) {
-            SampleScreen()
+            AddProduct()
         }
         composable(Screen.topNavigationBar.TermsConditions.tRoute) {
             SampleScreen()
