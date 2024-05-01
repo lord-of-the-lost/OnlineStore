@@ -1,6 +1,8 @@
 package com.example.onlinestore.views.CartScreen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,9 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +26,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -34,9 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -44,9 +49,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
 import com.example.onlinestore.R
 import com.example.onlinestore.ui.theme.inter
+import kotlin.random.Random
 
 
 data class ShopItem(
@@ -57,7 +63,7 @@ data class ShopItem(
     var isSelected: Boolean = false
 )
 
-val shopItemsInCart = listOf(
+var shopItemsInCart = mutableListOf(
     ShopItem(
         R.drawable.img_detail_screen,
         "Air pods max by Apple",
@@ -78,7 +84,8 @@ val shopItemsInCart = listOf(
         "\$ 199,99",
         1,
         false
-    ),ShopItem(
+    ),
+    ShopItem(
         R.drawable.img_detail_screen,
         "Air pods max by Apple",
         "\$ 1999.99",
@@ -98,7 +105,8 @@ val shopItemsInCart = listOf(
         "\$ 199,99",
         1,
         false
-    ),ShopItem(
+    ),
+    ShopItem(
         R.drawable.img_detail_screen,
         "Air pods max by Apple",
         "\$ 1999.99",
@@ -118,7 +126,8 @@ val shopItemsInCart = listOf(
         "\$ 199,99",
         1,
         false
-    ),ShopItem(
+    ),
+    ShopItem(
         R.drawable.img_detail_screen,
         "Air pods max by Apple",
         "\$ 1999.99",
@@ -141,19 +150,15 @@ val shopItemsInCart = listOf(
     ),
 )
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun CartScreen(
-    //modifier: Modifier,
-    //navController: NavController,
-    //item: ShoppingItem
 ) {
 
-
-    var quantityOfProduct by remember { mutableStateOf(1) }
-
+    var shopItemsInCart by remember { mutableStateOf(shopItemsInCart) }
 
     Column {
-        DeliveryAdress()
+        DeliveryAddress()
         Box(
             modifier = Modifier
                 .border(1.dp, Color(0xFFD9D9D9))
@@ -165,9 +170,13 @@ fun CartScreen(
                 .weight(1f)
                 .padding(start = 20.dp, end = 20.dp)
         ) {
-            items(shopItemsInCart) {
+            items(shopItemsInCart) { shopItem ->
                 ShoppingListItem(
-                    shopItem = it
+                    shopItem = shopItem,
+                    onDeleteItem = {
+                        shopItemsInCart = shopItemsInCart.toMutableList()
+                            .also { it.remove(shopItem) }
+                    }
                 )
             }
         }
@@ -187,7 +196,7 @@ fun CartScreen(
 }
 
 @Composable
-fun DeliveryAdress() {
+fun DeliveryAddress() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,7 +209,7 @@ fun DeliveryAdress() {
             text = "Delivery to",
             style = TextStyle(
                 fontFamily = inter,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 12.sp,
                 lineHeight = 16.94.sp,
                 color = Color(0xFF393F42),
@@ -214,7 +223,7 @@ fun DeliveryAdress() {
 @Composable
 fun DropDownExample() {
     val options = listOf(
-        "Salatiga City, Central Java",
+        "Кудыкина Гора, пещера №5",
         "г.Оренбург, ул.Советская",
         "г.Иркутск, ул.Космическая"
     )
@@ -226,34 +235,55 @@ fun DropDownExample() {
         onExpandedChange = { expanded = !expanded },
     ) {
         TextField(
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier
+                .menuAnchor()
+                .wrapContentSize()
+                .offset(x = 18.dp),
             readOnly = true,
             value = selectedOptionText,
             onValueChange = {},
             textStyle = TextStyle(
                 fontFamily = inter,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 12.sp,
                 lineHeight = 16.94.sp,
                 color = Color(0xFF393F42),
+                textAlign = TextAlign.End
             ),
             singleLine = true,
-            //label = { Text("Label") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            trailingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.drop_down_icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(12.dp)
+                        .rotate(if (expanded) 180f else 0f)
+                )
+            },
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
                 unfocusedTextColor = Color(0xff888888),
                 focusedContainerColor = Color.White,
                 focusedTextColor = Color(0xff222222),
-            ),
+                unfocusedIndicatorColor = Color.White,
+                focusedIndicatorColor = Color.White
+            )
         )
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            modifier = Modifier.background(Color.White)
+
         ) {
             options.forEach { selectionOption ->
                 DropdownMenuItem(
-                    text = { Text(selectionOption) },
+                    text = {
+                        Text(
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth(),
+                            text = selectionOption
+                        )
+                    },
                     onClick = {
                         selectedOptionText = selectionOption
                         expanded = false
@@ -266,23 +296,21 @@ fun DropDownExample() {
 
 @Composable
 fun ShoppingListItem(
-    shopItem: ShopItem
-    // onSelectedPaymentMethodClick: () -> Unit
+    shopItem: ShopItem,
+    onDeleteItem: (ShopItem) -> Unit
 ) {
     var isSelected by remember { mutableStateOf(false) }
-    isSelected = shopItem.isSelected == true
+    isSelected = shopItem.isSelected
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 22.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        //horizontalArrangement = Arrangement.SpaceBetween
-
+        verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(modifier = Modifier
             .size(24.dp),
             onClick = {
-                if (isSelected != true) {
+                if (!isSelected) {
                     isSelected = true
                     shopItem.isSelected = isSelected
                 } else {
@@ -309,17 +337,21 @@ fun ShoppingListItem(
             modifier = Modifier
                 .size(82.dp, 76.dp)
                 .clip(RoundedCornerShape(4.dp)),
-            painter = rememberImagePainter(shopItem.imgOfProduct),
+            painter = rememberAsyncImagePainter(shopItem.imgOfProduct),
             contentDescription = null,
             contentScale = ContentScale.Crop,
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column(
-            modifier = Modifier.height(76.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(0.dp, 76.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column {
+            Column()
+            {
                 Text(
+                    modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
                     text = shopItem.nameOfProduct,
                     style = TextStyle(
                         fontFamily = inter,
@@ -330,7 +362,7 @@ fun ShoppingListItem(
                     )
                 )
                 Text(
-                    text = "Available: 10 pcs",
+                    text = "Available: ${Random.nextInt(70, 501)} pcs",
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.Normal,
@@ -341,12 +373,15 @@ fun ShoppingListItem(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(0.dp, 24.dp),
+                verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = shopItem.priceOfProduct.toString(),
+                    modifier = Modifier.padding(bottom = 5.dp),
+                    text = shopItem.priceOfProduct,
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.Medium,
@@ -355,8 +390,7 @@ fun ShoppingListItem(
                         color = Color(0xFF393F42)
                     )
                 )
-                QuantityOfProduct(quantityOfProduct = 0) {
-                }
+                QuantityOfProduct(shopItem, onDeleteItem)
             }
         }
     }
@@ -364,21 +398,26 @@ fun ShoppingListItem(
 
 @Composable
 fun QuantityOfProduct(
-    quantityOfProduct: Int,
-    onSelectedPaymentMethodClick: () -> Unit
+    shopItem: ShopItem,
+    onDeleteItem: (ShopItem) -> Unit
 ) {
+    var quantityOfProduct by remember { mutableStateOf(shopItem.quantity) }
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
             modifier = Modifier
                 .size(24.dp),
-            onClick = { /*TODO*/ }) {
+            onClick = {
+                if (quantityOfProduct > 1) {
+                    quantityOfProduct--
+                }
+            }) {
             Icon(
                 modifier = Modifier
                     .size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.increase_icon),
-                tint = Color(0xFFD9D9D9),
+                imageVector = ImageVector.vectorResource(R.drawable.decrease_icon),
+                tint = Color.Unspecified,
                 contentDescription = null
             )
         }
@@ -398,12 +437,14 @@ fun QuantityOfProduct(
         IconButton(
             modifier = Modifier
                 .size(24.dp),
-            onClick = { /*TODO*/ }) {
+            onClick = {
+                quantityOfProduct++
+            }) {
             Icon(
                 modifier = Modifier
                     .size(24.dp),
-                imageVector = ImageVector.vectorResource(R.drawable.decrease_icon),
-                tint = Color(0xFFD9D9D9),
+                imageVector = ImageVector.vectorResource(R.drawable.increase_icon),
+                tint = Color.Unspecified,
                 contentDescription = null
             )
         }
@@ -411,12 +452,12 @@ fun QuantityOfProduct(
         IconButton(
             modifier = Modifier
                 .size(24.dp),
-            onClick = { /*TODO*/ }) {
+            onClick = { onDeleteItem(shopItem) }) {
             Icon(
                 modifier = Modifier
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.trash_can_icon),
-                tint = Color(0xFFD9D9D9),
+                tint = Color.Unspecified,
                 contentDescription = null
             )
         }
@@ -425,10 +466,7 @@ fun QuantityOfProduct(
 
 @Composable
 fun OrderSummary() {
-    Column(
-        //verticalArrangement = Arrangement.Bottom
-        /*modifier = Modifier.size()*/
-    ) {
+    Column {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
