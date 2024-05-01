@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -80,7 +81,7 @@ fun TopNavigationBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        title,
+                        title, modifier = Modifier.padding(end = if(icon != null) 65.dp else 0.dp),
                         color = Color.Black,
                     )
                 }
