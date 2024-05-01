@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.views.AuthentificationScreen.AuthViewModel
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
@@ -38,6 +39,7 @@ import com.example.onlinestore.views.search_screen.SearchScreen
 @Composable
 fun MainNavigationScreen() {
     var viewModel: StoreViewModel = viewModel()
+    var authViewModel: AuthViewModel = viewModel()
     val controller: NavController = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -62,15 +64,15 @@ fun MainNavigationScreen() {
         }
 
     ) {
-        Navigation(controller, viewModel, it)
+        Navigation(controller, viewModel, authViewModel, it)
     }
 }
 
 @Composable
-fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: PaddingValues) {
+fun Navigation(navController: NavController, viewModel: StoreViewModel, authViewModel: AuthViewModel, dp: PaddingValues) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.BottomNavigation.Home.broute, modifier = Modifier.padding(dp),
+        startDestination = Screen.topNavigationBar.Registration.route, modifier = Modifier.padding(dp),
         enterTransition = { EnterTransition.None},
         exitTransition = { ExitTransition.None}
     ) {
@@ -121,10 +123,10 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             DetailScreen(modifier = Modifier, navController = navController, product)
         }
         composable(Screen.topNavigationBar.Authorization.tRoute) {
-            LoginScreen(navController)
+            LoginScreen(navController, authViewModel)
         }
         composable(Screen.topNavigationBar.Registration.tRoute) {
-            RegistrationScreen(navController)
+            RegistrationScreen(navController, authViewModel)
         }
         composable(Screen.topNavigationBar.SearchResultScreen.tRoute) {
             SearchScreen()
@@ -133,5 +135,4 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, dp: Padd
             SampleScreen()
         }
     }
-
 }

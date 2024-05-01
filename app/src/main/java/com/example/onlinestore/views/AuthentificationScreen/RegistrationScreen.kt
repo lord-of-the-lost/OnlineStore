@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.AuthentificationScreen
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,26 +14,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 
 import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material3.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +42,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -50,16 +49,20 @@ import com.example.onlinestore.R
 import com.example.onlinestore.navigation.Screen
 
 @Composable
-fun RegistrationScreen(controller: NavController) {
+fun RegistrationScreen(
+    controller: NavController,
+    authViewModel: AuthViewModel
+) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .verticalScroll(state = ScrollState(0)),
         color = Color.White
     ) {
         var firstName by remember { mutableStateOf("") }
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var confirmPass by remember { mutableStateOf("") }
-
+        val authState by authViewModel.authState.collectAsState()
 
         Column(
             modifier = Modifier
@@ -109,13 +112,27 @@ fun RegistrationScreen(controller: NavController) {
             Spacer(Modifier.padding(bottom = 30.dp))
             TextFieldDropDownMenu()
 
-
-
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column() {
-                    CustomButton("Sign Up")
-                    Row(Modifier.fillMaxWidth().padding(top = 30.dp),
-                        horizontalArrangement = Arrangement.Center) {
+                    CustomButton("Sign Up") {
+                        authViewModel.register(firstName, email, password, confirmPass)
+                    }
+                    // Обработка ошибок
+                    if (authState.error.isNotBlank()) {
+                        Text(
+                            authState.error,
+                            fontSize = 14.sp,
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 30.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Text(
                             "Already have an account?",
                             fontSize = 16.sp,
@@ -133,10 +150,7 @@ fun RegistrationScreen(controller: NavController) {
                     }
                 }
             }
-
-
         }
-
     }
 }
 
@@ -190,10 +204,8 @@ fun CustomTextField(
             keyboardActions = KeyboardActions {
                 focusManager.clearFocus()
             },
-
-            )
+        )
     }
-
 }
 
 @OptIn(
@@ -244,10 +256,7 @@ fun TextFieldDropDownMenu() {
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
-
-
             }
         }
     }
-
 }
