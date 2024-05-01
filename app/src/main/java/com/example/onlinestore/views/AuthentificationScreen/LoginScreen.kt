@@ -1,8 +1,6 @@
 package com.example.onlinestore.views.AuthentificationScreen
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,6 +21,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,9 +41,14 @@ import com.example.onlinestore.R
 import com.example.onlinestore.navigation.Screen
 
 @Composable
-fun LoginScreen(controller:NavController) {
+fun LoginScreen(
+    controller: NavController,
+    authViewModel: AuthViewModel
+) {
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    val authState by authViewModel.authState.collectAsState()
+
     Surface(
         color = Color.White,
         modifier = Modifier.fillMaxSize()
@@ -63,7 +66,7 @@ fun LoginScreen(controller:NavController) {
             Spacer(modifier = Modifier.padding(bottom = 10.dp))
 
             Text("Пароль", fontSize = 14.sp, color = colorResource(R.color.Grey))
-            TextField(text = password, { login = it }, "Пароль")
+            TextField(text = password, { password = it }, "Пароль")
 
             Box(
                 Modifier
@@ -72,40 +75,52 @@ fun LoginScreen(controller:NavController) {
                     .padding(top = 30.dp),
                 contentAlignment = Alignment.TopCenter,
             ) {
-                CustomButton("Войти")
-
-            }
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        "У вас еще нет аккаунта?",
-                        color = colorResource(R.color.Dark_Arsenic),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        "Зарегистрироваться",
-                        color = colorResource(R.color.Green_Sheen),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.clickable {
-                            controller.navigate(Screen.topNavigationBar.Registration.route)
-                        }
-                    )
+                CustomButton("Войти") {
+                    authViewModel.login(login, password)
                 }
             }
-
+            when {
+                authState.error.isNotBlank() -> {
+                    Text(
+                        authState.error,
+                        fontSize = 14.sp,
+                        color = Color.Red,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+                authState.success -> {
+                    controller.navigate(Screen.BottomNavigation.Home.broute)
+                }
+            }
+        }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    "У вас еще нет аккаунта?",
+                    color = colorResource(R.color.Dark_Arsenic),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    "Зарегистрироваться",
+                    color = colorResource(R.color.Green_Sheen),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    modifier = Modifier.clickable {
+                        controller.navigate(Screen.topNavigationBar.Registration.route)
+                    }
+                )
+            }
         }
     }
-
 }
 
-
 @Composable
-fun CustomButton(text:String){
+fun CustomButton(text: String, action: () -> Unit) {
     Button(
         {
-            TODO()
+            action()
         },
         modifier = Modifier
             .height(56.dp)
@@ -151,5 +166,4 @@ fun TextField(
         },
         singleLine = true
     )
-
 }
