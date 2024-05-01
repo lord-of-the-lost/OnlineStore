@@ -4,8 +4,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.onlinestore.views.HomeScreen.networkTest.Product
-import com.example.onlinestore.views.HomeScreen.networkTest.productService
+import com.example.onlinestore.views.HomeScreen.network.Products
+import com.example.onlinestore.views.HomeScreen.network.productService
 import kotlinx.coroutines.launch
 import java.lang.Exception
 
@@ -13,7 +13,8 @@ class ProductViewModelTest : ViewModel() {
 
     private val _productState = mutableStateOf(ProductState())
     val productState:State<ProductState> = _productState
-   init {
+
+    init {
      fetch()
    }
 
@@ -21,7 +22,7 @@ class ProductViewModelTest : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = productService.getAllProduct()
-                _productState.value = _productState.value.copy(
+                 _productState.value = _productState.value.copy(
                     list = response,
                     loading = false,
                     error = null
@@ -35,13 +36,9 @@ class ProductViewModelTest : ViewModel() {
             }
         }
     }
-
-
-
-
     data class ProductState(
         var loading: Boolean = true,
-        var list: Product? = null,
+        var list: Products? = null,
         var error: String? = null
 
     )

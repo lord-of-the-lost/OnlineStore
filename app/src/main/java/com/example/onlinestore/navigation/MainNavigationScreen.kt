@@ -25,39 +25,38 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
 import com.example.onlinestore.views.AuthentificationScreen.AuthViewModel
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
-import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
+import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainNavigationScreen() {
-    var viewModel: StoreViewModel = viewModel()
-    var authViewModel: AuthViewModel = viewModel()
+    val viewModel: StoreViewModel = viewModel()
+    val authViewModel: AuthViewModel = viewModel()
     val controller: NavController = rememberNavController()
-    val navBackStackEntry by controller.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
     val scaffoldState = rememberScaffoldState()
+    val route = currentRoute(controller)
+    val screenWithScaffold = allScreen.firstOrNull { it.route == route }?.withScaffold
 
-    var title = topScreens.firstOrNull() { it.route == currentRoute }?.title
-        ?: bottomScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            if (title != "Home") {
-                TopNavigationBar(title, { controller.navigateUp() }, controller)
+            if (screenWithScaffold == true) {
+                TopNavigationBar({ controller.navigateUp() }, controller)
             }
         },
         bottomBar = {
             bottomScreen.forEach { screen ->
-                if (currentRoute == screen.broute)
+                if (currentRoute(controller) == screen.broute)
                     BottomNavigationBar(controller)
             }
 
@@ -69,39 +68,43 @@ fun MainNavigationScreen() {
 }
 
 @Composable
-fun Navigation(navController: NavController, viewModel: StoreViewModel, authViewModel: AuthViewModel, dp: PaddingValues) {
+fun Navigation(
+    navController: NavController,
+    viewModel: StoreViewModel,
+    authViewModel: AuthViewModel,
+    dp: PaddingValues
+) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.topNavigationBar.Registration.route, modifier = Modifier.padding(dp),
-        enterTransition = { EnterTransition.None},
-        exitTransition = { ExitTransition.None}
+        startDestination = Screen.NavigationItem.Registration.route,
+        modifier = Modifier.padding(dp),
     ) {
 
-        composable(Screen.topNavigationBar.Onboarding.tRoute) {
+        composable(Screen.NavigationItem.Onboarding.route) {
+            OnboardingScreen(Modifier,navController)
+        }
+        composable(Screen.BottomNavigation.WishList.route) {
             SampleScreen()
         }
-        composable(Screen.BottomNavigation.WishList.broute) {
-            SampleScreen()
-        }
-        composable(Screen.BottomNavigation.Home.broute) {
+        composable(Screen.BottomNavigation.Home.route) {
             MainScreen(navController, navigateToDetail = {
                 navController.currentBackStackEntry?.savedStateHandle?.set("key", it)
-                navController.navigate(Screen.topNavigationBar.DetailProductScreen.tRoute)
+                navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
             })
         }
-        composable(Screen.BottomNavigation.Manager.broute) {
+        composable(Screen.BottomNavigation.Manager.route) {
             SampleScreen()
         }
-        composable(Screen.BottomNavigation.Account.broute) {
+        composable(Screen.BottomNavigation.Account.route) {
             SampleScreen()
         }
-        composable(Screen.topNavigationBar.AddProduct.tRoute) {
+        composable(Screen.NavigationItem.AddProduct.route) {
             SampleScreen()
         }
-        composable(Screen.topNavigationBar.TermsConditions.tRoute) {
+        composable(Screen.NavigationItem.TermsConditions.route) {
             SampleScreen()
         }
-        composable(Screen.topNavigationBar.DetailProductScreen.tRoute, enterTransition = {
+        composable(Screen.NavigationItem.DetailProductScreen.route, enterTransition = {
             fadeIn(
                 animationSpec = tween(300, easing = LinearEasing)
             ) + slideIntoContainer(
@@ -122,16 +125,16 @@ fun Navigation(navController: NavController, viewModel: StoreViewModel, authView
                     ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)
             DetailScreen(modifier = Modifier, navController = navController, product)
         }
-        composable(Screen.topNavigationBar.Authorization.tRoute) {
+        composable(Screen.NavigationItem.Authorization.tRoute) {
             LoginScreen(navController, authViewModel)
         }
-        composable(Screen.topNavigationBar.Registration.tRoute) {
+        composable(Screen.NavigationItem.Registration.tRoute) {
             RegistrationScreen(navController, authViewModel)
         }
-        composable(Screen.topNavigationBar.SearchResultScreen.tRoute) {
+        composable(Screen.NavigationItem.SearchResultScreen.tRoute) {
             SearchScreen()
         }
-        composable(Screen.topNavigationBar.Cart.tRoute) {
+        composable(Screen.NavigationItem.Cart.tRoute) {
             SampleScreen()
         }
     }

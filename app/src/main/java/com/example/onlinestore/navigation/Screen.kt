@@ -9,40 +9,45 @@ import com.example.onlinestore.R
 sealed class Screen(
     val route: String,
     val title: String,
+    val withScaffold:Boolean
 ) {
-    sealed class topNavigationBar(
+    sealed class NavigationItem(
         val tRoute: String,
         val tTitle: String,
         val icon: ImageVector?,
-        val actionIcon: Int?
-    ) : Screen(tRoute, tTitle) {
-        object Onboarding : topNavigationBar("onboarding", "", null, null)
-        object Registration : topNavigationBar("signUp", "Sign Up", Icons.Default.ArrowBack, null)
-        object Authorization : topNavigationBar("authorization", "", null, null)
-        object DetailProductScreen : topNavigationBar(
+        val actionIcon: Int?,
+        val addScaffold:Boolean
+    ) : Screen(tRoute, tTitle,addScaffold) {
+        object Onboarding : NavigationItem("onboarding", "", null, null,false)
+        object Registration : NavigationItem("signUp", "Sign Up", Icons.Default.ArrowBack, null,true)
+        object Authorization : NavigationItem("authorization", "", null, null,false)
+        object DetailProductScreen : NavigationItem(
             "detail_product",
             "Details product",
             Icons.Default.ArrowBack,
-            R.drawable.buy
+            R.drawable.buy,
+            true
         )
 
         object SearchResultScreen :
-            topNavigationBar(
+            NavigationItem(
                 "search_result_screen",
                 "SearchResult",
                 Icons.Default.ArrowBack,
-                R.drawable.buy
+                R.drawable.buy,
+                true
             )
 
         object TermsConditions :
-            topNavigationBar("terms_conditions", "", Icons.Default.ArrowBack,null)
+            NavigationItem("terms_conditions", "", Icons.Default.ArrowBack,null,true)
 
-        object AddProduct : topNavigationBar("add_product", "Add new product", null, null)
-        object Cart : topNavigationBar(
+        object AddProduct : NavigationItem("add_product", "Add new product", null, null,true)
+        object Cart : NavigationItem(
             "your_cart",
             "Your Cart",
             Icons.Default.ArrowBack,
-            R.drawable.buy
+            R.drawable.buy,
+            true
         )
     }
     sealed class BottomNavigation(
@@ -50,29 +55,30 @@ sealed class Screen(
         val bTitle: String,
         val icon: Int,
         val color: Color,
-        val actionIcon: Int?
+        val actionIcon: Int?,
+        val addScaffold: Boolean
     ) :
-        Screen(broute, bTitle) {
-        object Home : BottomNavigation("home", "Home", R.drawable.ic_home, Color(0xFF67C4A7), R.drawable.buy)
+        Screen(broute, bTitle,addScaffold) {
+        object Home : BottomNavigation("home", "Home", R.drawable.ic_home, Color(0xFF67C4A7), R.drawable.buy,false)
         object WishList :
-            BottomNavigation("wish_list", "Wishlist", R.drawable.ic_wishlist, Color(0xFF67C4A7), R.drawable.buy)
+            BottomNavigation("wish_list", "Wishlist", R.drawable.ic_wishlist, Color(0xFF67C4A7), R.drawable.buy,true)
 
         object Manager :
-            BottomNavigation("manager", "Manager", R.drawable.ic_manager, Color(0xFF67C4A7),null)
+            BottomNavigation("manager", "Manager", R.drawable.ic_manager, Color(0xFF67C4A7),null,true)
 
         object Account :
-            BottomNavigation("account", "Account", R.drawable.ic_account, Color(0xFF67C4A7),null)
+            BottomNavigation("account", "Account", R.drawable.ic_account, Color(0xFF67C4A7),null,true)
     }
 }
 val topScreens = listOf(
-    Screen.topNavigationBar.AddProduct,
-    Screen.topNavigationBar.DetailProductScreen,
-    Screen.topNavigationBar.SearchResultScreen,
-    Screen.topNavigationBar.Authorization,
-    Screen.topNavigationBar.Cart,
-    Screen.topNavigationBar.Onboarding,
-    Screen.topNavigationBar.Registration,
-    Screen.topNavigationBar.TermsConditions
+    Screen.NavigationItem.AddProduct,
+    Screen.NavigationItem.DetailProductScreen,
+    Screen.NavigationItem.SearchResultScreen,
+    Screen.NavigationItem.Authorization,
+    Screen.NavigationItem.Cart,
+    Screen.NavigationItem.Onboarding,
+    Screen.NavigationItem.Registration,
+    Screen.NavigationItem.TermsConditions,
 )
 val bottomScreen = listOf(
     Screen.BottomNavigation.Home,
@@ -80,3 +86,4 @@ val bottomScreen = listOf(
     Screen.BottomNavigation.Manager,
     Screen.BottomNavigation.Account
 )
+val allScreen = topScreens + bottomScreen

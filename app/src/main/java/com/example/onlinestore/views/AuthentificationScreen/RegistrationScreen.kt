@@ -145,7 +145,7 @@ fun RegistrationScreen(
                             fontWeight = FontWeight.Bold,
                             color = Color.Blue,
                             modifier = Modifier.clickable {
-                                controller.navigate(Screen.topNavigationBar.Authorization.tRoute)
+                                controller.navigate(Screen.NavigationItem.Authorization.tRoute)
                             })
                     }
                 }

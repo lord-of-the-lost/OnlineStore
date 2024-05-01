@@ -90,7 +90,7 @@ fun LoginScreen(
                     )
                 }
                 authState.success -> {
-                    controller.navigate(Screen.BottomNavigation.Home.broute)
+                    controller.navigate(Screen.BottomNavigation.Home.route)
                 }
             }
         }
@@ -108,7 +108,7 @@ fun LoginScreen(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.clickable {
-                        controller.navigate(Screen.topNavigationBar.Registration.route)
+                        controller.navigate(Screen.NavigationItem.Registration.route)
                     }
                 )
             }

@@ -1,4 +1,4 @@
-package com.example.onlinestore.views.HomeScreen.networkTest
+package com.example.onlinestore.views.HomeScreen.network.model
 
 
 import android.os.Parcelable
@@ -17,5 +17,4 @@ data class Category(
     var creationAt: String? = null,
     @SerializedName("updatedAt")
     var updatedAt: String? = null
-
 ) : Parcelable
