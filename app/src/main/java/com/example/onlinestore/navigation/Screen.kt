@@ -29,7 +29,7 @@ sealed class Screen(
         object SearchResultScreen :
             topNavigationBar(
                 "search_result_screen",
-                "",
+                "SearchResult",
                 Icons.Default.ArrowBack,
                 R.drawable.buy
             )

@@ -1,17 +1,21 @@
 package com.example.onlinestore.views.HomeScreen.networkTest
 
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class Category(
-    @SerializedName("creationAt")
-    val creationAt: String,
     @SerializedName("id")
-    val id: Int,
-    @SerializedName("image")
-    val image: String,
+    var id: Int? = null,
     @SerializedName("name")
-    val name: String,
+    var name: String? = null,
+    @SerializedName("image")
+    var image: String? = null,
+    @SerializedName("creationAt")
+    var creationAt: String? = null,
     @SerializedName("updatedAt")
-    val updatedAt: String
-)
+    var updatedAt: String? = null
+
+) : Parcelable
