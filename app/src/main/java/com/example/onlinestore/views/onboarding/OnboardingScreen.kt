@@ -1,6 +1,5 @@
 package com.example.onlinestore.views.onboarding
 
-
 import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -56,11 +55,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun OnboardingScreen(modifier: Modifier, navController: NavController) {
 
-
     val listOfImages = listOf(
-        R.drawable._01_onboarding,
-        R.drawable._02_onboarding,
-        R.drawable._03_onboarding
+        R.drawable._01_onboarding_trapezoid,
+        R.drawable._02_onboarding_trapezoid,
+        R.drawable._03_onboarding_trapezoid
     )
 
     val pagerState = rememberPagerState(pageCount = { listOfImages.size })
@@ -88,25 +86,22 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(14.dp),
+            .padding(start = 14.dp, end = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         HorizontalPager(
             modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp)),
+                .clip(RoundedCornerShape(46.dp)),
             state = pagerState
         ) { index ->
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Image(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .size(345.dp, 447.dp)
-                        .clip(RoundedCornerShape(24.dp)),
+                        .fillMaxWidth(),
                     painter = painterResource(id = listOfImages[index]),
                     contentDescription = null,
                     contentScale = ContentScale.Crop
@@ -117,6 +112,7 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                 descriptionHeadTextIndex = index
             }
         }
+
         Spacer(modifier = Modifier.height(66.dp))
 
         Text(
@@ -145,39 +141,53 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                 color = Color(0xFF7C7C7B),
             )
         )
+
         Spacer(modifier = Modifier.height(50.dp))
 
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .weight(1f)
+                .fillMaxWidth()
+                .size(0.dp, 98.dp),
+            Arrangement.Bottom
 
         ) {
-            Box()
-            {
-                Row(
-                    Modifier
-                        .wrapContentHeight(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    repeat(pagerState.pageCount) { iteration ->
-                        val color =
-                            if (pagerState.currentPage == iteration) Color.Black else Color(
-                                0xFFD9D9D9
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(0.dp, 64.dp)
+                    .padding(bottom = 34.dp)
+                    .weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+
+            ) {
+                Box()
+                {
+                    Row(
+                        Modifier
+                            .wrapContentHeight(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        repeat(pagerState.pageCount) { iteration ->
+                            val color =
+                                if (pagerState.currentPage == iteration) Color.Black else Color(
+                                    0xFFD9D9D9
+                                )
+                            val x =
+                                if (pagerState.currentPage == iteration) 24.dp else 8.dp
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .size(x, 8.dp)
                             )
-                        val x =
-                            if (pagerState.currentPage == iteration) 24.dp else 8.dp
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .background(color)
-                                .size(x, 8.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                        }
                     }
                 }
+
             }
 
             IconButton(
@@ -190,12 +200,25 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                     }
                 }) {
                 Icon(
+
+                IconButton(
+
                     modifier = Modifier
                         .size(64.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.onboarding_button),
-                    tint = Color.Black,
-                    contentDescription = null
-                )
+                    onClick = {
+                        pagerScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
+                        if (descriptionHeadTextIndex == 2) {
+                            navController.navigate(Screen.topNavigationBar.Registration.route)
+                        }
+                    }) {
+                    Icon(
+                        modifier = Modifier
+                            .size(64.dp),
+                        imageVector = ImageVector.vectorResource(R.drawable.onboarding_button),
+                        tint = Color.Black,
+                        contentDescription = null
+                    )
+                }
             }
         }
     }

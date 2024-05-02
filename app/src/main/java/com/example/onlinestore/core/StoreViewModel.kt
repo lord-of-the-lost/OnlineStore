@@ -7,6 +7,4 @@ import com.example.onlinestore.navigation.Screen
 
 class StoreViewModel : ViewModel() {
 
-
-
 }

@@ -157,6 +157,7 @@ fun TextField(
             Text(placeholder, color = colorResource(R.color.Grey))
         },
         trailingIcon = {
+
             IconButton({ passwordVisibility = !passwordVisibility }) {
                 Icon(
                     painter = painterResource(R.drawable.eye),
@@ -164,6 +165,12 @@ fun TextField(
                     tint = colorResource(R.color.Grey)
                 )
             }
+
+            Icon(
+                painter = painterResource(R.drawable.eye), "",
+                tint = colorResource(R.color.Grey)
+            )
+
         },
         modifier = Modifier
             .fillMaxWidth()

@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.MainNavigationScreen
 import com.example.onlinestore.ui.theme.OnlineStoreTheme
+import com.example.onlinestore.views.profile_screen.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

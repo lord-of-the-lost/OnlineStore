@@ -31,8 +31,14 @@ import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
+import com.example.onlinestore.views.SampleScreen
+import com.example.onlinestore.views.add_screen.AddProduct
+import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
+import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
+import com.example.onlinestore.views.manager_screen.ManagerScreen
+import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 
 
@@ -76,8 +82,15 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController as NavHostController,
+
         startDestination = Screen.NavigationItem.Registration.route,
         modifier = Modifier.padding(dp),
+
+        startDestination = Screen.topNavigationBar.Registration.route,
+        modifier = Modifier.padding(dp),
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
+
     ) {
 
         composable(Screen.NavigationItem.Onboarding.route) {
@@ -92,6 +105,7 @@ fun Navigation(
                 navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
             })
         }
+
         composable(Screen.BottomNavigation.Manager.route) {
             SampleScreen()
         }
@@ -100,6 +114,16 @@ fun Navigation(
         }
         composable(Screen.NavigationItem.AddProduct.route) {
             SampleScreen()
+
+        composable(Screen.BottomNavigation.Manager.broute) {
+            ManagerScreen()
+        }
+        composable(Screen.BottomNavigation.Account.broute) {
+            ProfileScreen()
+        }
+        composable(Screen.topNavigationBar.AddProduct.tRoute) {
+            AddProduct()
+
         }
         composable(Screen.NavigationItem.TermsConditions.route) {
             SampleScreen()
@@ -134,8 +158,13 @@ fun Navigation(
         composable(Screen.NavigationItem.SearchResultScreen.tRoute) {
             SearchScreen()
         }
+
         composable(Screen.NavigationItem.Cart.tRoute) {
             SampleScreen()
+
+        composable(Screen.topNavigationBar.Cart.tRoute) {
+            CartScreen()
+
         }
     }
 }
