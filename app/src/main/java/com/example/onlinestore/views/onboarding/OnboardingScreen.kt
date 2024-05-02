@@ -189,7 +189,6 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                 }
 
             }
-
             IconButton(
                 modifier = Modifier
                     .size(64.dp),
@@ -200,25 +199,12 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                     }
                 }) {
                 Icon(
-
-                IconButton(
-
                     modifier = Modifier
                         .size(64.dp),
-                    onClick = {
-                        pagerScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
-                        if (descriptionHeadTextIndex == 2) {
-                            navController.navigate(Screen.topNavigationBar.Registration.route)
-                        }
-                    }) {
-                    Icon(
-                        modifier = Modifier
-                            .size(64.dp),
-                        imageVector = ImageVector.vectorResource(R.drawable.onboarding_button),
-                        tint = Color.Black,
-                        contentDescription = null
-                    )
-                }
+                    imageVector = ImageVector.vectorResource(R.drawable.onboarding_button),
+                    tint = Color.Black,
+                    contentDescription = null
+                )
             }
         }
     }

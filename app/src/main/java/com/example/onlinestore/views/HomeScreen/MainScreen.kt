@@ -162,18 +162,11 @@ fun MainScreen(
                     color = Color.Black
                 )
             }
-
             else -> {
                 ProductItem2(viewModel.productState.value.list, controller, navigateToDetail)
-
             }
-
         }
-
-
     }
-
-
 }
 
 
@@ -190,7 +183,6 @@ fun ProductItem2(
 
             }
         }
-
     }
 }
 
@@ -252,7 +244,6 @@ fun SearchBar2(
                 )
             },
             contentPadding = TextFieldDefaults.textFieldWithLabelPadding(top = 0.dp, bottom = 0.dp)
-
         )
     }
 }
@@ -343,13 +334,9 @@ fun TextFieldDropDownMenu() {
                                 }
                             }
                         }
-
                     }
                 }
-
-
             }
         }
     }
-
 }

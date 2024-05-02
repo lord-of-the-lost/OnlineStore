@@ -46,7 +46,6 @@ fun CardItem(
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
-
         ) {
             Box(
                 modifier = Modifier
@@ -74,7 +73,6 @@ fun CardItem(
                             contentScale = ContentScale.Crop
                         )
                     }
-
                 }
             }
             Box(
@@ -97,12 +95,9 @@ fun CardItem(
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))
                     ) {
                         Text(text = "Add to cart")
-
                     }
                 }
             }
-
-
         }
     }
 }
