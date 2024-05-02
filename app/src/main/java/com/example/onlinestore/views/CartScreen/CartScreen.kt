@@ -156,6 +156,7 @@ fun CartScreen(
 ) {
 
     var shopItemsInCart by remember { mutableStateOf(shopItemsInCart) }
+    var isAtLeastOneItemSelected by remember { mutableStateOf(false) }
 
     Column {
         DeliveryAddress()
@@ -176,6 +177,9 @@ fun CartScreen(
                     onDeleteItem = {
                         shopItemsInCart = shopItemsInCart.toMutableList()
                             .also { it.remove(shopItem) }
+                    },
+                    onItemSelectedChanged = {
+                        isAtLeastOneItemSelected = shopItemsInCart.any { it.isSelected }
                     }
                 )
             }
@@ -190,7 +194,7 @@ fun CartScreen(
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp)
         ) {
-            OrderSummary()
+            OrderSummary(isAtLeastOneItemSelected)
         }
     }
 }
@@ -297,10 +301,16 @@ fun DropDownExample() {
 @Composable
 fun ShoppingListItem(
     shopItem: ShopItem,
-    onDeleteItem: (ShopItem) -> Unit
+    onDeleteItem: (ShopItem) -> Unit,
+    onItemSelectedChanged: (Boolean) -> Unit
 ) {
     var isSelected by remember { mutableStateOf(false) }
     isSelected = shopItem.isSelected
+
+    if (isSelected) {
+        onItemSelectedChanged(true)
+    } else onItemSelectedChanged(false)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -417,7 +427,8 @@ fun QuantityOfProduct(
                 modifier = Modifier
                     .size(24.dp),
                 imageVector = ImageVector.vectorResource(R.drawable.decrease_icon),
-                tint = Color.Unspecified,
+                tint = if (quantityOfProduct == 1) Color(0xFFD9D9D9)
+                else Color.Unspecified,
                 contentDescription = null
             )
         }
@@ -465,7 +476,7 @@ fun QuantityOfProduct(
 }
 
 @Composable
-fun OrderSummary() {
+fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
     Column {
         Column(
             modifier = Modifier
@@ -519,9 +530,12 @@ fun OrderSummary() {
             shape = RoundedCornerShape(4.dp),
             colors = ButtonDefaults
                 .buttonColors(
-                    containerColor = Color(0xFF67C4A7)
+                    containerColor = (
+                            if (isAtLeastOneItemSelected) Color(0xFF67C4A7)
+                            else Color(0xFFF0F2F1))
                 ),
-            onClick = { })
+            onClick = { }
+        )
         {
             Text(
                 text = "Selected payment method",
