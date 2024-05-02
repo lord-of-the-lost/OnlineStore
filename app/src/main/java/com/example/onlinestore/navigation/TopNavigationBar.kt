@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -41,25 +42,25 @@ import com.example.onlinestore.views.search_screen.HistoryItem
 
 @Composable
 fun TopNavigationBar(
-    title: String,
     onBackClicked: () -> Unit = {},
     controller: NavController
 ) {
 
     val currentRoute = currentRoute(controller)
-    var icon = topScreens.firstOrNull() { it.tRoute == currentRoute }
-    var action = topScreens.firstOrNull() { it.tRoute == currentRoute }?.actionIcon
-        ?: bottomScreen.firstOrNull() { it.broute == currentRoute }?.actionIcon
+    val title = allScreen.firstOrNull(){it.route == currentRoute}?.title?:"Unknown"
+    val icon = topScreens.firstOrNull { it.route == currentRoute }?.icon
+    val action = topScreens.firstOrNull { it.route == currentRoute }?.actionIcon
+        ?: bottomScreen.firstOrNull { it.route == currentRoute }?.actionIcon
 
-    val navigationIcon: (@Composable () -> Unit) = {
-        if (icon != null) {
+    val navigationIcon: (@Composable () -> Unit) =
+        {
             IconButton(onClick = { onBackClicked() }) {
-                icon.icon?.let { Icon(it, "") }
+                icon?.let { Icon(it, "") }
             }
+
         }
-    }
     val actionIcon: (@Composable () -> Unit) = {
-        IconButton(onClick = { controller.navigate(Screen.topNavigationBar.Cart.route) }) {
+        IconButton(onClick = { controller.navigate(Screen.NavigationItem.Cart.route) }) {
             action?.let { painterResource(it) }
                 ?.let { Icon(painter = it, "", tint = colorResource(R.color.Dark_Arsenic)) }
         }
@@ -71,7 +72,7 @@ fun TopNavigationBar(
 
     TopAppBar(
         title = {
-            if (title == "Wishlist"||title == "SearchResult"){
+            if (title == "Wishlist" || title == "SearchResult") {
                 SearchBar(text.value) { text.value = it }
             } else {
                 Row(
@@ -80,7 +81,7 @@ fun TopNavigationBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        title,
+                        title, modifier = Modifier.padding(end = if(icon != null) 65.dp else 0.dp),
                         color = Color.Black,
                     )
                 }
@@ -91,7 +92,8 @@ fun TopNavigationBar(
         elevation = 5.dp,
         backgroundColor = Color.White,
         modifier = Modifier.height(80.dp),
-        actions = { actionIcon() }
+        actions = {if(action !=null) actionIcon()
+        }
 
 
     )
@@ -104,7 +106,7 @@ fun SearchBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit
 ) {
-    var interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = searchQuery,
         onValueChange = { onSearchQueryChange(it) },
@@ -127,6 +129,7 @@ fun SearchBar(
             interactionSource = interactionSource,
             visualTransformation = VisualTransformation.None,
             placeholder = {
+                if(searchQuery == "")
                 Text("Search here...", color = colorResource(R.color.Grey), fontSize = 13.sp)
             },
             leadingIcon = {

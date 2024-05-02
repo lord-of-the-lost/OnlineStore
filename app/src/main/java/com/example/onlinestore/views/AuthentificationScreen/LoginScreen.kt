@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +36,8 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -91,7 +95,7 @@ fun LoginScreen(
                 }
 
                 authState.success -> {
-                    controller.navigate(Screen.BottomNavigation.Home.broute)
+                    controller.navigate(Screen.BottomNavigation.Home.route)
                 }
             }
         }
@@ -109,7 +113,7 @@ fun LoginScreen(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.ExtraBold,
                     modifier = Modifier.clickable {
-                        controller.navigate(Screen.topNavigationBar.Registration.route)
+                        controller.navigate(Screen.NavigationItem.Registration.route)
                     }
                 )
             }
@@ -141,6 +145,9 @@ fun TextField(
     placeholder: String
 ) {
     val focusManager = LocalFocusManager.current
+    var passwordVisibility by remember { mutableStateOf(false) }
+    val visibility =
+        if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
     OutlinedTextField(
         value = text,
         onValueChange = {
@@ -150,15 +157,26 @@ fun TextField(
             Text(placeholder, color = colorResource(R.color.Grey))
         },
         trailingIcon = {
+
+            IconButton({ passwordVisibility = !passwordVisibility }) {
+                Icon(
+                    painter = painterResource(R.drawable.eye),
+                    "",
+                    tint = colorResource(R.color.Grey)
+                )
+            }
+
             Icon(
                 painter = painterResource(R.drawable.eye), "",
                 tint = colorResource(R.color.Grey)
             )
+
         },
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 5.dp),
         shape = RoundedCornerShape(12.dp),
+        visualTransformation = visibility,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedBorderColor = colorResource(R.color.border_color),
             focusedBorderColor = colorResource(R.color.label_blueColor),

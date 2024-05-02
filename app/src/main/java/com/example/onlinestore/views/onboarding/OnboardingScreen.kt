@@ -187,7 +187,22 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
                         }
                     }
                 }
+
+            }
+
+            IconButton(
+                modifier = Modifier
+                    .size(64.dp),
+                onClick = {
+                    pagerScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
+                    if (descriptionHeadTextIndex == 2) {
+                        navController.navigate(Screen.NavigationItem.Registration.route)
+                    }
+                }) {
+                Icon(
+
                 IconButton(
+
                     modifier = Modifier
                         .size(64.dp),
                     onClick = {

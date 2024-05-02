@@ -42,6 +42,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -54,15 +57,21 @@ fun RegistrationScreen(
     authViewModel: AuthViewModel
 ) {
     Surface(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(state = ScrollState(0)),
         color = Color.White
     ) {
+
         var firstName by remember { mutableStateOf("") }
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
         var confirmPass by remember { mutableStateOf("") }
         val authState by authViewModel.authState.collectAsState()
+        var isErrorName by remember { mutableStateOf(false) }
+        var isErrorEmail by remember { mutableStateOf(false) }
+        var isErrorPassword by remember { mutableStateOf(false) }
+        var isErrorConfirmPass by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -80,34 +89,51 @@ fun RegistrationScreen(
             CustomTextField(
                 "First Name",
                 firstName,
-                onChangeText = { firstName = it },
+                onChangeText = {
+                    firstName = it
+                    isErrorName = isValidLogin(it)
+                },
                 "Enter your First name",
                 "",
-                false
+                false,
+                isErrorName
             )
             CustomTextField(
                 "E-mail",
                 email,
-                onChangeText = { email = it },
+                onChangeText = {
+                    email = it
+                    isErrorEmail = isValidEmail(it)
+                },
                 "Enter your email",
                 "",
-                false
+                false,
+                isErrorEmail
             )
             CustomTextField(
                 "Password",
                 password,
-                onChangeText = { password = it },
+                onChangeText = {
+                    password = it
+
+                    isErrorPassword = isValidPassword(it)
+                },
                 "Enter your password",
                 "",
-                false
+                false,
+                isErrorPassword
             )
             CustomTextField(
                 "Confirm Password",
                 confirmPass,
-                onChangeText = { confirmPass = it },
+                onChangeText = {
+                    confirmPass = it
+                    isErrorConfirmPass = it != password
+                },
                 "Enter your password",
                 "",
-                false
+                false,
+                isErrorConfirmPass
             )
             Spacer(Modifier.padding(bottom = 30.dp))
             TextFieldDropDownMenu()
@@ -145,13 +171,25 @@ fun RegistrationScreen(
                             fontWeight = FontWeight.Bold,
                             color = Color.Blue,
                             modifier = Modifier.clickable {
-                                controller.navigate(Screen.topNavigationBar.Authorization.tRoute)
+                                controller.navigate(Screen.NavigationItem.Authorization.tRoute)
                             })
                     }
                 }
             }
         }
     }
+}
+
+fun isValidPassword(text: String): Boolean {
+    return text.isEmpty() || text.length <= 6
+}
+
+fun isValidLogin(text: String): Boolean {
+    return text.isEmpty() || text.length <= 2
+}
+
+fun isValidEmail(text: String): Boolean {
+    return text.isEmpty() || !text.contains("@").and(text.endsWith(".ru") || text.endsWith(".com"))
 }
 
 @Composable
@@ -161,9 +199,14 @@ fun CustomTextField(
     onChangeText: (String) -> Unit,
     placeholder: String,
     errorMassage: String,
-    readOnly: Boolean
+    readOnly: Boolean,
+    isError: Boolean
 ) {
+    var passwordVisibility by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+    val visibility =
+        if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             title,
@@ -184,25 +227,35 @@ fun CustomTextField(
             trailingIcon = {
                 if (title == "Password" || title == "Confirm Password")
                     IconButton({
-                        TODO()
+                        passwordVisibility = !passwordVisibility
                     }) {
-                        Icon(painter = painterResource(R.drawable.hide), "")
+                        if (text != "")
+                            Icon(painter = painterResource(R.drawable.hide), "")
                     }
             },
+            visualTransformation = when (title) {
+                "Password" -> visibility
+                "Confirm Password" -> visibility
+                else -> VisualTransformation.None
+            },
+            isError = isError,
             readOnly = readOnly,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 7.dp, bottom = 10.dp),
-
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 backgroundColor = colorResource(R.color.backgroung_textField2),
                 unfocusedBorderColor = Color.Transparent,
-                focusedBorderColor = colorResource(R.color.label_blueColor)
+                focusedBorderColor = colorResource(R.color.label_blueColor),
 
+
+                ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                imeAction = ImeAction.Done
             ),
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions {
                 focusManager.clearFocus()
+
             },
         )
     }

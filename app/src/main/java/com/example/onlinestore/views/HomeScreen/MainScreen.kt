@@ -65,110 +65,108 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.onlinestore.R
 import com.example.onlinestore.navigation.Screen
-import com.example.onlinestore.views.HomeScreen.networkTest.Product
-import com.example.onlinestore.views.HomeScreen.networkTest.ProductItem
+import com.example.onlinestore.views.HomeScreen.network.Products
+import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen(controller: NavController,
-               navigateToDetail:(ProductItem)->Unit) {
-        var viewModel: ProductViewModelTest = viewModel()
-        val viewState by viewModel.productState
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+fun MainScreen(
+    controller: NavController,
+    navigateToDetail: (ProductItem) -> Unit
+) {
+    val viewModel: ProductViewModelTest = viewModel()
+    val viewState by viewModel.productState
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 20.dp, end = 20.dp, top = 20.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column() {
-                    Text(
-                        "Delivery address",
-                        fontSize = 10.sp,
-                        color = colorResource(R.color.Grey),
+            Column() {
+                Text(
+                    "Delivery address",
+                    fontSize = 10.sp,
+                    color = colorResource(R.color.Grey),
 
-                        )
-                    TextFieldDropDownMenu()
-                }
-                Row(
-                    Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton({
-                        controller.navigate(Screen.topNavigationBar.Cart.route)
-                    }) {
-                        Icon(painter = painterResource(R.drawable.buy), "")
-                    }
-                    Icon(painter = painterResource(R.drawable.notification), "")
-                }
-
-            }
-            Spacer(Modifier.padding(top = 20.dp))
-            SearchBar2(controller)
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp)
-            ) {
-                CategoryButtonItem(R.drawable.c_2)
-                CategoryButtonItem(R.drawable.c_4)
-                CategoryButtonItem(R.drawable.c_3)
-                CategoryButtonItem(R.drawable.c_1)
-                CategoryButtonItem(R.drawable.c_5)
+                    )
+                TextFieldDropDownMenu()
             }
             Row(
                 Modifier
-                    .fillMaxWidth()
-                    .padding(top = 30.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Products", fontSize = 25.sp)
-
-                Button(
-                    {
-                        TODO()
-                    },
-                    colors = ButtonDefaults.buttonColors(Color.Transparent),
-                    modifier = Modifier
-                        .border(
-                            1.dp,
-                            shape = RoundedCornerShape(10.dp),
-                            color = colorResource(R.color.buttonBorder)
-                        )
-                        .height(40.dp),
-                    elevation = ButtonDefaults.elevation(0.dp)
-
-                ) {
-                    Text(
-                        "Filters",
-                        color = colorResource(R.color.Dark_Arsenic),
-                        modifier = Modifier.padding(end = 3.dp)
-                    )
-                    Icon(painter = painterResource(R.drawable.outline_filter_alt_24), "")
+                IconButton({
+                    controller.navigate(Screen.NavigationItem.Cart.route)
+                }) {
+                    Icon(painter = painterResource(R.drawable.buy), "")
                 }
-            }
-            when {
-                viewState.loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Start),
-                        color = Color.Black
-                    )
-                }
-
-                else -> {
-                    ProductItem2(viewModel.productState.value.list,controller,navigateToDetail)
-
-                }
-
+                Icon(painter = painterResource(R.drawable.notification), "")
             }
 
+        }
+        Spacer(Modifier.padding(top = 20.dp))
+        SearchBar2(controller)
 
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp)
+        ) {
+            CategoryButtonItem(R.drawable.c_2)
+            CategoryButtonItem(R.drawable.c_4)
+            CategoryButtonItem(R.drawable.c_3)
+            CategoryButtonItem(R.drawable.c_1)
+            CategoryButtonItem(R.drawable.c_5)
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Products", fontSize = 25.sp)
+
+            Button(
+                {
+                    TODO()
+                },
+                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                modifier = Modifier
+                    .border(
+                        1.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        color = colorResource(R.color.buttonBorder)
+                    )
+                    .height(40.dp),
+                elevation = ButtonDefaults.elevation(0.dp)
+
+            ) {
+                Text(
+                    "Filters",
+                    color = colorResource(R.color.Dark_Arsenic),
+                    modifier = Modifier.padding(end = 3.dp)
+                )
+                Icon(painter = painterResource(R.drawable.outline_filter_alt_24), "")
+            }
+        }
+        when {
+            viewState.loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Start),
+                    color = Color.Black
+                )
+            }
+
+            else -> {
+                ProductItem2(viewModel.productState.value.list, controller, navigateToDetail)
+
+            }
 
         }
 
@@ -176,18 +174,26 @@ fun MainScreen(controller: NavController,
     }
 
 
+}
+
+
 @Composable
-fun ProductItem2(list: Product?,controller: NavController,navigateToDetail: (ProductItem) -> Unit) {
-    LazyVerticalGrid(columns = GridCells.Fixed(2),state = rememberLazyGridState()) {
+fun ProductItem2(
+    list: Products?,
+    controller: NavController,
+    navigateToDetail: (ProductItem) -> Unit
+) {
+    LazyVerticalGrid(columns = GridCells.Fixed(2), state = rememberLazyGridState()) {
         list?.let {
-            items(list){items ->
-                CardItem(items,navigateToDetail)
+            items(list) { items ->
+                CardItem(items, navigateToDetail)
 
             }
         }
 
     }
 }
+
 @Composable
 fun CategoryButtonItem(image: Int) {
     Image(painter = painterResource(image), "",
@@ -216,7 +222,7 @@ fun SearchBar2(
             .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
             .onFocusEvent {
                 if (it.isFocused) {
-                    controller.navigate(Screen.topNavigationBar.SearchResultScreen.tRoute)
+                    controller.navigate(Screen.NavigationItem.SearchResultScreen.tRoute)
                     focusManager.clearFocus()
                 }
             },
