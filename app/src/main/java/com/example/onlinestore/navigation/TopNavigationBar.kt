@@ -1,6 +1,7 @@
 package com.example.onlinestore.navigation
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -100,6 +101,7 @@ fun TopNavigationBar(
 
 }
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchBar(
