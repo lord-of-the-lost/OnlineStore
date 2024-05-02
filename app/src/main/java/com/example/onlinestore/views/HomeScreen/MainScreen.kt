@@ -1,5 +1,9 @@
 package com.example.onlinestore.views.HomeScreen
 
+import android.Manifest
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,7 +39,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
-
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,6 +46,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -61,9 +67,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.onlinestore.MainActivity
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.views.HomeScreen.network.Products
 import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
@@ -72,10 +81,50 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     controller: NavController,
+    viewModel: StoreViewModel,
     navigateToDetail: (ProductItem) -> Unit
 ) {
-    val viewModel: ProductViewModelTest = viewModel()
-    val viewState by viewModel.productState
+    val viewModel2: ProductViewModelTest = viewModel()
+    val viewState by viewModel2.productState
+    val context = LocalContext.current
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            if (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            ) {
+                viewModel.requestLocationUpdates()
+            } else {
+                val rationalRequired = ActivityCompat.shouldShowRequestPermissionRationale(
+                        context as MainActivity,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+
+                if (rationalRequired) {
+                    Toast.makeText(
+                        context,
+                        "Location permission is required to this feature to work", Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Location permission is required. Please enable it in the Android Settings",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        })
+    LaunchedEffect(key1 = viewModel) {
+        if (viewModel.hasLocationPermission(context)) {
+            viewModel.requestLocationUpdates()
+        } else {
+            requestPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -92,7 +141,7 @@ fun MainScreen(
                     color = colorResource(R.color.Grey),
 
                     )
-                TextFieldDropDownMenu()
+                TextFieldDropDownMenu(viewModel)
             }
             Row(
                 Modifier
@@ -162,8 +211,9 @@ fun MainScreen(
                     color = Color.Black
                 )
             }
+
             else -> {
-                ProductItem2(viewModel.productState.value.list, controller, navigateToDetail)
+                ProductItem2(viewModel2.productState.value.list, controller, navigateToDetail)
             }
         }
     }
@@ -248,16 +298,16 @@ fun SearchBar2(
     }
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun TextFieldDropDownMenu() {
+fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
+    val locationState by viewModel.currentCountry.collectAsState()
     val options =
         listOf(
-            "Москва, ул.Алкашей",
-            "Санкт-Петербург, Софийская улица, 6 ",
-            "Berlin, hitler street"
+            "Текущая локация: $locationState",
+            "Россия",
+            "Америка",
+            "Европа",
         )
     var expanded by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(options[0]) }
@@ -277,6 +327,7 @@ fun TextFieldDropDownMenu() {
             )
         }
         if (expanded) {
+            viewModel.requestLocationUpdates()
             ModalBottomSheet(
                 onDismissRequest = {
                     expanded = false

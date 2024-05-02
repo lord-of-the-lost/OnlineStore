@@ -1,11 +1,16 @@
 package com.example.onlinestore.core
 
+import android.Manifest
 import android.app.Application
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import com.example.onlinestore.core.location.LocationUseCase
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.repository.StoreRepository
 import com.example.onlinestore.core.storage.AppDatabase
@@ -35,7 +40,25 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         StoreRepository(productDAO, userDAO)
     }
 
+    private val locationUseCase: LocationUseCase by lazy {
+        LocationUseCase(application)
+    }
+
     var savedProducts: MutableState<List<ProductModel>?> = mutableStateOf(null)
+    var currentCountry: StateFlow<String> = locationUseCase.countryStateFlow
+
+
+    // Location VM logic
+    fun requestLocationUpdates() {
+        locationUseCase.requestLocationUpdates(this)
+    }
+
+    fun hasLocationPermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
     //Storage Product VM logic
     fun saveProduct(product: ProductModel) {

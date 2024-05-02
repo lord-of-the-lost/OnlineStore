@@ -71,7 +71,7 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.NavigationItem.Registration.route,
+        startDestination = Screen.BottomNavigation.Home.route,
         modifier = Modifier.padding(dp),
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
@@ -83,7 +83,7 @@ fun Navigation(
             SampleScreen()
         }
         composable(Screen.BottomNavigation.Home.route) {
-            MainScreen(navController, navigateToDetail = {
+            MainScreen(navController, viewModel, navigateToDetail = {
                 navController.currentBackStackEntry?.savedStateHandle?.set("key", it)
                 navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
             })
