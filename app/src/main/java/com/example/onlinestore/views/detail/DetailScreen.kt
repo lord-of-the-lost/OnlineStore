@@ -2,6 +2,7 @@ package com.example.onlinestore.views.detail
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,12 +11,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -26,21 +30,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
 import com.example.onlinestore.ui.theme.inter
 import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
 
 @Composable
-fun DetailScreen(modifier: Modifier, navController: NavController, product: ProductItem) {
+fun DetailScreen(product: ProductItem) {
 
     val nameOfProduct = product.title
     val priceOfProduct = "$ ${product.price}"
@@ -76,18 +82,49 @@ fun DetailScreen(modifier: Modifier, navController: NavController, product: Prod
 @Composable
 fun ImgOfProduct(product: ProductItem) {
     val pagerState = rememberPagerState(pageCount = { product.images.size })
-    HorizontalPager(state = pagerState) {
-        var image = product.images
-        if (product.images[0].startsWith("[")) {
-            image = listOf(
-                product.images[0].substring(
-                    2,
-                    product.images[0].length - 2
+    Box {
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth()
+                .size(0.dp, 296.dp),
+            state = pagerState
+        ) {
+            var image = product.images
+            if (product.images[0].startsWith("[")) {
+                image = listOf(
+                    product.images[0].substring(
+                        2,
+                        product.images[0].length - 2
+                    )
                 )
+            }
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentScale = ContentScale.Crop,
+                model = image[it], contentDescription = "Photo"
             )
         }
-        AsyncImage(model = image[it], contentDescription = "Photo")
 
+        Row(
+            Modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .offset(y = 280.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(pagerState.pageCount) { iteration ->
+                val color =
+                    if (pagerState.currentPage == iteration) Color.DarkGray else Color(0x55CCCCCC)
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(CircleShape)
+                        .background(color)
+                        .size(8.dp)
+                )
+            }
+        }
     }
 }
 
@@ -199,7 +236,6 @@ fun Buttons() {
     }
 }
 
-
 @Composable
 fun AddToCardButton() {
     Button(
@@ -251,4 +287,10 @@ fun BuyNowButton() {
     }
 }
 
-
+@Preview(showBackground = true)
+@Composable
+fun DetailScreenPreview() {
+    DetailScreen(
+        ProductItem(0, "sdgsgsd", 34534534, "rsghdfg", emptyList(), "", "", null)
+    )
+}

@@ -130,7 +130,7 @@ fun Navigation(
             val product =
                 navController.previousBackStackEntry?.savedStateHandle?.get<ProductItem>("key")
                     ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)
-            DetailScreen(modifier = Modifier, navController = navController, product)
+            DetailScreen(product)
         }
         composable(Screen.NavigationItem.Authorization.tRoute) {
             LoginScreen(navController, authViewModel)
