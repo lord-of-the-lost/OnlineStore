@@ -42,12 +42,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 
 @Composable
 fun LoginScreen(
     controller: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: StoreViewModel
 ) {
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }

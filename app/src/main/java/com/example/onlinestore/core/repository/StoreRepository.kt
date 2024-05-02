@@ -7,36 +7,18 @@ import com.example.onlinestore.core.storage.UserDAO
 import com.example.onlinestore.core.storage.UserObject
 
 class StoreRepository(private val productDAO: ProductDAO, private val userDAO: UserDAO) {
-
-    suspend fun insertProduct(products: List<ProductModel>) {
-        val productObjects = products.map { product ->
-            ProductObject(
-                id = product.id,
-                title = product.title,
-                price = product.price,
-                description = product.description,
-                images = product.images,
-                creationAt = product.creationAt,
-                updatedAt = product.updatedAt,
-                category = product.category
-            )
-        }
-        productDAO.insertProductList(productObjects)
+    suspend fun saveProduct(product: ProductModel) {
+        productDAO.saveProduct(product.toProductObject())
     }
 
     suspend fun getAllProducts(): List<ProductModel>? {
         return productDAO.getAllProducts()?.map { productObject ->
-            ProductModel(
-                id = productObject.id,
-                title = productObject.title,
-                price = productObject.price,
-                description = productObject.description,
-                images = productObject.images,
-                creationAt = productObject.creationAt,
-                updatedAt = productObject.updatedAt,
-                category = productObject.category
-            )
+            productObject.toProductModel()
         }
+    }
+
+    suspend fun deleteProduct(product: ProductModel) {
+        productDAO.deleteProduct(product.toProductObject())
     }
 
     suspend fun saveUser(user: UserObject) {
@@ -45,4 +27,31 @@ class StoreRepository(private val productDAO: ProductDAO, private val userDAO: U
     suspend fun getUserByEmail(email: String): UserObject? {
         return userDAO.getUserByEmail(email)
     }
+}
+
+// расширения для мапинга моделей
+fun ProductObject.toProductModel(): ProductModel {
+    return ProductModel(
+        id = this.id,
+        title = this.title,
+        price = this.price,
+        description = this.description,
+        images = this.images,
+        creationAt = this.creationAt,
+        updatedAt = this.updatedAt,
+        category = this.category
+    )
+}
+
+fun ProductModel.toProductObject(): ProductObject {
+    return ProductObject(
+        id = this.id,
+        title = this.title,
+        price = this.price,
+        description = this.description,
+        images = this.images,
+        creationAt = this.creationAt,
+        updatedAt = this.updatedAt,
+        category = this.category
+    )
 }

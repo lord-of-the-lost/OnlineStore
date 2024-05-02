@@ -24,11 +24,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
-import com.example.onlinestore.views.AuthentificationScreen.AuthViewModel
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
+import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
@@ -39,14 +39,11 @@ import com.example.onlinestore.views.search_screen.SearchScreen
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MainNavigationScreen() {
-    val viewModel: StoreViewModel = viewModel()
-    val authViewModel: AuthViewModel = viewModel()
+fun MainNavigationScreen(viewModel: StoreViewModel) {
     val controller: NavController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
     val route = currentRoute(controller)
     val screenWithScaffold = allScreen.firstOrNull { it.route == route }?.withScaffold
-
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -62,7 +59,7 @@ fun MainNavigationScreen() {
             }
         }
     ) {
-        Navigation(controller, viewModel, authViewModel, it)
+        Navigation(controller, viewModel, it)
     }
 }
 
@@ -70,7 +67,6 @@ fun MainNavigationScreen() {
 fun Navigation(
     navController: NavController,
     viewModel: StoreViewModel,
-    authViewModel: AuthViewModel,
     dp: PaddingValues
 ) {
     NavHost(
@@ -93,17 +89,11 @@ fun Navigation(
             })
         }
 
-        composable(Screen.BottomNavigation.Manager.route) {
-            SampleScreen()
-        }
-        composable(Screen.BottomNavigation.Account.route) {
-            SampleScreen()
-        }
         composable(Screen.BottomNavigation.Manager.broute) {
             ManagerScreen()
         }
         composable(Screen.BottomNavigation.Account.broute) {
-            ProfileScreen()
+            ProfileScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.AddProduct.tRoute) {
             AddProduct()
@@ -133,16 +123,16 @@ fun Navigation(
             DetailScreen(product)
         }
         composable(Screen.NavigationItem.Authorization.tRoute) {
-            LoginScreen(navController, authViewModel)
+            LoginScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.Registration.tRoute) {
-            RegistrationScreen(navController, authViewModel)
+            RegistrationScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.SearchResultScreen.tRoute) {
             SearchScreen()
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
-            SampleScreen()
+            CartScreen()
         }
     }
 }

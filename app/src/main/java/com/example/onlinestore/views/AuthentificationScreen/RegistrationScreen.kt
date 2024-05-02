@@ -49,12 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 
 @Composable
 fun RegistrationScreen(
     controller: NavController,
-    authViewModel: AuthViewModel
+    authViewModel: StoreViewModel
 ) {
     Surface(
         modifier = Modifier

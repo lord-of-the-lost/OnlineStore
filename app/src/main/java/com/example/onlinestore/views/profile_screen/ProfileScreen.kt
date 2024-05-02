@@ -32,20 +32,22 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.ui.theme.CustomGrey
 import com.example.onlinestore.ui.theme.CustomGrey2
 
 @Composable
-@Preview(showBackground = true)
-fun ProfileScreen() {
+fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
         Spacer(Modifier.height(14.dp))
-        Row (verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .padding(horizontal = 27.dp)
@@ -68,7 +70,7 @@ fun ProfileScreen() {
                         .width(32.dp)
                         .height(32.dp)
                         .fillMaxSize()
-                        .clickable {  }
+                        .clickable { }
                 )
             }
             Box(
@@ -105,7 +107,7 @@ fun ProfileScreen() {
                         Image(
                             painter = painterResource(id = R.drawable.ic_eye),
                             contentDescription = null,
-                            modifier = Modifier.clickable {  }
+                            modifier = Modifier.clickable { }
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = "***********", style = TextStyle(color = CustomGrey2))
@@ -116,9 +118,13 @@ fun ProfileScreen() {
         Spacer(Modifier.weight(1.0f))
         ActionButton(title = "Type of Account", painterResource = R.drawable.ic_arrow, {})
         Spacer(Modifier.height(22.dp))
-        ActionButton(title = "Terms & Conditions", painterResource = R.drawable.ic_arrow, {})
+        ActionButton(title = "Terms & Conditions", painterResource = R.drawable.ic_arrow) {
+            navController.navigate(Screen.NavigationItem.TermsConditions.route)
+        }
         Spacer(Modifier.height(22.dp))
-        ActionButton(title = "Sign Out", painterResource = R.drawable.ic_signout, {})
+        ActionButton(title = "Sign Out", painterResource = R.drawable.ic_signout) {
+            navController.navigate(Screen.NavigationItem.Onboarding.route)
+        }
         Spacer(Modifier.height(33.dp))
     }
 }

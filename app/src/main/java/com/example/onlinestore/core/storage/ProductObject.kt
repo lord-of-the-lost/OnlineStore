@@ -3,9 +3,12 @@ package com.example.onlinestore.core.storage
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import com.example.onlinestore.core.models.CategoryModel
+import com.example.onlinestore.core.models.Converters
 
 @Entity
+@TypeConverters(Converters::class)
 data class ProductObject(
     @PrimaryKey
     @ColumnInfo("id") val id: Int,
