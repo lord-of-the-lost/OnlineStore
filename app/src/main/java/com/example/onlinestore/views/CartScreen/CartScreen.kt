@@ -1,6 +1,7 @@
 package com.example.onlinestore.views.CartScreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,8 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,12 +31,16 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +60,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.onlinestore.R
 import com.example.onlinestore.ui.theme.inter
+import kotlinx.coroutines.launch
 import kotlin.random.Random
-
 
 data class ShopItem(
     val imgOfProduct: Int,
@@ -150,10 +158,16 @@ var shopItemsInCart = mutableListOf(
     ),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun CartScreen(
 ) {
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
 
     var shopItemsInCart by remember { mutableStateOf(shopItemsInCart) }
     var isAtLeastOneItemSelected by remember { mutableStateOf(false) }
@@ -194,7 +208,10 @@ fun CartScreen(
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp)
         ) {
-            OrderSummary(isAtLeastOneItemSelected)
+            OrderSummary(isAtLeastOneItemSelected, showBottomSheet, sheetState) {
+                showBottomSheet = true
+                Log.d("CartScreen", "showBottomSheet is now $showBottomSheet")
+            }
         }
     }
 }
@@ -475,8 +492,14 @@ fun QuantityOfProduct(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
+fun OrderSummary(
+    isAtLeastOneItemSelected: Boolean,
+    showBottomSheet:Boolean,
+    sheetState: SheetState,
+    onButtonClick: () -> Unit
+) {
     Column {
         Column(
             modifier = Modifier
@@ -534,7 +557,7 @@ fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
                             if (isAtLeastOneItemSelected) Color(0xFF67C4A7)
                             else Color(0xFFF0F2F1))
                 ),
-            onClick = { }
+            onClick = { if (isAtLeastOneItemSelected) PaymentSuccess(showBottomSheet, sheetState) }
         )
         {
             Text(
@@ -551,6 +574,75 @@ fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
         Spacer(modifier = Modifier.height(43.dp))
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PaymentSuccess(
+    showBottomSheet: Boolean,
+    sheetState: SheetState
+) {
+
+    var showBottomSheet = showBottomSheet
+    val scope = rememberCoroutineScope()
+
+    ModalBottomSheet(
+        onDismissRequest = {
+            showBottomSheet = false
+        },
+        sheetState = sheetState,
+        modifier = Modifier
+            .fillMaxHeight(0.5f)
+            .navigationBarsPadding(),
+        containerColor = Color.White
+
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp)
+        ) {
+            Image(
+                modifier = Modifier
+                    .size(82.dp, 76.dp)
+                    .clip(RoundedCornerShape(4.dp)),
+                painter = painterResource(id = R.drawable.payment_success),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+            )
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(0.dp, 45.dp),
+                shape = RoundedCornerShape(4.dp),
+                colors = ButtonDefaults
+                    .buttonColors(
+                        Color(0xFF67C4A7)
+
+                    ),
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            showBottomSheet = false
+                        }
+                    }
+                })
+            {
+                Text(
+                    text = "Continue",
+                    style = TextStyle(
+                        fontFamily = inter,
+                        fontWeight = FontWeight(500),
+                        fontSize = 14.sp,
+                        lineHeight = 16.94.sp,
+                        color = Color.White
+                    )
+                )
+            }
+            Spacer(modifier = Modifier.height(43.dp))
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
