@@ -72,7 +72,7 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.NavigationItem.Registration.route,
+        startDestination = Screen.NavigationItem.Onboarding.route,
         modifier = Modifier.padding(dp),
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
