@@ -147,6 +147,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+    fun resetAuthState() {
+        _authStateState.value = AuthState(success = false)
+    }
 }
 
 data class AuthState(

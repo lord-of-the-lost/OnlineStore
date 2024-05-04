@@ -118,7 +118,6 @@ fun RegistrationScreen(
                 password,
                 onChangeText = {
                     password = it
-
                     isErrorPassword = isValidPassword(it)
                 },
                 "Enter your password",
@@ -146,9 +145,15 @@ fun RegistrationScreen(
                     CustomButton("Sign Up", inputDataCheck) {
                         authViewModel.register(firstName, email, password, confirmPass)
                     }
-                    // Обработка ошибок
-                    if (authState.error.isNotBlank()) {
-                        Toast.makeText(context,authState.error, Toast.LENGTH_LONG).show()
+                    when {
+                        authState.error.isNotBlank() -> {
+                            Toast.makeText(context, authState.error, Toast.LENGTH_LONG).show()
+                        }
+
+                        authState.success -> {
+                            authViewModel.resetAuthState()
+                            controller.navigate(Screen.NavigationItem.Authorization.route)
+                        }
                     }
                     Row(
                         Modifier
@@ -259,7 +264,6 @@ fun CustomTextField(
             keyboardActions = KeyboardActions {
                 activeError = isError
                 focusManager.clearFocus()
-
             },
         )
         if (activeError) {
@@ -297,7 +301,8 @@ fun TextFieldDropDownMenu() {
                 .background(
                     color = colorResource(R.color.backgroung_textField2),
                     shape = RoundedCornerShape(24.dp)
-                ).menuAnchor(),
+                )
+                .menuAnchor(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = colorResource(R.color.label_blueColor)
