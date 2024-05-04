@@ -73,9 +73,7 @@ fun Navigation(
     NavHost(
         navController = navController as NavHostController,
         startDestination = Screen.NavigationItem.Registration.route,
-        modifier = Modifier.padding(dp),
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None }
+        modifier = Modifier.padding(dp)
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {
             OnboardingScreen(Modifier, navController)
@@ -109,15 +107,7 @@ fun Navigation(
                 animationSpec = tween(300, easing = EaseIn),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start
             )
-        },
-            exitTransition = {
-                fadeOut(
-                    animationSpec = tween(3000, easing = LinearEasing)
-                ) + slideOutOfContainer(
-                    animationSpec = tween(3000, easing = EaseOut),
-                    towards = AnimatedContentTransitionScope.SlideDirection.End
-                )
-            }) {
+        }) {
             val product =
                 navController.previousBackStackEntry?.savedStateHandle?.get<ProductItem>("key")
                     ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)
