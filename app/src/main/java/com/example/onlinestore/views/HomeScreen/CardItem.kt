@@ -19,6 +19,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -28,14 +30,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardItem(
     productItem: ProductItem,
-    navigateToDetail: (ProductItem) -> Unit,) {
+    viewModel: StoreViewModel,
+    navigateToDetail: (ProductItem) -> Unit) {
     val pagerState = rememberPagerState(pageCount = { productItem.images.size })
+    val currentCurrency by viewModel.currentCurrency.collectAsState()
+    val price =
+        productItem.price?.let { viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency) } ?: "0"
 
     Card(
         modifier = Modifier
@@ -82,12 +89,12 @@ fun CardItem(
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(text = productItem.title.toString(), fontSize = 12.sp, maxLines = 1)
-                    Text(
-                        text = "$${productItem.price.toString()}",
-                        color = colorResource(id = R.color.Dark_Arsenic),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                        Text(
+                            text = price,
+                            color = colorResource(id = R.color.Dark_Arsenic),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     Button(
                         onClick = { /*TODO*/ },
                         Modifier.fillMaxWidth(),

@@ -42,7 +42,7 @@ class LocationUseCase(private val context: Context) {
             }
         }
 
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000).build()
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100).build()
 
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
@@ -50,7 +50,6 @@ class LocationUseCase(private val context: Context) {
             Looper.getMainLooper()
         )
     }
-
     private fun determineCountry(location: Location) {
         val geocoder = Geocoder(context, Locale.getDefault())
         try {
@@ -71,26 +70,13 @@ class LocationUseCase(private val context: Context) {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun determineCurrency(location: String): Currency {
+    fun determineCurrency(location: String): Currency {
         return when (location) {
             "America" -> Currency.USD
             "Europe" -> Currency.EUR
             "Russia" -> Currency.RUB
             else -> Currency.USD
         }
-    }
-
-    private fun convertCurrency(priceInUSD: Double, currency: Currency): Double {
-        return when (currency) {
-            Currency.USD -> priceInUSD
-            Currency.EUR -> priceInUSD * 0.9
-            Currency.RUB -> priceInUSD * 90
-        }
-    }
-
-    fun getPriceBasedOnLocation(location: String, priceInUSD: Double): Double {
-        val currency = determineCurrency(location)
-        return convertCurrency(priceInUSD, currency)
     }
 }
 

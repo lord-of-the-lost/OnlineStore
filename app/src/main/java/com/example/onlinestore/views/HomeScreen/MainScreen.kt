@@ -103,9 +103,9 @@ fun MainScreen(
                 viewModel.requestLocationUpdates()
             } else {
                 val rationalRequired = ActivityCompat.shouldShowRequestPermissionRationale(
-                        context as MainActivity,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
+                    context as MainActivity,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
 
                 if (rationalRequired) {
                     Toast.makeText(
@@ -133,8 +133,8 @@ fun MainScreen(
         }
     }
     var expended by remember { mutableStateOf(false) }
-    val productFilter = listOf("price up", "price down", "title A","title Z")
-    val productList= viewState.list?.toMutableStateList()
+    val productFilter = listOf("price up", "price down", "title A", "title Z")
+    val productList = viewState.list?.toMutableStateList()
     val categoryState by viewModel2.categoryState
     val categoryList = categoryState.list?.toMutableStateList()
 
@@ -244,8 +244,9 @@ fun MainScreen(
                     color = Color.Black
                 )
             }
+
             else -> {
-                ProductItem2(productList, navigateToDetail)
+                ProductItem2(productList, viewModel, navigateToDetail)
             }
         }
     }
@@ -255,13 +256,13 @@ fun MainScreen(
 @Composable
 fun ProductItem2(
     list: SnapshotStateList<ProductItem>?,
+    viewModel: StoreViewModel,
     navigateToDetail: (ProductItem) -> Unit
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(2), state = rememberLazyGridState()) {
         list?.let {
             items(list) { items ->
-                CardItem(items, navigateToDetail)
-
+                CardItem(items, viewModel, navigateToDetail)
             }
         }
     }
@@ -370,13 +371,12 @@ fun SearchBar2(
 @Composable
 fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
     val locationState by viewModel.currentCountry.collectAsState()
-    val options =
-        listOf(
-            "Текущая локация: $locationState",
-            "Россия",
-            "Америка",
-            "Европа",
-        )
+    val options = listOf(
+        "Текущая локация: $locationState",
+        "Россия",
+        "Америка",
+        "Европа"
+    )
     var expanded by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf(options[0]) }
     val sheetState = rememberModalBottomSheetState()
@@ -386,20 +386,17 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
-        Row() {
+        Row(modifier = Modifier.clickable { expanded = true }) {
             Text(text)
             Icon(
                 Icons.Filled.KeyboardArrowDown,
-                null,
+                contentDescription = "Dropdown Arrow",
                 Modifier.rotate(if (expanded) 180f else 0f)
             )
         }
         if (expanded) {
-            viewModel.requestLocationUpdates()
             ModalBottomSheet(
-                onDismissRequest = {
-                    expanded = false
-                },
+                onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .fillMaxHeight(0.5f)
                     .navigationBarsPadding(),
@@ -418,19 +415,22 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
                         fontWeight = FontWeight.ExtraBold
                     )
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(options) { adress ->
+                        items(options) { option ->
                             Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
+                                    .fillMaxWidth()
                                     .padding(top = 10.dp),
                                 colors = CardDefaults.cardColors(Color.White),
                                 onClick = {
-                                    text = adress
+                                    text = option
                                     scope.launch {
                                         sheetState.hide()
                                     }.invokeOnCompletion {
-                                        if (!sheetState.isVisible)
+                                        if (!sheetState.isVisible) {
                                             expanded = false
+                                            val actualCountry = option.replace("Текущая локация: ", "")
+                                            viewModel.setCurrentCountry(actualCountry)
+                                        }
                                     }
                                 }
                             ) {
@@ -439,15 +439,15 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        adress,
+                                        option,
                                         color = colorResource(R.color.Dark_Arsenic),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp
                                     )
-                                    if (adress == text)
+                                    if (option == text)
                                         Icon(
                                             Icons.Default.Check,
-                                            "",
+                                            contentDescription = "Selected",
                                             tint = colorResource(R.color.Green_Sheen)
                                         )
                                 }

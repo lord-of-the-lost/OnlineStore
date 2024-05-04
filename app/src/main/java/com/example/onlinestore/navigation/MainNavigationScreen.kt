@@ -72,7 +72,7 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.NavigationItem.Onboarding.route,
+        startDestination = Screen.BottomNavigation.Home.route,
         modifier = Modifier.padding(dp)
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {

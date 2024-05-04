@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import com.example.onlinestore.core.location.Currency
 import com.example.onlinestore.core.location.LocationUseCase
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.repository.StoreRepository
@@ -19,6 +20,7 @@ import com.example.onlinestore.core.storage.UserDAO
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class StoreViewModel(application: Application) : AndroidViewModel(application) {
@@ -47,6 +49,17 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     var savedProducts: MutableState<List<ProductModel>?> = mutableStateOf(null)
     var currentCountry: StateFlow<String> = locationUseCase.countryStateFlow
 
+    private val _currentCurrency = MutableStateFlow<Currency>(Currency.USD)
+    val currentCurrency: StateFlow<Currency> = _currentCurrency.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            currentCountry.collect { country ->
+                _currentCurrency.value = locationUseCase.determineCurrency(country)
+            }
+        }
+    }
+
 
     // Location VM logic
     fun requestLocationUpdates() {
@@ -58,6 +71,27 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             context,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun formatPriceWithCurrency(price: Double, currency: Currency): String {
+        val (convertedPrice, currencySymbol) = when(currency) {
+            Currency.USD -> price to "$"
+            Currency.EUR -> (price * 0.9) to "€"
+            Currency.RUB -> (price * 90) to "₽"
+        }
+        return "${currencySymbol}${convertedPrice.format(2)}"
+    }
+
+    fun setCurrentCountry(country: String) {
+        val newCurrency = when (country) {
+            "Россия" -> Currency.RUB
+            "Америка" -> Currency.USD
+            "Европа" -> Currency.EUR
+            else -> Currency.USD
+        }
+        if (currentCurrency.value != newCurrency) {
+            _currentCurrency.value = newCurrency
+        }
     }
 
     //Storage Product VM logic
@@ -132,3 +166,5 @@ data class AuthState(
     val success: Boolean = false,
     val error: String = ""
 )
+
+fun Double.format(digits: Int) = "%.${digits}f".format(this)
