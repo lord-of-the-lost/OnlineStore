@@ -2,7 +2,6 @@ package com.example.onlinestore.core
 
 import android.app.Application
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -69,6 +68,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
+    private val _categoryId = MutableStateFlow(0)
+    val categoryId: StateFlow<Int> = _categoryId.asStateFlow()
+
     init {
         loadProducts()
         loadCategories()
@@ -99,7 +101,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     // Location VM logic
     fun formatPriceWithCurrency(price: Double, currency: Currency): String {
-        val (convertedPrice, currencySymbol) = when(currency) {
+        val (convertedPrice, currencySymbol) = when (currency) {
             Currency.USD -> price to "$"
             Currency.EUR -> (price * 0.9) to "€"
             Currency.RUB -> (price * 90) to "₽"
@@ -217,6 +219,17 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loadProductById(id:Int) {
+        viewModelScope.launch {
+            try {
+                val productList = networkService.getProductByCategory(id)
+                _products.value = productList
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+
     private fun loadCategories() {
         viewModelScope.launch {
             try {
@@ -227,6 +240,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     fun sortProductsByPriceAscending() {
         _products.value = _products.value.sortedBy { it.price }
     }

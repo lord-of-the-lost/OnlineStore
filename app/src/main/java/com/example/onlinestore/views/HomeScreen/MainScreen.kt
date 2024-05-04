@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.IconButton
@@ -32,13 +34,10 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -126,9 +125,9 @@ fun MainScreen(
                 .padding(top = 30.dp)
         ) {
             categoryList.take(4).forEach { category ->
-                CategoryButtonItem(category, Modifier.weight(1f))
+                CategoryButtonItem(category, Modifier.weight(1f),viewModel)
             }
-            AllCategoryButton(categoryList, Modifier.weight(1f))
+            AllCategoryButton(categoryList, Modifier.weight(1f),viewModel)
         }
         Row(
             Modifier
@@ -201,7 +200,7 @@ fun ProductItem2(
 }
 
 @Composable
-fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier) {
+fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier,viewModel: StoreViewModel) {
     Column(
         modifier = modifier
             .padding(end = 18.dp),
@@ -214,15 +213,15 @@ fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier) {
                 .size(60.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable {
-                    TODO()
-                },
+                    viewModel.loadProductById(category.id)
+                           },
         )
         Text(category.name, fontSize = 10.sp)
     }
 }
 
 @Composable
-fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier) {
+fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier,viewModel: StoreViewModel)  {
     var expended by remember { mutableStateOf(false) }
     IconButton({
         expended = !expended
@@ -242,7 +241,7 @@ fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier)
                 expended = false
             }) {
             list2.distinctBy { it.name }.forEach { item ->
-                DropdownMenuItem(text = { Text(item.name) }, {})
+                DropdownMenuItem(text = { Text(item.name) }, {viewModel.loadProductById(item.id)})
             }
         }
     }
