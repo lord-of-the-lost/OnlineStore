@@ -1,16 +1,15 @@
 package com.example.onlinestore.core
 
-import android.Manifest
 import android.app.Application
-import android.content.Context
-import android.content.pm.PackageManager
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
+import com.example.onlinestore.core.api.NetworkService
 import com.example.onlinestore.core.location.LocationUseCase
+import com.example.onlinestore.core.models.CategoryModel
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.repository.StoreRepository
 import com.example.onlinestore.core.storage.AppDatabase
@@ -21,8 +20,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class StoreViewModel(application: Application) : AndroidViewModel(application) {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.escuelajs.co/api/v1/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
     private val productDAO: ProductDAO by lazy {
         Room.databaseBuilder(
@@ -37,6 +42,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         ).build().userDao()
     }
 
+    private val networkService = retrofit.create(NetworkService::class.java)
+
     private val repository: StoreRepository by lazy {
         StoreRepository(productDAO, userDAO)
     }
@@ -46,12 +53,49 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     var savedProducts: MutableState<List<ProductModel>?> = mutableStateOf(null)
+
     private val _currentCurrency = MutableStateFlow<Currency>(Currency.USD)
     val currentCurrency: StateFlow<Currency> = _currentCurrency.asStateFlow()
+
     private val _selectedCountry = MutableStateFlow("Америка")
     val selectedCountry: StateFlow<String> = _selectedCountry.asStateFlow()
 
+    private val _favoriteProducts = MutableStateFlow<Set<Int>>(setOf())
+    val favoriteProducts: StateFlow<Set<Int>> = _favoriteProducts.asStateFlow()
 
+    private val _products = MutableStateFlow<List<ProductModel>>(emptyList())
+    val products: StateFlow<List<ProductModel>> = _products.asStateFlow()
+
+    private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
+    val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
+
+    init {
+        loadProducts()
+        loadCategories()
+    }
+
+    private val _selectedProduct = MutableStateFlow<ProductModel?>(null)
+    val selectedProduct: StateFlow<ProductModel?> = _selectedProduct
+
+    fun setSelectedProduct(product: ProductModel) {
+        _selectedProduct.value = product
+    }
+
+    fun toggleFavorite(productId: Int) {
+        viewModelScope.launch {
+            val product = _products.value.find { it.id == productId }
+
+            product?.let {
+                if (_favoriteProducts.value.contains(productId)) {
+                    _favoriteProducts.value = _favoriteProducts.value.minus(productId)
+                    deleteProduct(it)
+                } else {
+                    _favoriteProducts.value = _favoriteProducts.value.plus(productId)
+                    saveProduct(it)
+                }
+            }
+        }
+    }
 
     // Location VM logic
     fun formatPriceWithCurrency(price: Double, currency: Currency): String {
@@ -79,7 +123,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             _currentCurrency.value = newCurrency
         }
     }
-
 
     //Storage Product VM logic
     fun saveProduct(product: ProductModel) {
@@ -150,6 +193,54 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resetAuthState() {
         _authStateState.value = AuthState(success = false)
+    }
+
+    //Network VM logic
+    fun deleteProductById(productId: Int) {
+        viewModelScope.launch {
+            try {
+                networkService.deleteProduct(productId)
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+
+    private fun loadProducts() {
+        viewModelScope.launch {
+            try {
+                val productList = networkService.getAllProduct()
+                _products.value = productList
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+
+    private fun loadCategories() {
+        viewModelScope.launch {
+            try {
+                val categoryList = networkService.getAllCategories()
+                _categories.value = categoryList
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+    fun sortProductsByPriceAscending() {
+        _products.value = _products.value.sortedBy { it.price }
+    }
+
+    fun sortProductsByPriceDescending() {
+        _products.value = _products.value.sortedByDescending { it.price }
+    }
+
+    fun sortProductsByTitleAscending() {
+        _products.value = _products.value.sortedBy { it.title }
+    }
+
+    fun sortProductsByTitleDescending() {
+        _products.value = _products.value.sortedByDescending { it.title }
     }
 }
 

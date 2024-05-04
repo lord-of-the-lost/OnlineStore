@@ -1,9 +1,5 @@
 package com.example.onlinestore.views.HomeScreen
 
-import android.Manifest
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,22 +44,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -72,32 +64,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.onlinestore.MainActivity
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.core.models.CategoryModel
+import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.navigation.Screen
-import com.example.onlinestore.views.HomeScreen.network.model.Category
-import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
     controller: NavController,
-    viewModel: StoreViewModel,
-    navigateToDetail: (ProductItem) -> Unit
+    viewModel: StoreViewModel
 ) {
-    val viewModel2: ProductViewModelTest = viewModel()
-    val viewState by viewModel2.productState
-
     var expended by remember { mutableStateOf(false) }
     val productFilter = listOf("price up", "price down", "title A", "title Z")
-    val productList = viewState.list?.toMutableStateList()
-    val categoryState by viewModel2.categoryState
-    val categoryList = categoryState.list?.toMutableStateList()
+
+    val productList by viewModel.products.collectAsState()
+    val categoryList by viewModel.categories.collectAsState()
 
     Column(
         modifier = Modifier
@@ -140,12 +125,10 @@ fun MainScreen(
                 .fillMaxWidth()
                 .padding(top = 30.dp)
         ) {
-            categoryList?.let {
-                repeat(4) {
-                    CategoryButtonItem(categoryList, it)
-                }
-                AllCategoryButton(categoryList)
+            categoryList.take(4).forEach { category ->
+                CategoryButtonItem(category, Modifier.weight(1f))
             }
+            AllCategoryButton(categoryList, Modifier.weight(1f))
         }
         Row(
             Modifier
@@ -186,10 +169,10 @@ fun MainScreen(
                     productFilter.forEach {
                         DropdownMenuItem(text = { Text(it) }, onClick = {
                             when (it) {
-                                "price up" -> productList?.sortBy { it.price }
-                                "price down" -> productList?.sortByDescending { it.price }
-                                "title A" -> productList?.sortBy { it.title }
-                                "title Z" -> productList?.sortByDescending { it.title }
+                                "price up" -> viewModel.sortProductsByPriceAscending()
+                                "price down" -> viewModel.sortProductsByPriceDescending()
+                                "title A" -> viewModel.sortProductsByTitleAscending()
+                                "title Z" -> viewModel.sortProductsByTitleDescending()
                             }
                             expended = false
                         })
@@ -198,46 +181,35 @@ fun MainScreen(
                 }
             }
         }
-        when {
-            viewState.loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Start),
-                    color = Color.Black
-                )
-            }
-
-            else -> {
-                ProductItem2(productList, viewModel, navigateToDetail)
-            }
-        }
+        ProductItem2(productList, viewModel, controller)
     }
 }
-
 
 @Composable
 fun ProductItem2(
-    list: SnapshotStateList<ProductItem>?,
+    list: List<ProductModel>?,
     viewModel: StoreViewModel,
-    navigateToDetail: (ProductItem) -> Unit
+    navController: NavController
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(2), state = rememberLazyGridState()) {
         list?.let {
-            items(list) { items ->
-                CardItem(items, viewModel, navigateToDetail)
+            items(list) { item ->
+                CardItem(item, viewModel, navController)
             }
         }
     }
 }
 
 @Composable
-fun CategoryButtonItem(list2: SnapshotStateList<Category>, it: Int) {
+fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier) {
     Column(
-        Modifier
-            .padding(end = 18.dp), horizontalAlignment =
-        Alignment.CenterHorizontally
+        modifier = modifier
+            .padding(end = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AsyncImage(
-            model = list2[it].image, "",
+            model = category.image,
+            contentDescription = "",
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(10.dp))
@@ -245,17 +217,17 @@ fun CategoryButtonItem(list2: SnapshotStateList<Category>, it: Int) {
                     TODO()
                 },
         )
-        Text(list2[it].name.toString(), fontSize = 10.sp)
+        Text(category.name, fontSize = 10.sp)
     }
 }
 
 @Composable
-fun AllCategoryButton(list2: SnapshotStateList<Category>) {
+fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier) {
     var expended by remember { mutableStateOf(false) }
     IconButton({
         expended = !expended
     }) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painterResource(R.drawable.group_8__3_),
                 "",
@@ -270,10 +242,9 @@ fun AllCategoryButton(list2: SnapshotStateList<Category>) {
                 expended = false
             }) {
             list2.distinctBy { it.name }.forEach { item ->
-                DropdownMenuItem(text = { Text(item.name.toString()) }, {})
+                DropdownMenuItem(text = { Text(item.name) }, {})
             }
         }
-
     }
 }
 
@@ -388,7 +359,8 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
                                     }.invokeOnCompletion {
                                         if (!sheetState.isVisible) {
                                             expanded = false
-                                            val actualCountry = option.replace("Текущая локация: ", "")
+                                            val actualCountry =
+                                                option.replace("Текущая локация: ", "")
                                             viewModel.setSelectedCountry(actualCountry)
                                         }
                                     }

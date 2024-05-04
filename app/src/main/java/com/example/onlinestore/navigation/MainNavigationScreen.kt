@@ -18,7 +18,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
+import com.example.onlinestore.core.models.CategoryModel
+import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
@@ -31,6 +32,7 @@ import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
+import com.example.onlinestore.views.terms_conditions.Terms
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -67,20 +69,17 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.NavigationItem.Onboarding.route,
+        startDestination = Screen.BottomNavigation.Home.route,
         modifier = Modifier.padding(dp)
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {
             OnboardingScreen(Modifier, navController)
         }
         composable(Screen.BottomNavigation.WishList.route) {
-            FavoriteScreen()
+            FavoriteScreen(navController, viewModel)
         }
         composable(Screen.BottomNavigation.Home.route) {
-            MainScreen(navController, viewModel, navigateToDetail = {
-                navController.currentBackStackEntry?.savedStateHandle?.set("key", it)
-                navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
-            })
+            MainScreen(navController, viewModel)
         }
 
         composable(Screen.BottomNavigation.Manager.broute) {
@@ -93,20 +92,10 @@ fun Navigation(
             AddProduct()
         }
         composable(Screen.NavigationItem.TermsConditions.route) {
-            SampleScreen()
+            Terms()
         }
-        composable(Screen.NavigationItem.DetailProductScreen.route, enterTransition = {
-            fadeIn(
-                animationSpec = tween(300, easing = LinearEasing)
-            ) + slideIntoContainer(
-                animationSpec = tween(300, easing = EaseIn),
-                towards = AnimatedContentTransitionScope.SlideDirection.Start
-            )
-        }) {
-            val product =
-                navController.previousBackStackEntry?.savedStateHandle?.get<ProductItem>("key")
-                    ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)
-            DetailScreen(product, viewModel)
+        composable(Screen.NavigationItem.DetailProductScreen.route) {
+            DetailScreen(viewModel)
         }
         composable(Screen.NavigationItem.Authorization.tRoute) {
             LoginScreen(navController, viewModel)

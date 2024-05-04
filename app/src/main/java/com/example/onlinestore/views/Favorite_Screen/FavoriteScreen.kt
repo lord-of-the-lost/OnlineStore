@@ -5,14 +5,14 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -22,9 +22,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -32,34 +34,53 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.views.HomeScreen.CardItem
-import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
+import com.example.onlinestore.core.models.ProductModel
+import com.example.onlinestore.navigation.Screen
 
 @Composable
-fun FavoriteScreen() {
-    val model: StoreViewModel = viewModel()
-    val list = model.getProductsFromDB()
-    LazyVerticalGrid(GridCells.Fixed(2), state = rememberLazyGridState()) {
+fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
 
-
+    LaunchedEffect(key1 = true) {
+        viewModel.getProductsFromDB()
     }
 
+    val productList = viewModel.savedProducts.value
+
+    productList?.let { list ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            state = rememberLazyGridState()
+        ) {
+            items(list) { product ->
+                FavoriteItem(navController, viewModel, product)
+            }
+        }
+    }
 }
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardItem(
-    productItem: ProductItem,
-    navigateToDetail: (ProductItem) -> Unit,
+fun FavoriteItem(
+    navController: NavController,
+    viewModel: StoreViewModel,
+    productItem: ProductModel)
+{
+    val images = productItem.images.mapNotNull { img ->
+        if (img.startsWith("[")) img.substring(2, img.length - 2)
+        else img
+    }.filterNot { it.isBlank() }
 
-    ) {
-    val pagerState = rememberPagerState(pageCount = { productItem.images.size })
-    val storeModel: StoreViewModel = viewModel()
+    val pagerState = rememberPagerState(pageCount = { images.size })
+    val currentCurrency by viewModel.currentCurrency.collectAsState()
+    val priceOfProduct =
+        productItem?.price?.let { viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency) }
+            ?: "0"
+
     Card(
         modifier = Modifier
             .fillMaxSize()
@@ -67,34 +88,24 @@ fun CardItem(
             .size(170.dp, 217.dp),
         colors = CardDefaults.cardColors(colorResource(id = R.color.CardColor)),
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
+                    .height(100.dp)
                     .clickable {
-                        navigateToDetail(productItem)
+                        viewModel.setSelectedProduct(productItem)
+                        navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
                     }
             ) {
-                var image = productItem.images
-                HorizontalPager(state = pagerState) {
-                    if (productItem.images[0].startsWith("[")) {
-                        image = listOf(
-                            productItem.images[0].substring(
-                                2,
-                                productItem.images[0].length - 2
-                            )
-                        )
-                    }
-                    if (image[0].contains("https://placeimg.com/640/480/any")) {
-                        Image(painter = painterResource(id = R.drawable.maxresdefault), "")
-                    } else {
+                HorizontalPager(state = pagerState) { page ->
+                    if (images.isNotEmpty()) {
                         AsyncImage(
-                            model = image[it], contentDescription = "photo",
+                            model = images[page], contentDescription = "photo",
                             contentScale = ContentScale.Crop
                         )
+                    } else {
+                        Image(painter = painterResource(id = R.drawable.maxresdefault), contentDescription = "Default image")
                     }
                 }
             }
@@ -104,27 +115,24 @@ fun CardItem(
                     .fillMaxWidth()
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = productItem.title.toString(), fontSize = 12.sp, maxLines = 1)
+                    Text(text = productItem.title, fontSize = 12.sp, maxLines = 1)
                     Text(
-                        text = "$${productItem.price.toString()}",
+                        text = priceOfProduct,
                         color = colorResource(id = R.color.Dark_Arsenic),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Button(
-                        onClick = { },
+                        onClick = { viewModel.toggleFavorite(productItem.id) },
                         Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))
                     ) {
-                        IconButton({ }) {
-                            Icon(
-                                painterResource(R.drawable.heart_fill),
-                                "",
-                                tint = colorResource(R.color.Green_Sheen)
-                            )
-                        }
-
+                        Icon(
+                            painterResource(R.drawable.heart_fill),
+                            contentDescription = "Favorite",
+                            tint = colorResource(R.color.Green_Sheen)
+                        )
                         Text(text = "Add to cart")
                     }
                 }

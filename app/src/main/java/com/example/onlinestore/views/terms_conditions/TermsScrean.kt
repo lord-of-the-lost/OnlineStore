@@ -26,14 +26,6 @@ fun Terms() {
             .verticalScroll(rememberScrollState())
 
     ) {
-        Text(text = "Terms&Conditions",
-        modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
-        color = Color.Black,
-        style = TextStyle(
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center
-        )
-        )
         Text( stringResource(R.string.Terms),
             modifier = Modifier.padding(start = 10.dp, end = 10.dp),
             color = Color.Black

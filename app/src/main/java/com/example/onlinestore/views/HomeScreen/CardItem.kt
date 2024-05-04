@@ -5,9 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -28,21 +28,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
+import com.example.onlinestore.core.models.ProductModel
+import com.example.onlinestore.navigation.Screen
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardItem(
-    productItem: ProductItem,
+    productItem: ProductModel,
     viewModel: StoreViewModel,
-    navigateToDetail: (ProductItem) -> Unit) {
-    val pagerState = rememberPagerState(pageCount = { productItem.images.size })
+    navController: NavController)
+{
+    val images = productItem.images.map { img ->
+        if (img.startsWith("[")) img.substring(2, img.length - 2) else img
+    }.filter { it.isNotEmpty() }
+
+    val pagerState = rememberPagerState(pageCount = { images.size })
+
     val currentCurrency by viewModel.currentCurrency.collectAsState()
-    val price =
-        productItem.price?.let { viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency) } ?: "0"
+    val price = productItem.price?.let {
+        viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency)
+    } ?: "0"
 
     Card(
         modifier = Modifier
@@ -51,35 +60,29 @@ fun CardItem(
             .size(170.dp, 217.dp),
         colors = CardDefaults.cardColors(colorResource(id = R.color.CardColor)),
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f)
+                    .height(100.dp)
                     .clickable {
-                        navigateToDetail(productItem)
+                        viewModel.setSelectedProduct(productItem)
+                        navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
                     }
             ) {
-                var image = productItem.images
-                HorizontalPager(state = pagerState) {
-                    if (productItem.images[0].startsWith("[")) {
-                        image = listOf(
-                            productItem.images[0].substring(
-                                2,
-                                productItem.images[0].length - 2
-                            )
-                        )
-                    }
-                    if (image[0].contains("https://placeimg.com/640/480/any")) {
-                        Image(painter = painterResource(id = R.drawable.maxresdefault), "")
-                    } else {
+                if (images.isNotEmpty()) {
+                    HorizontalPager(state = pagerState) { page ->
                         AsyncImage(
-                            model = image[it], contentDescription = "photo",
+                            model = images[page], contentDescription = "photo",
                             contentScale = ContentScale.Crop
                         )
                     }
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.maxresdefault),
+                        contentDescription = "Default Image",
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
             Box(
@@ -88,13 +91,13 @@ fun CardItem(
                     .fillMaxWidth()
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = productItem.title.toString(), fontSize = 12.sp, maxLines = 1)
-                        Text(
-                            text = price,
-                            color = colorResource(id = R.color.Dark_Arsenic),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                    Text(text = productItem.title, fontSize = 12.sp, maxLines = 1)
+                    Text(
+                        text = price,
+                        color = colorResource(id = R.color.Dark_Arsenic),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                     Button(
                         onClick = { /*TODO*/ },
                         Modifier.fillMaxWidth(),
