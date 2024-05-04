@@ -29,6 +29,7 @@ import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.CartScreen.CartScreen
+import com.example.onlinestore.views.Favorite_Screen.FavoriteScreen
 import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
@@ -71,16 +72,14 @@ fun Navigation(
 ) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.BottomNavigation.Home.route,
-        modifier = Modifier.padding(dp),
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None }
+        startDestination = Screen.NavigationItem.Onboarding.route,
+        modifier = Modifier.padding(dp)
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {
             OnboardingScreen(Modifier, navController)
         }
         composable(Screen.BottomNavigation.WishList.route) {
-            SampleScreen()
+            FavoriteScreen()
         }
         composable(Screen.BottomNavigation.Home.route) {
             MainScreen(navController, viewModel, navigateToDetail = {
@@ -108,15 +107,7 @@ fun Navigation(
                 animationSpec = tween(300, easing = EaseIn),
                 towards = AnimatedContentTransitionScope.SlideDirection.Start
             )
-        },
-            exitTransition = {
-                fadeOut(
-                    animationSpec = tween(3000, easing = LinearEasing)
-                ) + slideOutOfContainer(
-                    animationSpec = tween(3000, easing = EaseOut),
-                    towards = AnimatedContentTransitionScope.SlideDirection.End
-                )
-            }) {
+        }) {
             val product =
                 navController.previousBackStackEntry?.savedStateHandle?.get<ProductItem>("key")
                     ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)

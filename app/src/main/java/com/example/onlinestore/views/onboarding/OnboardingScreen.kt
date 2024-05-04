@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,131 +88,144 @@ fun OnboardingScreen(modifier: Modifier, navController: NavController) {
 
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(start = 14.dp, end = 14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(start = 14.dp, end = 14.dp)
     ) {
 
-        HorizontalPager(
-            modifier = Modifier
-                .clip(RoundedCornerShape(46.dp)),
-            state = pagerState
-        ) { index ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    painter = painterResource(id = listOfImages[index]),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
-            }
-            if (pagerState.currentPage == index) {
-                headTextIndex = index
-                descriptionHeadTextIndex = index
+        Column {
+            HorizontalPager(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(46.dp)),
+                state = pagerState
+            ) { index ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        painter = painterResource(id = listOfImages[index]),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                if (pagerState.currentPage == index) {
+                    headTextIndex = index
+                    descriptionHeadTextIndex = index
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(66.dp))
-
-        Text(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            text = headTexts[headTextIndex],
-            style = TextStyle(
-                fontFamily = plusJakartaSans,
-                fontSize = 29.sp,
-                lineHeight = 45.sp,
-                color = Color.Black,
+                .weight(66 / 144f)
+        ) { }
+
+        Column {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(0.dp, 80.dp)
+                    .wrapContentHeight(align = Alignment.CenterVertically),
+                textAlign = TextAlign.Left,
+                text = headTexts[headTextIndex],
+                style = TextStyle(
+                    fontFamily = plusJakartaSans,
+                    fontSize = 29.sp,
+                    lineHeight = 45.sp,
+                    color = Color.Black,
+                )
             )
-        )
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(),
-            text = descriptionHeadTexts[descriptionHeadTextIndex],
-            style = TextStyle(
-                fontFamily = inter,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-                lineHeight = 25.sp,
-                color = Color(0xFF7C7C7B),
-            )
-        )
-
-        Spacer(modifier = Modifier.height(50.dp))
+        }
 
         Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .size(0.dp, 98.dp),
-            Arrangement.Bottom
+                .weight(28 / 144f)
+        ) { }
 
-        ) {
-            Row(
+        Column {
+            Text(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .size(0.dp, 64.dp)
-                    .padding(bottom = 34.dp)
-                    .weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .size(0.dp, 45.dp)
+                    .wrapContentHeight(align = Alignment.CenterVertically),
+                text = descriptionHeadTexts[descriptionHeadTextIndex],
+                style = TextStyle(
+                    fontFamily = inter,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    lineHeight = 25.sp,
+                    color = Color(0xFF7C7C7B),
+                )
+            )
+        }
 
-            ) {
-                Box()
-                {
-                    Row(
-                        Modifier
-                            .wrapContentHeight(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        repeat(pagerState.pageCount) { iteration ->
-                            val color =
-                                if (pagerState.currentPage == iteration) Color.Black else Color(
-                                    0xFFD9D9D9
+        Column(
+            modifier = Modifier
+                .weight(50 / 144f)
+        ) { }
+
+        Column {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(0.dp, 64.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Box()
+                    {
+                        Row(
+                            Modifier
+                                .wrapContentHeight(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            repeat(pagerState.pageCount) { iteration ->
+                                val color =
+                                    if (pagerState.currentPage == iteration) Color.Black else Color(
+                                        0xFFD9D9D9
+                                    )
+                                val x =
+                                    if (pagerState.currentPage == iteration) 24.dp else 8.dp
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(color)
+                                        .size(x, 8.dp)
                                 )
-                            val x =
-                                if (pagerState.currentPage == iteration) 24.dp else 8.dp
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(color)
-                                    .size(x, 8.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                            }
                         }
                     }
-                }
 
-            }
-            IconButton(
-                modifier = Modifier
-                    .size(64.dp),
-                onClick = {
-                    pagerScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
-                    if (descriptionHeadTextIndex == 2) {
-                        navController.navigate(Screen.NavigationItem.Registration.route)
+                    IconButton(
+                        modifier = Modifier
+                            .size(64.dp),
+                        onClick = {
+                            pagerScope.launch { pagerState.scrollToPage(pagerState.currentPage + 1) }
+                            if (descriptionHeadTextIndex == 2) {
+                                navController.navigate(Screen.NavigationItem.Registration.route)
+                            }
+                        }) {
+                        Icon(
+                            modifier = Modifier
+                                .size(64.dp),
+                            imageVector = ImageVector.vectorResource(R.drawable.onboarding_button),
+                            tint = Color.Black,
+                            contentDescription = null
+                        )
                     }
-                }) {
-                Icon(
+                }
+                Spacer(
                     modifier = Modifier
-                        .size(64.dp),
-                    imageVector = ImageVector.vectorResource(R.drawable.onboarding_button),
-                    tint = Color.Black,
-                    contentDescription = null
+                        .height(14.dp)
                 )
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
