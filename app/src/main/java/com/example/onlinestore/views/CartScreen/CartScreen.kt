@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.ui.theme.inter
 import kotlin.random.Random
 
@@ -152,9 +154,7 @@ var shopItemsInCart = mutableListOf(
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun CartScreen(
-) {
-
+fun CartScreen(viewModel: StoreViewModel) {
     var shopItemsInCart by remember { mutableStateOf(shopItemsInCart) }
     var isAtLeastOneItemSelected by remember { mutableStateOf(false) }
 
@@ -174,6 +174,7 @@ fun CartScreen(
             items(shopItemsInCart) { shopItem ->
                 ShoppingListItem(
                     shopItem = shopItem,
+                    viewModel = viewModel,
                     onDeleteItem = {
                         shopItemsInCart = shopItemsInCart.toMutableList()
                             .also { it.remove(shopItem) }
@@ -301,11 +302,16 @@ fun DropDownExample() {
 @Composable
 fun ShoppingListItem(
     shopItem: ShopItem,
+    viewModel: StoreViewModel,
     onDeleteItem: (ShopItem) -> Unit,
     onItemSelectedChanged: (Boolean) -> Unit
 ) {
     var isSelected by remember { mutableStateOf(false) }
     isSelected = shopItem.isSelected
+
+    val currentCurrency by viewModel.currentCurrency.collectAsState()
+    val price = parsePrice(shopItem.priceOfProduct)
+    val formattedPrice = viewModel.formatPriceWithCurrency(price, currentCurrency)
 
     if (isSelected) {
         onItemSelectedChanged(true)
@@ -391,7 +397,7 @@ fun ShoppingListItem(
             ) {
                 Text(
                     modifier = Modifier.padding(bottom = 5.dp),
-                    text = shopItem.priceOfProduct,
+                    text = formattedPrice,
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.Medium,
@@ -552,8 +558,7 @@ fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ShoppingListItemPreview() {
-    CartScreen()
+
+fun parsePrice(priceStr: String): Double {
+    return priceStr.replace("[^\\d.]".toRegex(), "").replace(',', '.').toDoubleOrNull() ?: 0.0
 }

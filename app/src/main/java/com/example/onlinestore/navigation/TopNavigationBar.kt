@@ -113,7 +113,6 @@ fun SearchBar(
         textStyle = TextStyle(fontSize = 13.sp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {
-
         })
     ) {
         TextFieldDefaults.TextFieldDecorationBox(
@@ -141,11 +140,8 @@ fun SearchBar(
                     }) {
                         Icon(Icons.Default.Clear, "", tint = Color.Gray)
                     }
-
-
             },
             contentPadding = TextFieldDefaults.textFieldWithLabelPadding(top = 0.dp, bottom = 0.dp)
-
         )
     }
 }

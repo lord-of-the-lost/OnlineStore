@@ -2,21 +2,16 @@ package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -111,7 +106,7 @@ fun Navigation(
             val product =
                 navController.previousBackStackEntry?.savedStateHandle?.get<ProductItem>("key")
                     ?: ProductItem(0, "", 0, "", emptyList(), "", "", null)
-            DetailScreen(product)
+            DetailScreen(product, viewModel)
         }
         composable(Screen.NavigationItem.Authorization.tRoute) {
             LoginScreen(navController, viewModel)
@@ -123,7 +118,7 @@ fun Navigation(
             SearchScreen()
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
-            CartScreen()
+            CartScreen(viewModel)
         }
     }
 }

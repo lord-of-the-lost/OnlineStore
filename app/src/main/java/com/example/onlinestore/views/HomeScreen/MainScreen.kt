@@ -4,7 +4,6 @@ import android.Manifest
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,7 +21,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -94,44 +92,7 @@ fun MainScreen(
 ) {
     val viewModel2: ProductViewModelTest = viewModel()
     val viewState by viewModel2.productState
-    val context = LocalContext.current
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            if (permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-            ) {
-                viewModel.requestLocationUpdates()
-            } else {
-                val rationalRequired = ActivityCompat.shouldShowRequestPermissionRationale(
-                    context as MainActivity,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
 
-                if (rationalRequired) {
-                    Toast.makeText(
-                        context,
-                        "Location permission is required to this feature to work", Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    Toast.makeText(
-                        context,
-                        "Location permission is required. Please enable it in the Android Settings",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        })
-    LaunchedEffect(key1 = viewModel) {
-        if (viewModel.hasLocationPermission(context)) {
-            viewModel.requestLocationUpdates()
-        } else {
-            requestPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
-    }
     var expended by remember { mutableStateOf(false) }
     val productFilter = listOf("price up", "price down", "title A", "title Z")
     val productList = viewState.list?.toMutableStateList()
@@ -370,15 +331,14 @@ fun SearchBar2(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
-    val locationState by viewModel.currentCountry.collectAsState()
     val options = listOf(
-        "Текущая локация: $locationState",
-        "Россия",
         "Америка",
+        "Россия",
         "Европа"
     )
     var expanded by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(options[0]) }
+    val selectedCountry by viewModel.selectedCountry.collectAsState()
+    var text by remember { mutableStateOf(selectedCountry) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
@@ -429,7 +389,7 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
                                         if (!sheetState.isVisible) {
                                             expanded = false
                                             val actualCountry = option.replace("Текущая локация: ", "")
-                                            viewModel.setCurrentCountry(actualCountry)
+                                            viewModel.setSelectedCountry(actualCountry)
                                         }
                                     }
                                 }

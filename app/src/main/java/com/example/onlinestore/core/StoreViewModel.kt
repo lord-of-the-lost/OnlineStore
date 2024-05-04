@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
-import com.example.onlinestore.core.location.Currency
 import com.example.onlinestore.core.location.LocationUseCase
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.repository.StoreRepository
@@ -47,32 +46,14 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     var savedProducts: MutableState<List<ProductModel>?> = mutableStateOf(null)
-    var currentCountry: StateFlow<String> = locationUseCase.countryStateFlow
-
     private val _currentCurrency = MutableStateFlow<Currency>(Currency.USD)
     val currentCurrency: StateFlow<Currency> = _currentCurrency.asStateFlow()
+    private val _selectedCountry = MutableStateFlow("Америка")
+    val selectedCountry: StateFlow<String> = _selectedCountry.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            currentCountry.collect { country ->
-                _currentCurrency.value = locationUseCase.determineCurrency(country)
-            }
-        }
-    }
 
 
     // Location VM logic
-    fun requestLocationUpdates() {
-        locationUseCase.requestLocationUpdates(this)
-    }
-
-    fun hasLocationPermission(context: Context): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
     fun formatPriceWithCurrency(price: Double, currency: Currency): String {
         val (convertedPrice, currencySymbol) = when(currency) {
             Currency.USD -> price to "$"
@@ -82,17 +63,23 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         return "${currencySymbol}${convertedPrice.format(2)}"
     }
 
-    fun setCurrentCountry(country: String) {
+    fun setSelectedCountry(country: String) {
+        if (_selectedCountry.value != country) {
+            _selectedCountry.value = country
+        }
+
         val newCurrency = when (country) {
             "Россия" -> Currency.RUB
             "Америка" -> Currency.USD
             "Европа" -> Currency.EUR
             else -> Currency.USD
         }
-        if (currentCurrency.value != newCurrency) {
+
+        if (_currentCurrency.value != newCurrency) {
             _currentCurrency.value = newCurrency
         }
     }
+
 
     //Storage Product VM logic
     fun saveProduct(product: ProductModel) {
@@ -168,3 +155,7 @@ data class AuthState(
 )
 
 fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
+enum class Currency {
+    USD, EUR, RUB
+}
