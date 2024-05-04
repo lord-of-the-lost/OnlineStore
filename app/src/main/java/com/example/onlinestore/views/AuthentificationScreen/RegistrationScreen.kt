@@ -1,13 +1,14 @@
 package com.example.onlinestore.views.AuthentificationScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,18 +17,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-
-import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExposedDropdownMenuDefaults.TrailingIcon
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,12 +36,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -73,6 +72,9 @@ fun RegistrationScreen(
         var isErrorEmail by remember { mutableStateOf(false) }
         var isErrorPassword by remember { mutableStateOf(false) }
         var isErrorConfirmPass by remember { mutableStateOf(false) }
+        val context = LocalContext.current
+        val inputDataCheck =
+            if (!isValidLogin(firstName) && !isValidEmail(email) && !isValidPassword(password) && password == confirmPass) true else false
 
         Column(
             modifier = Modifier
@@ -95,7 +97,7 @@ fun RegistrationScreen(
                     isErrorName = isValidLogin(it)
                 },
                 "Enter your First name",
-                "",
+                "Invalid name",
                 false,
                 isErrorName
             )
@@ -107,7 +109,7 @@ fun RegistrationScreen(
                     isErrorEmail = isValidEmail(it)
                 },
                 "Enter your email",
-                "",
+                "Invalid emeil",
                 false,
                 isErrorEmail
             )
@@ -120,7 +122,7 @@ fun RegistrationScreen(
                     isErrorPassword = isValidPassword(it)
                 },
                 "Enter your password",
-                "",
+                "Invalid password",
                 false,
                 isErrorPassword
             )
@@ -132,7 +134,7 @@ fun RegistrationScreen(
                     isErrorConfirmPass = it != password
                 },
                 "Enter your password",
-                "",
+                "Password mismatch ",
                 false,
                 isErrorConfirmPass
             )
@@ -141,18 +143,12 @@ fun RegistrationScreen(
 
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column() {
-                    CustomButton("Sign Up") {
+                    CustomButton("Sign Up", inputDataCheck) {
                         authViewModel.register(firstName, email, password, confirmPass)
                     }
                     // Обработка ошибок
                     if (authState.error.isNotBlank()) {
-                        Text(
-                            authState.error,
-                            fontSize = 14.sp,
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                        Toast.makeText(context,authState.error, Toast.LENGTH_LONG).show()
                     }
                     Row(
                         Modifier
@@ -193,6 +189,7 @@ fun isValidEmail(text: String): Boolean {
     return text.isEmpty() || !text.contains("@").and(text.endsWith(".ru") || text.endsWith(".com"))
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomTextField(
     title: String,
@@ -207,6 +204,7 @@ fun CustomTextField(
     val focusManager = LocalFocusManager.current
     val visibility =
         if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
+    var activeError by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -231,7 +229,10 @@ fun CustomTextField(
                         passwordVisibility = !passwordVisibility
                     }) {
                         if (text != "")
-                            Icon(painter = painterResource(R.drawable.hide), "")
+                            Icon(
+                                painter = painterResource(if (passwordVisibility) R.drawable.hide else R.drawable.eye),
+                                ""
+                            )
                     }
             },
             visualTransformation = when (title) {
@@ -239,32 +240,35 @@ fun CustomTextField(
                 "Confirm Password" -> visibility
                 else -> VisualTransformation.None
             },
-            isError = isError,
+            isError = activeError,
             readOnly = readOnly,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 7.dp, bottom = 10.dp),
+                .padding(top = 7.dp, bottom = 10.dp)
+                .background(
+                    color = colorResource(R.color.backgroung_textField2),
+                    shape = RoundedCornerShape(24.dp)
+                ),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = colorResource(R.color.backgroung_textField2),
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = colorResource(R.color.label_blueColor),
-
-
-                ),
+            ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions {
+                activeError = isError
                 focusManager.clearFocus()
 
             },
         )
+        if (activeError) {
+            Text(errorMassage, color = Color.Red)
+        }
     }
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFieldDropDownMenu() {
     val options = listOf("Admin", "User")
@@ -274,7 +278,7 @@ fun TextFieldDropDownMenu() {
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded}
     ) {
         OutlinedTextField(
             value = text,
@@ -289,9 +293,12 @@ fun TextFieldDropDownMenu() {
             readOnly = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 7.dp, bottom = 8.dp),
+                .padding(top = 7.dp, bottom = 8.dp)
+                .background(
+                    color = colorResource(R.color.backgroung_textField2),
+                    shape = RoundedCornerShape(24.dp)
+                ).menuAnchor(),
             colors = TextFieldDefaults.outlinedTextFieldColors(
-                backgroundColor = colorResource(R.color.backgroung_textField2),
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = colorResource(R.color.label_blueColor)
             ),
