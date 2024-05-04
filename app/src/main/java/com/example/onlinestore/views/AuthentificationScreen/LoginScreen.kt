@@ -13,20 +13,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +49,10 @@ fun LoginScreen(
     controller: NavController,
     authViewModel: StoreViewModel
 ) {
-    var login by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    var login by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val authState by authViewModel.authState.collectAsState()
+    val activeCheck = if (!isValidEmail(login) && !isValidPassword(password)) true else false
 
     Surface(
         color = Color.White,
@@ -80,7 +80,7 @@ fun LoginScreen(
                     .padding(top = 30.dp),
                 contentAlignment = Alignment.TopCenter,
             ) {
-                CustomButton("Войти") {
+                CustomButton("Войти", activeCheck) {
                     authViewModel.login(login, password)
                 }
             }
@@ -123,11 +123,13 @@ fun LoginScreen(
 }
 
 @Composable
-fun CustomButton(text: String, action: () -> Unit) {
+fun CustomButton(text: String, active: Boolean, action: () -> Unit) {
     Button(
+        onClick =
         {
             action()
         },
+        enabled = active,
         modifier = Modifier
             .height(56.dp)
             .fillMaxWidth(),
@@ -143,7 +145,7 @@ fun CustomButton(text: String, action: () -> Unit) {
 fun TextField(
     text: String,
     textChanged: (String) -> Unit,
-    placeholder: String
+    placeholder: String,
 ) {
     val focusManager = LocalFocusManager.current
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -160,24 +162,20 @@ fun TextField(
         trailingIcon = {
 
             IconButton({ passwordVisibility = !passwordVisibility }) {
-                Icon(
-                    painter = painterResource(R.drawable.eye),
-                    "",
-                    tint = colorResource(R.color.Grey)
-                )
+                if (placeholder == "Пароль")
+                    Icon(
+                        painter = painterResource(if (passwordVisibility) R.drawable.hide else R.drawable.eye),
+                        "",
+                        tint = colorResource(R.color.Grey)
+                    )
             }
-
-            Icon(
-                painter = painterResource(R.drawable.eye), "",
-                tint = colorResource(R.color.Grey)
-            )
 
         },
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 5.dp),
         shape = RoundedCornerShape(12.dp),
-        visualTransformation = visibility,
+        visualTransformation = if (placeholder == "Пароль") visibility else VisualTransformation.None,
         colors = TextFieldDefaults.outlinedTextFieldColors(
             unfocusedBorderColor = colorResource(R.color.border_color),
             focusedBorderColor = colorResource(R.color.label_blueColor),
