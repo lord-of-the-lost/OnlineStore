@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.AuthentificationScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -70,6 +72,7 @@ fun RegistrationScreen(
         var isErrorEmail by remember { mutableStateOf(false) }
         var isErrorPassword by remember { mutableStateOf(false) }
         var isErrorConfirmPass by remember { mutableStateOf(false) }
+        val context = LocalContext.current
         val inputDataCheck =
             if (!isValidLogin(firstName) && !isValidEmail(email) && !isValidPassword(password) && password == confirmPass) true else false
 
@@ -145,13 +148,7 @@ fun RegistrationScreen(
                     }
                     // Обработка ошибок
                     if (authState.error.isNotBlank()) {
-                        Text(
-                            authState.error,
-                            fontSize = 14.sp,
-                            color = Color.Red,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                        Toast.makeText(context,authState.error, Toast.LENGTH_LONG).show()
                     }
                     Row(
                         Modifier
