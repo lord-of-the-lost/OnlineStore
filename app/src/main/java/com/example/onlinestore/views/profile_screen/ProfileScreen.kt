@@ -217,7 +217,7 @@ fun AlertDialogTypeAccount(
     val visibility =
         if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
     var Error by remember { mutableStateOf(false) }
-    var borderColor by remember { mutableStateOf(false) }
+
     AlertDialog(
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
@@ -323,7 +323,7 @@ fun AlertDialogTypeAccount(
                             backgroundColor = colorResource(
                                 R.color.backgroung_textField2
                             ),
-                            unfocusedBorderColor = if (borderColor) Color.Green else Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
                             focusedBorderColor = colorResource(R.color.backgroung_textField2),
                         ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword).copy(
@@ -333,8 +333,6 @@ fun AlertDialogTypeAccount(
                             if (inputPassword != password) {
                                 Error = true
                                 inputPassword = ""
-                            } else {
-                                borderColor = true
                             }
                             focusManager.clearFocus()
                         }),
