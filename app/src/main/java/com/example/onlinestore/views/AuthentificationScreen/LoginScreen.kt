@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.AuthentificationScreen
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -53,6 +55,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val authState by authViewModel.authState.collectAsState()
     val activeCheck = if (!isValidEmail(login) && !isValidPassword(password)) true else false
+    var context = LocalContext.current
 
     Surface(
         color = Color.White,
@@ -86,13 +89,7 @@ fun LoginScreen(
             }
             when {
                 authState.error.isNotBlank() -> {
-                    Text(
-                        authState.error,
-                        fontSize = 14.sp,
-                        color = Color.Red,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
+                    Toast.makeText(context,authState.error,Toast.LENGTH_LONG).show()
                 }
 
                 authState.success -> {
