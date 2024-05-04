@@ -46,9 +46,8 @@ fun TopNavigationBar(
     onBackClicked: () -> Unit = {},
     controller: NavController
 ) {
-
     val currentRoute = currentRoute(controller)
-    val title = allScreen.firstOrNull(){it.route == currentRoute}?.title?:"Unknown"
+    val title = allScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
     val icon = topScreens.firstOrNull { it.route == currentRoute }?.icon
     val action = topScreens.firstOrNull { it.route == currentRoute }?.actionIcon
         ?: bottomScreen.firstOrNull { it.route == currentRoute }?.actionIcon
@@ -58,7 +57,6 @@ fun TopNavigationBar(
             IconButton(onClick = { onBackClicked() }) {
                 icon?.let { Icon(it, "") }
             }
-
         }
     val actionIcon: (@Composable () -> Unit) = {
         IconButton(onClick = { controller.navigate(Screen.NavigationItem.Cart.route) }) {
@@ -69,8 +67,6 @@ fun TopNavigationBar(
     val text = remember {
         mutableStateOf("")
     }
-
-
     TopAppBar(
         title = {
             if (title == "Wishlist" || title == "SearchResult") {
@@ -82,23 +78,20 @@ fun TopNavigationBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        title, modifier = Modifier.padding(end = if(icon != null) 65.dp else 0.dp),
+                        title, modifier = Modifier.padding(end = if (icon != null) 65.dp else 0.dp),
                         color = Color.Black,
                     )
                 }
             }
-
         },
         navigationIcon = if (icon == null) null else navigationIcon,
         elevation = 5.dp,
         backgroundColor = Color.White,
         modifier = Modifier.height(80.dp),
-        actions = {if(action !=null) actionIcon()
+        actions = {
+            if (action != null) actionIcon()
         }
-
-
     )
-
 }
 
 @SuppressLint("SuspiciousIndentation")
@@ -120,7 +113,6 @@ fun SearchBar(
         textStyle = TextStyle(fontSize = 13.sp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {
-
         })
     ) {
         TextFieldDefaults.TextFieldDecorationBox(
@@ -131,8 +123,8 @@ fun SearchBar(
             interactionSource = interactionSource,
             visualTransformation = VisualTransformation.None,
             placeholder = {
-                if(searchQuery == "")
-                Text("Search here...", color = colorResource(R.color.Grey), fontSize = 13.sp)
+                if (searchQuery == "")
+                    Text("Search here...", color = colorResource(R.color.Grey), fontSize = 13.sp)
             },
             leadingIcon = {
                 Icon(
@@ -148,11 +140,8 @@ fun SearchBar(
                     }) {
                         Icon(Icons.Default.Clear, "", tint = Color.Gray)
                     }
-
-
             },
             contentPadding = TextFieldDefaults.textFieldWithLabelPadding(top = 0.dp, bottom = 0.dp)
-
         )
     }
 }

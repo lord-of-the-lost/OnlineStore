@@ -1,6 +1,9 @@
 package com.example.onlinestore.views.HomeScreen
 
-import android.widget.ImageButton
+import android.Manifest
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,7 +21,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -38,7 +40,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
-
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -47,6 +48,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -68,10 +72,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.onlinestore.MainActivity
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.views.HomeScreen.network.model.Category
 import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
@@ -80,16 +87,17 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     controller: NavController,
+    viewModel: StoreViewModel,
     navigateToDetail: (ProductItem) -> Unit
 ) {
-    val viewModel: ProductViewModelTest = viewModel()
-    val viewState by viewModel.productState
-    var expended by remember { mutableStateOf(false) }
-    val productFilter = listOf("price up", "price down", "title A","title Z")
-    val productList= viewState.list?.toMutableStateList()
-    val categoryState by viewModel.categoryState
-    val categoryList = categoryState.list?.toMutableStateList()
+    val viewModel2: ProductViewModelTest = viewModel()
+    val viewState by viewModel2.productState
 
+    var expended by remember { mutableStateOf(false) }
+    val productFilter = listOf("price up", "price down", "title A", "title Z")
+    val productList = viewState.list?.toMutableStateList()
+    val categoryState by viewModel2.categoryState
+    val categoryList = categoryState.list?.toMutableStateList()
 
     Column(
         modifier = Modifier
@@ -107,7 +115,7 @@ fun MainScreen(
                     color = colorResource(R.color.Grey),
 
                     )
-                TextFieldDropDownMenu()
+                TextFieldDropDownMenu(viewModel)
             }
             Row(
                 Modifier
@@ -199,7 +207,7 @@ fun MainScreen(
             }
 
             else -> {
-                ProductItem2(productList, navigateToDetail)
+                ProductItem2(productList, viewModel, navigateToDetail)
             }
         }
     }
@@ -209,13 +217,13 @@ fun MainScreen(
 @Composable
 fun ProductItem2(
     list: SnapshotStateList<ProductItem>?,
+    viewModel: StoreViewModel,
     navigateToDetail: (ProductItem) -> Unit
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(2), state = rememberLazyGridState()) {
         list?.let {
             items(list) { items ->
-                CardItem(items, navigateToDetail)
-
+                CardItem(items, viewModel, navigateToDetail)
             }
         }
     }
@@ -320,19 +328,17 @@ fun SearchBar2(
     }
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun TextFieldDropDownMenu() {
-    val options =
-        listOf(
-            "Москва, ул.Алкашей",
-            "Санкт-Петербург, Софийская улица, 6 ",
-            "Berlin, hitler street"
-        )
+fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
+    val options = listOf(
+        "Америка",
+        "Россия",
+        "Европа"
+    )
     var expanded by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(options[0]) }
+    val selectedCountry by viewModel.selectedCountry.collectAsState()
+    var text by remember { mutableStateOf(selectedCountry) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
@@ -340,19 +346,17 @@ fun TextFieldDropDownMenu() {
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
-        Row() {
+        Row(modifier = Modifier.clickable { expanded = true }) {
             Text(text)
             Icon(
                 Icons.Filled.KeyboardArrowDown,
-                null,
+                contentDescription = "Dropdown Arrow",
                 Modifier.rotate(if (expanded) 180f else 0f)
             )
         }
         if (expanded) {
             ModalBottomSheet(
-                onDismissRequest = {
-                    expanded = false
-                },
+                onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .fillMaxHeight(0.5f)
                     .navigationBarsPadding(),
@@ -371,19 +375,22 @@ fun TextFieldDropDownMenu() {
                         fontWeight = FontWeight.ExtraBold
                     )
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(options) { adress ->
+                        items(options) { option ->
                             Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
+                                    .fillMaxWidth()
                                     .padding(top = 10.dp),
                                 colors = CardDefaults.cardColors(Color.White),
                                 onClick = {
-                                    text = adress
+                                    text = option
                                     scope.launch {
                                         sheetState.hide()
                                     }.invokeOnCompletion {
-                                        if (!sheetState.isVisible)
+                                        if (!sheetState.isVisible) {
                                             expanded = false
+                                            val actualCountry = option.replace("Текущая локация: ", "")
+                                            viewModel.setSelectedCountry(actualCountry)
+                                        }
                                     }
                                 }
                             ) {
@@ -392,15 +399,15 @@ fun TextFieldDropDownMenu() {
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        adress,
+                                        option,
                                         color = colorResource(R.color.Dark_Arsenic),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp
                                     )
-                                    if (adress == text)
+                                    if (option == text)
                                         Icon(
                                             Icons.Default.Check,
-                                            "",
+                                            contentDescription = "Selected",
                                             tint = colorResource(R.color.Green_Sheen)
                                         )
                                 }

@@ -55,6 +55,7 @@ android {
 dependencies {
     implementation("androidx.hilt:hilt-work:1.0.0")
     implementation("androidx.work:work-runtime-ktx:2.7.0")
+    implementation("com.google.android.gms:play-services-location:21.2.0")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
