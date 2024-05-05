@@ -1,8 +1,7 @@
 package com.example.onlinestore.core.api
+
 import com.example.onlinestore.core.models.CategoryModel
 import com.example.onlinestore.core.models.ProductModel
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -19,7 +18,7 @@ interface NetworkService {
     suspend fun getSingleCategory(@Path("id") id: Int): CategoryModel
 
     @GET("categories/{id}/products")
-    suspend fun getProductByCategory(): List<ProductModel>
+    suspend fun getProductByCategory(@Path("id") id: Int): List<ProductModel>
 
     @POST("categories/")
     suspend fun createCategory()
