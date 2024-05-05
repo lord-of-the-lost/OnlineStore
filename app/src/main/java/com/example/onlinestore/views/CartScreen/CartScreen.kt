@@ -66,106 +66,24 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 data class ShopItem(
-    val imgOfProduct: Int,
+    val productId: Int,
+    val imgOfProduct: String?,
     val nameOfProduct: String,
     val priceOfProduct: String,
     val quantity: Int,
     var isSelected: Boolean = false
 )
 
-var shopItemsInCart = mutableListOf(
-    ShopItem(
-        R.drawable.img_detail_screen,
-        "Air pods max by Apple",
-        "\$ 1999.99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._01_cart,
-        "Monitor LG 22”inc 4K 120Fps",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._02_cart,
-        "Earphones for monitor",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable.img_detail_screen,
-        "Air pods max by Apple",
-        "\$ 1999.99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._01_cart,
-        "Monitor LG 22”inc 4K 120Fps",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._02_cart,
-        "Earphones for monitor",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable.img_detail_screen,
-        "Air pods max by Apple",
-        "\$ 1999.99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._01_cart,
-        "Monitor LG 22”inc 4K 120Fps",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._02_cart,
-        "Earphones for monitor",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable.img_detail_screen,
-        "Air pods max by Apple",
-        "\$ 1999.99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._01_cart,
-        "Monitor LG 22”inc 4K 120Fps",
-        "\$ 199,99",
-        1,
-        false
-    ),
-    ShopItem(
-        R.drawable._02_cart,
-        "Earphones for monitor",
-        "\$ 199,99",
-        1,
-        false
-    ),
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun CartScreen(viewModel: StoreViewModel) {
-    var shopItemsInCart by remember { mutableStateOf(shopItemsInCart) }
+    val shopItemsInCart by viewModel.shopItemsInCart.collectAsState()
     var isAtLeastOneItemSelected by remember { mutableStateOf(false) }
+
+    val totalPrice = shopItemsInCart
+        .filter { it.isSelected }
+        .sumOf { parsePrice(it.priceOfProduct) }
 
     Column {
         DeliveryAddress()
@@ -185,8 +103,7 @@ fun CartScreen(viewModel: StoreViewModel) {
                     shopItem = shopItem,
                     viewModel = viewModel,
                     onDeleteItem = {
-                        shopItemsInCart = shopItemsInCart.toMutableList()
-                            .also { it.remove(shopItem) }
+                        viewModel.removeFromCart(shopItem.productId)
                     },
                     onItemSelectedChanged = {
                         isAtLeastOneItemSelected = shopItemsInCart.any { it.isSelected }
@@ -204,7 +121,7 @@ fun CartScreen(viewModel: StoreViewModel) {
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp)
         ) {
-            OrderSummary(isAtLeastOneItemSelected)
+            OrderSummary(totalPrice, isAtLeastOneItemSelected, viewModel)
         }
     }
 }
@@ -493,13 +410,15 @@ fun QuantityOfProduct(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderSummary(
-    isAtLeastOneItemSelected: Boolean
+    totalPrice: Double,
+    isAtLeastOneItemSelected: Boolean,
+    viewModel: StoreViewModel
 ) {
 
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-
+    var currency = viewModel.currentCurrency.value
 
     Column {
         Column(
@@ -536,7 +455,7 @@ fun OrderSummary(
                     )
                 )
                 Text(
-                    text = "\$ 2499,97",
+                    text = viewModel.formatPriceWithCurrency(totalPrice, currency),
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.SemiBold,

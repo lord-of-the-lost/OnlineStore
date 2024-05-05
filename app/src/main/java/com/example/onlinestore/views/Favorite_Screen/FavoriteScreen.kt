@@ -136,7 +136,7 @@ fun FavoriteItem(
                             )
                         }
                         Button(
-                            onClick = { },
+                            onClick = { viewModel.addToCart(productItem) },
                             Modifier.fillMaxWidth().height(29.dp),
                             shape = RoundedCornerShape(5.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))

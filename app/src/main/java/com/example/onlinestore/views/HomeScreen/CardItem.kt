@@ -105,9 +105,7 @@ fun CardItem(
                     Button(
                         onClick = {
                             addToCard = !addToCard
-                            if (addToCard) viewModel.saveProduct(productItem) else viewModel.deleteProduct(
-                                productItem
-                            )
+                            if (addToCard) viewModel.addToCart(productItem) else viewModel.removeFromCart(productItem.id)
                         },
                         Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp),
