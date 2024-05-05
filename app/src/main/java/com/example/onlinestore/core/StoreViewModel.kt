@@ -69,8 +69,13 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
+
     val search:MutableState<String> = mutableStateOf("")
     val search2 = mutableStateOf("")
+
+    private val _isUserManager = MutableStateFlow(false)
+    val isUserManager: StateFlow<Boolean> = _isUserManager.asStateFlow()
+
 
     init {
         loadProducts()
@@ -79,6 +84,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedProduct = MutableStateFlow<ProductModel?>(null)
     val selectedProduct: StateFlow<ProductModel?> = _selectedProduct
+
+    fun setUserManagerStatus(isManager: Boolean) {
+        _isUserManager.value = isManager
+    }
 
     fun setSelectedProduct(product: ProductModel) {
         _selectedProduct.value = product

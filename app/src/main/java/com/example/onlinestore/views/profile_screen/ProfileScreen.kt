@@ -156,7 +156,9 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
     if (showAlertDialog) {
         AlertDialogTypeAccount(
             onDismissRequest = { showAlertDialog = false },
-            onConfirmation = { showAlertDialog = false },
+            onConfirmation = { isManager ->
+                viewModel.setUserManagerStatus(isManager)
+            },
             "Select type of account",
             password = "0000"
         )
@@ -220,7 +222,7 @@ fun ActionButton(title: String, painterResource: Int, action: () -> Unit) {
 @Composable
 fun AlertDialogTypeAccount(
     onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
+    onConfirmation: (Boolean) -> Unit,
     dialogTitle: String,
     password: String
 ) {
@@ -237,7 +239,11 @@ fun AlertDialogTypeAccount(
         onDismissRequest = { onDismissRequest() },
         confirmButton = {
             TextButton({
-                onConfirmation()
+                if (select2 && inputPassword == password) {
+                    onConfirmation(true)
+                } else if (select) {
+                    onConfirmation(false)
+                }
             }) {
                 Text("Confirm")
             }

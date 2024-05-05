@@ -45,7 +45,7 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
         bottomBar = {
             bottomScreen.forEach { screen ->
                 if (currentRoute(controller) == screen.broute)
-                    BottomNavigationBar(controller)
+                    BottomNavigationBar(controller, viewModel)
             }
         }
     ) {

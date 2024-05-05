@@ -1,6 +1,7 @@
 package com.example.onlinestore.views.CartScreen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,8 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,13 +31,17 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,8 +62,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.ui.theme.inter
+import kotlinx.coroutines.launch
 import kotlin.random.Random
-
 
 data class ShopItem(
     val imgOfProduct: Int,
@@ -152,6 +160,7 @@ var shopItemsInCart = mutableListOf(
     ),
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun CartScreen(viewModel: StoreViewModel) {
@@ -481,8 +490,17 @@ fun QuantityOfProduct(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
+fun OrderSummary(
+    isAtLeastOneItemSelected: Boolean
+) {
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+
     Column {
         Column(
             modifier = Modifier
@@ -540,7 +558,7 @@ fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
                             if (isAtLeastOneItemSelected) Color(0xFF67C4A7)
                             else Color(0xFFF0F2F1))
                 ),
-            onClick = { }
+            onClick = { if (isAtLeastOneItemSelected) showBottomSheet = true }
         )
         {
             Text(
@@ -556,8 +574,97 @@ fun OrderSummary(isAtLeastOneItemSelected: Boolean) {
         }
         Spacer(modifier = Modifier.height(43.dp))
     }
-}
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+            },
+            sheetState = sheetState,
 
+            modifier = Modifier
+                .fillMaxHeight(0.5f)
+                .navigationBarsPadding(),
+            containerColor = Color.White,
+            dragHandle = null
+
+        ) {
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 20.dp, end = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 28.dp, bottom = 28.dp),
+                    horizontalArrangement = Arrangement.End
+
+                ) {
+                    IconButton(
+                        modifier = Modifier
+                            .size(14.dp),
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.close_icon),
+                            tint = Color.Black,
+                            contentDescription = null
+                        )
+                    }
+                }
+                Image(
+                    modifier = Modifier
+                        .weight(1f),
+                    painter = painterResource(id = R.drawable.payment_success),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                )
+                Spacer(modifier = Modifier.height(37.dp))
+                Column {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(0.dp, 45.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = ButtonDefaults
+                            .buttonColors(
+                                Color(0xFF67C4A7)
+
+                            ),
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        })
+                    {
+                        Text(
+                            text = "Continue",
+                            style = TextStyle(
+                                fontFamily = inter,
+                                fontWeight = FontWeight(500),
+                                fontSize = 14.sp,
+                                lineHeight = 16.94.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(43.dp))
+                }
+            }
+        }
+    }
+}
 
 fun parsePrice(priceStr: String): Double {
     return priceStr.replace("[^\\d.]".toRegex(), "").replace(',', '.').toDoubleOrNull() ?: 0.0
