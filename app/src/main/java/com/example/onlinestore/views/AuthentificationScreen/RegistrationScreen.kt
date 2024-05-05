@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -42,6 +44,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -275,14 +278,14 @@ fun CustomTextField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFieldDropDownMenu() {
-    val options = listOf("Admin", "User")
+    val options = listOf("Manager", "User")
     var expanded by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded}
+        onExpandedChange = { expanded = !expanded }
     ) {
         OutlinedTextField(
             value = text,
@@ -324,5 +327,74 @@ fun TextFieldDropDownMenu() {
                 )
             }
         }
+
+    }
+    if (text == "Manager")
+        AddCustomPasswordField()
+}
+
+@Composable
+fun AddCustomPasswordField() {
+    var password = "0000"
+    var inputPassword by remember { mutableStateOf("") }
+    var passwordVisibility by remember { mutableStateOf(false) }
+    val visibility =
+        if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
+    var Error by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    androidx.compose.material.OutlinedTextField(
+        enabled = if (password == inputPassword) false else true,
+        value = inputPassword,
+        onValueChange = {
+            inputPassword = it
+            if (inputPassword != "") Error = false
+        },
+        placeholder = {
+            androidx.compose.material.Text(
+                text = "Enter password",
+                color = colorResource(R.color.Grey)
+            )
+        },
+        shape = RoundedCornerShape(24.dp),
+        trailingIcon = {
+            if (inputPassword != password) {
+                androidx.compose.material.IconButton(onClick = {
+                    passwordVisibility = !passwordVisibility
+                }) {
+                    Icon(painter = painterResource(R.drawable.hide), "")
+                }
+            } else {
+                Icon(Icons.Default.Check, "")
+            }
+
+
+        },
+
+        visualTransformation = visibility,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 7.dp, bottom = 10.dp),
+        colors = androidx.compose.material.TextFieldDefaults.outlinedTextFieldColors(
+            backgroundColor = colorResource(
+                R.color.backgroung_textField2
+            ),
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = colorResource(R.color.backgroung_textField2),
+        ),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword).copy(
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = {
+            if (inputPassword != password) {
+                Error = true
+                inputPassword = ""
+            }
+            focusManager.clearFocus()
+        }),
+        isError = Error
+    )
+    if (Error) {
+        Text("invalid password", color = Color.Red)
     }
 }
+
