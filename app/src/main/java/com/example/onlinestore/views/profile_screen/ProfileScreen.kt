@@ -59,10 +59,12 @@ import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.ui.theme.CustomGrey2
+import com.example.onlinestore.views.change_picture.ChangePhotoDialog
 
 @Composable
 fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
     var showAlertDialog by remember { mutableStateOf(false) }
+    var showChangePhotoDialog by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -92,7 +94,7 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                         .width(32.dp)
                         .height(32.dp)
                         .fillMaxSize()
-                        .clickable { }
+                        .clickable { showChangePhotoDialog = true }
                 )
             }
             Box(
@@ -159,8 +161,21 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
             password = "0000"
         )
     }
+    if (showChangePhotoDialog) {
+        ChangePhotoDialog(
+            onDismiss = { showChangePhotoDialog = false },
+            toTakePhoto = {
+                showChangePhotoDialog = false
+            },
+            toFindPhotoDir = {
+                showChangePhotoDialog = false
+            },
+            toDeletePhoto = {
+                showChangePhotoDialog = false
+            }
+        )
+    }
 }
-
 
 @Composable
 fun ActionButton(title: String, painterResource: Int, action: () -> Unit) {
