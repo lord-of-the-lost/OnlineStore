@@ -39,7 +39,7 @@ sealed class Screen(
             )
 
         object TermsConditions :
-            NavigationItem("terms_conditions", "", Icons.Default.ArrowBack,null,true)
+            NavigationItem("terms_conditions", "Terms & Conditions", Icons.Default.ArrowBack,null,true)
 
         object AddProduct : NavigationItem("add_product", "Add new product", null, null,true)
         object Cart : NavigationItem(

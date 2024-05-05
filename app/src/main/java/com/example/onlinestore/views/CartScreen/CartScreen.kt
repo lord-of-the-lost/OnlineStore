@@ -37,6 +37,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.ui.theme.inter
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -161,14 +163,7 @@ var shopItemsInCart = mutableListOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun CartScreen(
-) {
-
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
-
-
+fun CartScreen(viewModel: StoreViewModel) {
     var shopItemsInCart by remember { mutableStateOf(shopItemsInCart) }
     var isAtLeastOneItemSelected by remember { mutableStateOf(false) }
 
@@ -188,6 +183,7 @@ fun CartScreen(
             items(shopItemsInCart) { shopItem ->
                 ShoppingListItem(
                     shopItem = shopItem,
+                    viewModel = viewModel,
                     onDeleteItem = {
                         shopItemsInCart = shopItemsInCart.toMutableList()
                             .also { it.remove(shopItem) }
@@ -208,10 +204,7 @@ fun CartScreen(
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp)
         ) {
-            OrderSummary(isAtLeastOneItemSelected, showBottomSheet, sheetState) {
-                showBottomSheet = true
-                Log.d("CartScreen", "showBottomSheet is now $showBottomSheet")
-            }
+            OrderSummary(isAtLeastOneItemSelected)
         }
     }
 }
@@ -318,11 +311,16 @@ fun DropDownExample() {
 @Composable
 fun ShoppingListItem(
     shopItem: ShopItem,
+    viewModel: StoreViewModel,
     onDeleteItem: (ShopItem) -> Unit,
     onItemSelectedChanged: (Boolean) -> Unit
 ) {
     var isSelected by remember { mutableStateOf(false) }
     isSelected = shopItem.isSelected
+
+    val currentCurrency by viewModel.currentCurrency.collectAsState()
+    val price = parsePrice(shopItem.priceOfProduct)
+    val formattedPrice = viewModel.formatPriceWithCurrency(price, currentCurrency)
 
     if (isSelected) {
         onItemSelectedChanged(true)
@@ -408,7 +406,7 @@ fun ShoppingListItem(
             ) {
                 Text(
                     modifier = Modifier.padding(bottom = 5.dp),
-                    text = shopItem.priceOfProduct,
+                    text = formattedPrice,
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.Medium,
@@ -495,11 +493,14 @@ fun QuantityOfProduct(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderSummary(
-    isAtLeastOneItemSelected: Boolean,
-    showBottomSheet:Boolean,
-    sheetState: SheetState,
-    onButtonClick: () -> Unit
+    isAtLeastOneItemSelected: Boolean
 ) {
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+
     Column {
         Column(
             modifier = Modifier
@@ -557,7 +558,7 @@ fun OrderSummary(
                             if (isAtLeastOneItemSelected) Color(0xFF67C4A7)
                             else Color(0xFFF0F2F1))
                 ),
-            onClick = { if (isAtLeastOneItemSelected) PaymentSuccess(showBottomSheet, sheetState) }
+            onClick = { if (isAtLeastOneItemSelected) showBottomSheet = true }
         )
         {
             Text(
@@ -573,79 +574,98 @@ fun OrderSummary(
         }
         Spacer(modifier = Modifier.height(43.dp))
     }
-}
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+            },
+            sheetState = sheetState,
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PaymentSuccess(
-    showBottomSheet: Boolean,
-    sheetState: SheetState
-) {
-
-    var showBottomSheet = showBottomSheet
-    val scope = rememberCoroutineScope()
-
-    ModalBottomSheet(
-        onDismissRequest = {
-            showBottomSheet = false
-        },
-        sheetState = sheetState,
-        modifier = Modifier
-            .fillMaxHeight(0.5f)
-            .navigationBarsPadding(),
-        containerColor = Color.White
-
-    ) {
-        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(15.dp)
-        ) {
-            Image(
-                modifier = Modifier
-                    .size(82.dp, 76.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                painter = painterResource(id = R.drawable.payment_success),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-            )
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .size(0.dp, 45.dp),
-                shape = RoundedCornerShape(4.dp),
-                colors = ButtonDefaults
-                    .buttonColors(
-                        Color(0xFF67C4A7)
+                .fillMaxHeight(0.5f)
+                .navigationBarsPadding(),
+            containerColor = Color.White,
+            dragHandle = null
 
-                    ),
-                onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        if (!sheetState.isVisible) {
-                            showBottomSheet = false
+        ) {
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 20.dp, end = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 28.dp, bottom = 28.dp),
+                    horizontalArrangement = Arrangement.End
+
+                ) {
+                    IconButton(
+                        modifier = Modifier
+                            .size(14.dp),
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
                         }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.close_icon),
+                            tint = Color.Black,
+                            contentDescription = null
+                        )
                     }
-                })
-            {
-                Text(
-                    text = "Continue",
-                    style = TextStyle(
-                        fontFamily = inter,
-                        fontWeight = FontWeight(500),
-                        fontSize = 14.sp,
-                        lineHeight = 16.94.sp,
-                        color = Color.White
-                    )
+                }
+                Image(
+                    modifier = Modifier
+                        .weight(1f),
+                    painter = painterResource(id = R.drawable.payment_success),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
                 )
+                Spacer(modifier = Modifier.height(37.dp))
+                Column {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(0.dp, 45.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = ButtonDefaults
+                            .buttonColors(
+                                Color(0xFF67C4A7)
+
+                            ),
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        })
+                    {
+                        Text(
+                            text = "Continue",
+                            style = TextStyle(
+                                fontFamily = inter,
+                                fontWeight = FontWeight(500),
+                                fontSize = 14.sp,
+                                lineHeight = 16.94.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(43.dp))
+                }
             }
-            Spacer(modifier = Modifier.height(43.dp))
         }
     }
 }
 
-
-@Preview(showBackground = true)
-@Composable
-fun ShoppingListItemPreview() {
-    CartScreen()
+fun parsePrice(priceStr: String): Double {
+    return priceStr.replace("[^\\d.]".toRegex(), "").replace(',', '.').toDoubleOrNull() ?: 0.0
 }

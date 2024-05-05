@@ -1,6 +1,5 @@
 package com.example.onlinestore.views.HomeScreen
 
-import android.widget.ImageButton
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -26,6 +24,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.IconButton
@@ -34,26 +34,21 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,28 +63,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.core.models.CategoryModel
+import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.navigation.Screen
-import com.example.onlinestore.views.HomeScreen.network.model.Category
-import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
 import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(
     controller: NavController,
-    navigateToDetail: (ProductItem) -> Unit
+    viewModel: StoreViewModel
 ) {
-    val viewModel: ProductViewModelTest = viewModel()
-    val viewState by viewModel.productState
     var expended by remember { mutableStateOf(false) }
-    val productFilter = listOf("price up", "price down", "title A","title Z")
-    val productList= viewState.list?.toMutableStateList()
-    val categoryState by viewModel.categoryState
-    val categoryList = categoryState.list?.toMutableStateList()
+    val productFilter = listOf("price up", "price down", "title A", "title Z")
 
+    val productList by viewModel.products.collectAsState()
+    val categoryList by viewModel.categories.collectAsState()
 
     Column(
         modifier = Modifier
@@ -107,7 +99,7 @@ fun MainScreen(
                     color = colorResource(R.color.Grey),
 
                     )
-                TextFieldDropDownMenu()
+                TextFieldDropDownMenu(viewModel)
             }
             Row(
                 Modifier
@@ -132,12 +124,10 @@ fun MainScreen(
                 .fillMaxWidth()
                 .padding(top = 30.dp)
         ) {
-            categoryList?.let {
-                repeat(4) {
-                    CategoryButtonItem(categoryList, it)
-                }
-                AllCategoryButton(categoryList)
+            categoryList.take(4).forEach { category ->
+                CategoryButtonItem(category, Modifier.weight(1f),viewModel)
             }
+            AllCategoryButton(categoryList, Modifier.weight(1f),viewModel)
         }
         Row(
             Modifier
@@ -178,10 +168,10 @@ fun MainScreen(
                     productFilter.forEach {
                         DropdownMenuItem(text = { Text(it) }, onClick = {
                             when (it) {
-                                "price up" -> productList?.sortBy { it.price }
-                                "price down" -> productList?.sortByDescending { it.price }
-                                "title A" -> productList?.sortBy { it.title }
-                                "title Z" -> productList?.sortByDescending { it.title }
+                                "price up" -> viewModel.sortProductsByPriceAscending()
+                                "price down" -> viewModel.sortProductsByPriceDescending()
+                                "title A" -> viewModel.sortProductsByTitleAscending()
+                                "title Z" -> viewModel.sortProductsByTitleDescending()
                             }
                             expended = false
                         })
@@ -190,64 +180,53 @@ fun MainScreen(
                 }
             }
         }
-        when {
-            viewState.loading -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Start),
-                    color = Color.Black
-                )
-            }
-
-            else -> {
-                ProductItem2(productList, navigateToDetail)
-            }
-        }
+        ProductItem2(productList, viewModel, controller)
     }
 }
-
 
 @Composable
 fun ProductItem2(
-    list: SnapshotStateList<ProductItem>?,
-    navigateToDetail: (ProductItem) -> Unit
+    list: List<ProductModel>?,
+    viewModel: StoreViewModel,
+    navController: NavController
 ) {
     LazyVerticalGrid(columns = GridCells.Fixed(2), state = rememberLazyGridState()) {
         list?.let {
-            items(list) { items ->
-                CardItem(items, navigateToDetail)
-
+            items(list) { item ->
+                CardItem(item, viewModel, navController)
             }
         }
     }
 }
 
 @Composable
-fun CategoryButtonItem(list2: SnapshotStateList<Category>, it: Int) {
+fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier,viewModel: StoreViewModel) {
     Column(
-        Modifier
-            .padding(end = 18.dp), horizontalAlignment =
-        Alignment.CenterHorizontally
+        modifier = modifier
+            .padding(end = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AsyncImage(
-            model = list2[it].image, "",
+            model = category.image,
+            contentDescription = "",
             modifier = Modifier
                 .size(60.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable {
-                    TODO()
-                },
+                    viewModel.loadProductById(category.id)
+                           },
         )
-        Text(list2[it].name.toString(), fontSize = 10.sp)
+        Text(category.name, fontSize = 10.sp)
     }
 }
 
 @Composable
-fun AllCategoryButton(list2: SnapshotStateList<Category>) {
+fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier,viewModel: StoreViewModel)  {
     var expended by remember { mutableStateOf(false) }
     IconButton({
         expended = !expended
     }) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painterResource(R.drawable.group_8__3_),
                 "",
@@ -262,10 +241,9 @@ fun AllCategoryButton(list2: SnapshotStateList<Category>) {
                 expended = false
             }) {
             list2.distinctBy { it.name }.forEach { item ->
-                DropdownMenuItem(text = { Text(item.name.toString()) }, {})
+                DropdownMenuItem(text = { Text(item.name) }, {viewModel.loadProductById(item.id)})
             }
         }
-
     }
 }
 
@@ -320,19 +298,17 @@ fun SearchBar2(
     }
 }
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class
-)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun TextFieldDropDownMenu() {
-    val options =
-        listOf(
-            "Москва, ул.Алкашей",
-            "Санкт-Петербург, Софийская улица, 6 ",
-            "Berlin, hitler street"
-        )
+fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
+    val options = listOf(
+        "Америка",
+        "Россия",
+        "Европа"
+    )
     var expanded by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(options[0]) }
+    val selectedCountry by viewModel.selectedCountry.collectAsState()
+    var text by remember { mutableStateOf(selectedCountry) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
 
@@ -340,19 +316,17 @@ fun TextFieldDropDownMenu() {
         expanded = expanded,
         onExpandedChange = { expanded = !expanded }
     ) {
-        Row() {
+        Row(modifier = Modifier.clickable { expanded = true }) {
             Text(text)
             Icon(
                 Icons.Filled.KeyboardArrowDown,
-                null,
+                contentDescription = "Dropdown Arrow",
                 Modifier.rotate(if (expanded) 180f else 0f)
             )
         }
         if (expanded) {
             ModalBottomSheet(
-                onDismissRequest = {
-                    expanded = false
-                },
+                onDismissRequest = { expanded = false },
                 modifier = Modifier
                     .fillMaxHeight(0.5f)
                     .navigationBarsPadding(),
@@ -371,19 +345,23 @@ fun TextFieldDropDownMenu() {
                         fontWeight = FontWeight.ExtraBold
                     )
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(options) { adress ->
+                        items(options) { option ->
                             Card(
                                 modifier = Modifier
-                                    .fillMaxSize()
+                                    .fillMaxWidth()
                                     .padding(top = 10.dp),
                                 colors = CardDefaults.cardColors(Color.White),
                                 onClick = {
-                                    text = adress
+                                    text = option
                                     scope.launch {
                                         sheetState.hide()
                                     }.invokeOnCompletion {
-                                        if (!sheetState.isVisible)
+                                        if (!sheetState.isVisible) {
                                             expanded = false
+                                            val actualCountry =
+                                                option.replace("Текущая локация: ", "")
+                                            viewModel.setSelectedCountry(actualCountry)
+                                        }
                                     }
                                 }
                             ) {
@@ -392,15 +370,15 @@ fun TextFieldDropDownMenu() {
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(
-                                        adress,
+                                        option,
                                         color = colorResource(R.color.Dark_Arsenic),
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp
                                     )
-                                    if (adress == text)
+                                    if (option == text)
                                         Icon(
                                             Icons.Default.Check,
-                                            "",
+                                            contentDescription = "Selected",
                                             tint = colorResource(R.color.Green_Sheen)
                                         )
                                 }

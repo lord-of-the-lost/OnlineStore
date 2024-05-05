@@ -2,6 +2,7 @@ package com.example.onlinestore.views.detail
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,8 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,41 +29,60 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.ui.theme.inter
-import com.example.onlinestore.views.HomeScreen.network.model.ProductItem
+import kotlinx.coroutines.launch
 
 @Composable
-fun DetailScreen(product: ProductItem) {
+fun DetailScreen(viewModel: StoreViewModel) {
+    val product = viewModel.selectedProduct.collectAsState()
+    val currentCurrency by viewModel.currentCurrency.collectAsState()
+    val priceOfProduct =
+        product.value?.price?.let {
+            viewModel.formatPriceWithCurrency(
+                it.toDouble(),
+                currentCurrency
+            )
+        }
+            ?: "0"
+    val descriptionOfProductContent = product.value?.description ?: "Empty description"
 
-    val nameOfProduct = product.title
-    val priceOfProduct = "$ ${product.price}"
-    val descriptionOfProductContent = product.description
-    val productIsBookmarked = false
 
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        ImgOfProduct(product)
-        NameWithPriceOfProduct(nameOfProduct, priceOfProduct, productIsBookmarked)
+        product.value?.let {
+            ImgOfProduct(it)
+            NameWithPriceOfProduct(it, viewModel, priceOfProduct)
+        }
         DescriptionOfProductHead()
         Column(
             modifier = Modifier
@@ -80,42 +103,41 @@ fun DetailScreen(product: ProductItem) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ImgOfProduct(product: ProductItem) {
+fun ImgOfProduct(product: ProductModel) {
+    if (product.images.isEmpty()) return
+
     val pagerState = rememberPagerState(pageCount = { product.images.size })
+
     Box {
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth()
-                .size(0.dp, 296.dp),
+                .height(296.dp),
             state = pagerState
-        ) {
-            var image = product.images
-            if (product.images[0].startsWith("[")) {
-                image = listOf(
-                    product.images[0].substring(
-                        2,
-                        product.images[0].length - 2
-                    )
-                )
+        ) { page ->
+            val image = if (product.images[page].startsWith("[")) {
+                product.images[page].substring(2, product.images[page].length - 2)
+            } else {
+                product.images[page]
             }
+
             AsyncImage(
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.Crop,
-                model = image[it], contentDescription = "Photo"
+                model = image,
+                contentDescription = "Photo"
             )
         }
 
         Row(
             Modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .offset(y = 280.dp),
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            repeat(pagerState.pageCount) { iteration ->
+            repeat(pagerState.pageCount) { index ->
                 val color =
-                    if (pagerState.currentPage == iteration) Color.DarkGray else Color(0x55CCCCCC)
+                    if (pagerState.currentPage == index) Color.DarkGray else Color(0x55CCCCCC)
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
@@ -130,10 +152,13 @@ fun ImgOfProduct(product: ProductItem) {
 
 @Composable
 fun NameWithPriceOfProduct(
-    nameOfProduct: String?,
-    priceOfProduct: String?,
-    productIsBookmarked: Boolean
+    product: ProductModel,
+    viewModel: StoreViewModel,
+    priceOfProduct: String?
 ) {
+    val favoriteProducts by viewModel.favoriteProducts.collectAsState()
+    val isFavorite = favoriteProducts.contains(product.id)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -144,7 +169,7 @@ fun NameWithPriceOfProduct(
     ) {
         Column {
             Text(
-                text = nameOfProduct.toString(),
+                text = product.title,
                 style = TextStyle(
                     fontFamily = inter,
                     fontWeight = FontWeight(500),
@@ -169,10 +194,10 @@ fun NameWithPriceOfProduct(
         IconButton(
             modifier = Modifier
                 .size(46.dp),
-            onClick = { }) {
+            onClick = { viewModel.toggleFavorite(product.id) }) {
             Icon(
                 imageVector = ImageVector.vectorResource(
-                    if (productIsBookmarked) R.drawable.heart_fill
+                    if (isFavorite) R.drawable.heart_fill
                     else
                         R.drawable.heart
                 ),
@@ -261,8 +286,14 @@ fun AddToCardButton() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BuyNowButton() {
+
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
     Button(
         modifier = Modifier
             .size(167.dp, 45.dp),
@@ -272,7 +303,7 @@ fun BuyNowButton() {
                 containerColor = Color(0xFFF0F2F1)
             ),
         border = BorderStroke(1.dp, Color(0xFFD9D9D9)),
-        onClick = { })
+        onClick = { showBottomSheet = true })
     {
         Text(
             text = "Buy Now",
@@ -285,12 +316,94 @@ fun BuyNowButton() {
             )
         )
     }
-}
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showBottomSheet = false
+            },
+            sheetState = sheetState,
 
-@Preview(showBackground = true)
-@Composable
-fun DetailScreenPreview() {
-    DetailScreen(
-        ProductItem(0, "sdgsgsd", 34534534, "rsghdfg", emptyList(), "", "", null)
-    )
+            modifier = Modifier
+                .fillMaxHeight(0.5f)
+                .navigationBarsPadding(),
+            containerColor = Color.White,
+            dragHandle = null
+
+        ) {
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 20.dp, end = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 28.dp, bottom = 28.dp),
+                    horizontalArrangement = Arrangement.End
+
+                ) {
+                    androidx.compose.material.IconButton(
+                        modifier = Modifier
+                            .size(14.dp),
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.close_icon),
+                            tint = Color.Black,
+                            contentDescription = null
+                        )
+                    }
+                }
+                Image(
+                    modifier = Modifier
+                        .weight(1f),
+                    painter = painterResource(id = R.drawable.payment_success),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                )
+                Spacer(modifier = Modifier.height(37.dp))
+                Column {
+                    Button(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(0.dp, 45.dp),
+                        shape = RoundedCornerShape(4.dp),
+                        colors = ButtonDefaults
+                            .buttonColors(
+                                Color(0xFF67C4A7)
+
+                            ),
+                        onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        })
+                    {
+                        Text(
+                            text = "Continue",
+                            style = TextStyle(
+                                fontFamily = inter,
+                                fontWeight = FontWeight(500),
+                                fontSize = 14.sp,
+                                lineHeight = 16.94.sp,
+                                color = Color.White
+                            )
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(43.dp))
+                }
+            }
+        }
+    }
 }
