@@ -1,11 +1,6 @@
 package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -18,9 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.core.models.CategoryModel
-import com.example.onlinestore.core.models.ProductModel
-import com.example.onlinestore.views.SampleScreen
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
@@ -81,7 +73,6 @@ fun Navigation(
         composable(Screen.BottomNavigation.Home.route) {
             MainScreen(navController, viewModel)
         }
-
         composable(Screen.BottomNavigation.Manager.broute) {
             ManagerScreen()
         }

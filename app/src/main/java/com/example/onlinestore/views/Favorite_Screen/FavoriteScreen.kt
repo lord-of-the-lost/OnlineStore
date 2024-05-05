@@ -48,12 +48,11 @@ import com.example.onlinestore.navigation.Screen
 
 @Composable
 fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
-
     LaunchedEffect(key1 = true) {
         viewModel.getProductsFromDB()
     }
 
-    val productList = viewModel.savedProducts.value
+    val productList = viewModel.savedProducts.collectAsState().value
 
     productList?.let { list ->
         LazyVerticalGrid(
@@ -129,7 +128,7 @@ fun FavoriteItem(
                         fontWeight = FontWeight.Bold
                     )
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        IconButton({viewModel.toggleFavorite(productItem.id)}){
+                        IconButton({ viewModel.toggleFavorite(productItem.id) }){
                             Icon(
                                 painterResource(R.drawable.ic_wishlist),
                                 contentDescription = "Favorite",

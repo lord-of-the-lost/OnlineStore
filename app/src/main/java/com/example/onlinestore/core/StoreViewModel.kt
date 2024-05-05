@@ -51,7 +51,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         LocationUseCase(application)
     }
 
-    var savedProducts: MutableState<List<ProductModel>?> = mutableStateOf(null)
+    private val _savedProducts = MutableStateFlow<List<ProductModel>?>(null)
+    val savedProducts: StateFlow<List<ProductModel>?> = _savedProducts.asStateFlow()
 
     private val _currentCurrency = MutableStateFlow<Currency>(Currency.USD)
     val currentCurrency: StateFlow<Currency> = _currentCurrency.asStateFlow()
@@ -67,8 +68,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
-
-
 
     init {
         loadProducts()
@@ -134,7 +133,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getProductsFromDB() {
         viewModelScope.launch {
-            savedProducts.value = repository.getAllProducts()
+            val products = repository.getAllProducts()
+            _savedProducts.value = products
         }
     }
 
