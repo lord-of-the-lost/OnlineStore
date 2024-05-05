@@ -1,8 +1,6 @@
 package com.example.onlinestore.core
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -84,14 +82,15 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleFavorite(productId: Int) {
         viewModelScope.launch {
             val product = _products.value.find { it.id == productId }
-
             product?.let {
                 if (_favoriteProducts.value.contains(productId)) {
                     _favoriteProducts.value = _favoriteProducts.value.minus(productId)
                     deleteProduct(it)
+                    _savedProducts.value = _savedProducts.value?.filterNot { p -> p.id == productId }
                 } else {
                     _favoriteProducts.value = _favoriteProducts.value.plus(productId)
                     saveProduct(it)
+                    _savedProducts.value = _savedProducts.value?.plus(it)
                 }
             }
         }
