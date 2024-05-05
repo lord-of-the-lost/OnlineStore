@@ -1,31 +1,31 @@
 package com.example.onlinestore.navigation
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
+
     BottomNavigation(
         backgroundColor = Color.White,
         modifier = Modifier
@@ -43,12 +43,16 @@ fun BottomNavigationBar(navController: NavController) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         screen.icon.let { painterResource(id = it) }.let { icon ->
-                            (if (isSelected) screen.color else Color(0xFFACAFC3)).let {
-                                Icon(
+                            if (isSelected) {
+                                Image(
                                     painter = icon,
                                     contentDescription = null,
-                                    tint = it,
-                                    modifier = Modifier.size(24.dp)
+                                    colorFilter = ColorFilter.tint(screen.color)
+                                )
+                            } else {
+                                Image(
+                                    painter = icon,
+                                    contentDescription = null
                                 )
                             }
                         }
@@ -56,6 +60,7 @@ fun BottomNavigationBar(navController: NavController) {
                     }
 
                 },
+                selectedContentColor = screen.color,
                 selected = isSelected,
                 onClick = {
                     navController.navigate(screen.route) {
@@ -65,7 +70,8 @@ fun BottomNavigationBar(navController: NavController) {
                         launchSingleTop = true
                         restoreState = true
                     }
-                }
+                },
+
             )
         }
     }

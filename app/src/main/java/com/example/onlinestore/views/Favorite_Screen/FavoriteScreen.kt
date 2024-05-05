@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,16 +24,19 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -53,7 +58,8 @@ fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
     productList?.let { list ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            state = rememberLazyGridState()
+            state = rememberLazyGridState(),
+            modifier = Modifier.padding(20.dp)
         ) {
             items(list) { product ->
                 FavoriteItem(navController, viewModel, product)
@@ -70,7 +76,7 @@ fun FavoriteItem(
     viewModel: StoreViewModel,
     productItem: ProductModel)
 {
-    val images = productItem.images.mapNotNull { img ->
+    val images = productItem.images.map { img ->
         if (img.startsWith("[")) img.substring(2, img.length - 2)
         else img
     }.filterNot { it.isBlank() }
@@ -78,21 +84,21 @@ fun FavoriteItem(
     val pagerState = rememberPagerState(pageCount = { images.size })
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val priceOfProduct =
-        productItem?.price?.let { viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency) }
+        productItem.price.let { viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency) }
             ?: "0"
 
     Card(
         modifier = Modifier
             .fillMaxSize()
             .padding(3.dp)
-            .size(170.dp, 217.dp),
+            .size(170.dp, 215.dp),
         colors = CardDefaults.cardColors(colorResource(id = R.color.CardColor)),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp)
+                    .fillMaxHeight(0.5f)
                     .clickable {
                         viewModel.setSelectedProduct(productItem)
                         navController.navigate(Screen.NavigationItem.DetailProductScreen.tRoute)
@@ -122,18 +128,22 @@ fun FavoriteItem(
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
-                    Button(
-                        onClick = { viewModel.toggleFavorite(productItem.id) },
-                        Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(5.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.heart_fill),
-                            contentDescription = "Favorite",
-                            tint = colorResource(R.color.Green_Sheen)
-                        )
-                        Text(text = "Add to cart")
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        IconButton({viewModel.toggleFavorite(productItem.id)}){
+                            Icon(
+                                painterResource(R.drawable.ic_wishlist),
+                                contentDescription = "Favorite",
+                                tint = colorResource(R.color.Green_Sheen)
+                            )
+                        }
+                        Button(
+                            onClick = { },
+                            Modifier.fillMaxWidth().height(29.dp),
+                            shape = RoundedCornerShape(5.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))
+                        ) {
+                            Text(text = "Add to cart", fontSize = 12.sp, textAlign = TextAlign.Center)
+                        }
                     }
                 }
             }
