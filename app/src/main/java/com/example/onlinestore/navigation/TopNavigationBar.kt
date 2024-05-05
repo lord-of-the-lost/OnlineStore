@@ -17,14 +17,13 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.onlinestore.R
-import com.example.onlinestore.views.search_screen.HistoryItem
+import com.example.onlinestore.core.StoreViewModel
 
 @Composable
 fun TopNavigationBar(
@@ -47,6 +46,7 @@ fun TopNavigationBar(
     controller: NavController
 ) {
     val currentRoute = currentRoute(controller)
+    val model: StoreViewModel = viewModel()
     val title = allScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
     val icon = topScreens.firstOrNull { it.route == currentRoute }?.icon
     val action = topScreens.firstOrNull { it.route == currentRoute }?.actionIcon
@@ -64,13 +64,10 @@ fun TopNavigationBar(
                 ?.let { Icon(painter = it, "", tint = colorResource(R.color.Dark_Arsenic)) }
         }
     }
-    val text = remember {
-        mutableStateOf("")
-    }
     TopAppBar(
         title = {
             if (title == "Wishlist" || title == "SearchResult") {
-                SearchBar(text.value) { text.value = it }
+                SearchBar(model.search.value, model) { model.search.value = it }
             } else {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -99,8 +96,10 @@ fun TopNavigationBar(
 @Composable
 fun SearchBar(
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit
-) {
+    model: StoreViewModel,
+    onSearchQueryChange: (String) -> Unit,
+
+    ) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = searchQuery,
@@ -113,6 +112,7 @@ fun SearchBar(
         textStyle = TextStyle(fontSize = 13.sp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {
+            model.search2.value = searchQuery
         })
     ) {
         TextFieldDefaults.TextFieldDecorationBox(
