@@ -1,6 +1,8 @@
 package com.example.onlinestore.core
 
 import android.app.Application
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -67,8 +69,13 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
+
+    val search:MutableState<String> = mutableStateOf("")
+    val search2 = mutableStateOf("")
+
     private val _isUserManager = MutableStateFlow(false)
     val isUserManager: StateFlow<Boolean> = _isUserManager.asStateFlow()
+
 
     init {
         loadProducts()
@@ -261,7 +268,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun sortProductsByTitleDescending() {
         _products.value = _products.value.sortedByDescending { it.title }
     }
-}
+    fun sortByName(){
+        _products.value = _products.value.sortedByDescending { it.title .startsWith("Classic") } }
+    }
+
 
 data class AuthState(
     val success: Boolean = false,
