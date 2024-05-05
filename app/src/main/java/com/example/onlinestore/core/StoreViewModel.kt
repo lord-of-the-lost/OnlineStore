@@ -68,8 +68,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
-    private val _categoryId = MutableStateFlow(0)
-    val categoryId: StateFlow<Int> = _categoryId.asStateFlow()
+
 
     init {
         loadProducts()

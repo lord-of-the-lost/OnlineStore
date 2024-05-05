@@ -21,6 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
@@ -40,13 +43,14 @@ import com.example.onlinestore.navigation.Screen
 fun CardItem(
     productItem: ProductModel,
     viewModel: StoreViewModel,
-    navController: NavController)
-{
+    navController: NavController
+) {
     val images = productItem.images.map { img ->
         if (img.startsWith("[")) img.substring(2, img.length - 2) else img
     }.filter { it.isNotEmpty() }
 
     val pagerState = rememberPagerState(pageCount = { images.size })
+    var addToCard by rememberSaveable { mutableStateOf(false) }
 
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val price = productItem.price?.let {
@@ -99,12 +103,17 @@ fun CardItem(
                         fontWeight = FontWeight.Bold
                     )
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            addToCard = !addToCard
+                            if (addToCard) viewModel.saveProduct(productItem) else viewModel.deleteProduct(
+                                productItem
+                            )
+                        },
                         Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(if (!addToCard) R.color.Green_Sheen else R.color.Red))
                     ) {
-                        Text(text = "Add to cart")
+                        Text(text = if(!addToCard)"Add to cart" else "remove from cart")
                     }
                 }
             }
