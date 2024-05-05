@@ -13,7 +13,8 @@ val inter = FontFamily(
 )
 
 val plusJakartaSans = FontFamily(
-    Font(R.font.plus_jakarta_sans_extra_bold)
+    Font(R.font.plus_jakarta_sans_bold, FontWeight.Bold),
+    Font(R.font.plus_jakarta_sans_semi_bold, FontWeight.SemiBold)
 )
 
 
