@@ -44,7 +44,7 @@ fun ChangePhotoDialog(
             .fillMaxWidth()
     ) {
         Dialog(
-            onDismissRequest = { onDismiss() },
+            onDismissRequest = onDismiss,
             properties = DialogProperties(dismissOnClickOutside = true)
         ) {
             Surface(
@@ -77,21 +77,21 @@ fun ChangePhotoDialog(
                     CustomButtonForDialog(
                         text = "Take a photo",
                         iconId = R.drawable.ic_camera,
-                        onClick = { toTakePhoto() }
+                        onClick = toTakePhoto
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     CustomButtonForDialog(
                         text = "Choose from your file",
                         iconId = R.drawable.ic_file,
-                        onClick = { toFindPhotoDir() }
+                        onClick = toFindPhotoDir
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     CustomButtonForDialog(
                         text = "Delete photo",
                         iconId = R.drawable.ic_trash,
-                        onClick = { toDeletePhoto() },
+                        onClick = toDeletePhoto,
                         textColor = Color.Red,
                         iconColor = Color.Red
                     )
