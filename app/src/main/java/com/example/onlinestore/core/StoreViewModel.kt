@@ -1,6 +1,8 @@
 package com.example.onlinestore.core
 
 import android.app.Application
+import android.graphics.Bitmap
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -260,6 +262,14 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun sortProductsByTitleDescending() {
         _products.value = _products.value.sortedByDescending { it.title }
+    }
+
+
+    //image switch
+    private val _bitmap = mutableStateOf<Bitmap?>(null)
+    val bitmap = _bitmap
+    fun onTakePhoto(bitmap: Bitmap) {
+        _bitmap.value = bitmap
     }
 }
 

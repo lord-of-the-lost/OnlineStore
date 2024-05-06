@@ -53,9 +53,11 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material:material-icons-extended:1.5.1")
     implementation("androidx.hilt:hilt-work:1.0.0")
     implementation("androidx.work:work-runtime-ktx:2.7.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")
+    implementation("androidx.camera:camera-view:1.3.3")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     implementation("androidx.hilt:hilt-navigation-fragment:1.0.0")
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
@@ -89,4 +91,15 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+
+    val cameraxVersion = "1.3.0-rc01"
+
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-video:$cameraxVersion")
+
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+    implementation("androidx.camera:camera-extensions:$cameraxVersion")
 }

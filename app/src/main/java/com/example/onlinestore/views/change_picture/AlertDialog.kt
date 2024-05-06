@@ -1,6 +1,7 @@
 package com.example.onlinestore.views.change_picture
 
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,63 +39,67 @@ fun ChangePhotoDialog(
     toFindPhotoDir: () -> Unit,
     toDeletePhoto: () -> Unit
 ) {
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(dismissOnClickOutside = true)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
-        Surface(
-            modifier = Modifier
-                .padding(16.dp)
-                .width(328.dp)
-                .height(340.dp),
-            shape = MaterialTheme.shapes.medium,
+        Dialog(
+            onDismissRequest = { onDismiss() },
+            properties = DialogProperties(dismissOnClickOutside = true)
         ) {
-            Column(
+            Surface(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(16.dp)
+                    .width(328.dp)
+                    .height(340.dp),
+                shape = MaterialTheme.shapes.medium,
             ) {
-                Text(
-                    text = "Change your picture",
-                    style = TextStyle(
-                        fontFamily = FontFamily.Default,
-                        fontWeight = FontWeight.W600,
-                        fontSize = 20.sp,
-                        lineHeight = 28.sp,
-                        letterSpacing = 0.5.sp,
-                        textAlign = TextAlign.Center
-                    ),
-                    color = Color.Black,
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Change your picture",
+                        style = TextStyle(
+                            fontFamily = FontFamily.Default,
+                            fontWeight = FontWeight.W600,
+                            fontSize = 20.sp,
+                            lineHeight = 28.sp,
+                            letterSpacing = 0.5.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        color = Color.Black,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                CustomButtonForDialog(
-                    text = "Take a photo",
-                    iconId = R.drawable.ic_camera,
-                    onClick = toTakePhoto
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                    CustomButtonForDialog(
+                        text = "Take a photo",
+                        iconId = R.drawable.ic_camera,
+                        onClick = { toTakePhoto() }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                CustomButtonForDialog(
-                    text = "Choose from your file",
-                    iconId = R.drawable.ic_file,
-                    onClick = toFindPhotoDir
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                    CustomButtonForDialog(
+                        text = "Choose from your file",
+                        iconId = R.drawable.ic_file,
+                        onClick = { toFindPhotoDir() }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                CustomButtonForDialog(
-                    text = "Delete photo",
-                    iconId = R.drawable.ic_trash,
-                    onClick = toDeletePhoto,
-                    textColor = Color.Red,
-                    iconColor = Color.Red
-                )
+                    CustomButtonForDialog(
+                        text = "Delete photo",
+                        iconId = R.drawable.ic_trash,
+                        onClick = { toDeletePhoto() },
+                        textColor = Color.Red,
+                        iconColor = Color.Red
+                    )
+                }
             }
         }
     }
 }
-
 
 @Composable
 fun CustomButtonForDialog(
