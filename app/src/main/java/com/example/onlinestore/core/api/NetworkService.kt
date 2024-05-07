@@ -6,6 +6,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface NetworkService {
     @GET("products")
@@ -13,6 +14,10 @@ interface NetworkService {
 
     @GET("categories")
     suspend fun getAllCategories(): List<CategoryModel>
+
+    @GET("products/")
+    suspend fun productByName(@Query("title") title:String
+    ): List<ProductModel>
 
     @GET("categories/{id}")
     suspend fun getSingleCategory(@Path("id") id: Int): CategoryModel
