@@ -110,9 +110,9 @@ fun MainScreen(
                 IconButton({
                     controller.navigate(Screen.NavigationItem.Cart.route)
                 }) {
-                    Icon(painter = painterResource(R.drawable.buy), "")
+                    Icon(painter = painterResource(R.drawable.buy), "", tint = colorResource(R.color.Dark_Arsenic))
                 }
-                Icon(painter = painterResource(R.drawable.notification), "")
+                Icon(painter = painterResource(R.drawable.notification), "", tint = colorResource(R.color.Dark_Arsenic))
             }
 
         }

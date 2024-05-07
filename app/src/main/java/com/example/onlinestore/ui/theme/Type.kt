@@ -10,6 +10,7 @@ import com.example.onlinestore.R
 
 val inter = FontFamily(
     Font(R.font.inter, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium)
 )
 
 val plusJakartaSans = FontFamily(
@@ -17,6 +18,9 @@ val plusJakartaSans = FontFamily(
     Font(R.font.plus_jakarta_sans_semi_bold, FontWeight.SemiBold)
 )
 
+val SFProText = FontFamily(
+    Font(R.font.sfpro_text_bold, FontWeight.Bold)
+)
 
 // Set of Material typography styles to start with
 val Typography = Typography(
