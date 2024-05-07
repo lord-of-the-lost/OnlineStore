@@ -24,7 +24,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.views.search_screen.HistoryItem
 
 @Composable
 fun TopNavigationBar(
@@ -66,8 +70,8 @@ fun TopNavigationBar(
     }
     TopAppBar(
         title = {
-            if (title == "Wishlist" || title == "SearchResult") {
-                SearchBar(model.search.value, model) { model.search.value = it }
+            if (title == "SearchResult") {
+                SearchBar(model)
             } else {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -95,15 +99,14 @@ fun TopNavigationBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchBar(
-    searchQuery: String,
     model: StoreViewModel,
-    onSearchQueryChange: (String) -> Unit,
-
-    ) {
+) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    var text by remember { mutableStateOf("") }
+
     BasicTextField(
-        value = searchQuery,
-        onValueChange = { onSearchQueryChange(it) },
+        value = text,
+        onValueChange = { text = it},
         modifier = Modifier
             .background(Color.White)
             .fillMaxWidth()
@@ -111,9 +114,16 @@ fun SearchBar(
             .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp)),
         textStyle = TextStyle(fontSize = 13.sp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = {
-            model.search2.value = searchQuery
-        })
+        keyboardActions = KeyboardActions {
+            model.updateSearch(text)
+            if (text != "") {
+                val newItem = HistoryItem(
+                    name = text,
+                    id =  1
+                )
+                model.updateHistory(newItem)
+            }
+        }
     ) {
         TextFieldDefaults.TextFieldDecorationBox(
             value = "",
@@ -123,7 +133,7 @@ fun SearchBar(
             interactionSource = interactionSource,
             visualTransformation = VisualTransformation.None,
             placeholder = {
-                if (searchQuery == "")
+                if (text == "")
                     Text("Search here...", color = colorResource(R.color.Grey), fontSize = 13.sp)
             },
             leadingIcon = {
@@ -132,11 +142,12 @@ fun SearchBar(
                     "",
                     tint = Color.Gray
                 )
+
             },
             trailingIcon = {
-                if (searchQuery != "")
+                if (text != "")
                     IconButton({
-                        onSearchQueryChange("")
+                        text = ""
                     }) {
                         Icon(Icons.Default.Clear, "", tint = Color.Gray)
                     }

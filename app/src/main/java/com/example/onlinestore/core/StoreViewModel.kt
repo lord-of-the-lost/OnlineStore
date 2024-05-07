@@ -1,8 +1,6 @@
 package com.example.onlinestore.core
 
 import android.app.Application
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -14,13 +12,13 @@ import com.example.onlinestore.core.storage.AppDatabase
 import com.example.onlinestore.core.storage.ProductDAO
 import com.example.onlinestore.core.storage.UserDAO
 import com.example.onlinestore.views.CartScreen.ShopItem
+import com.example.onlinestore.views.search_screen.HistoryItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -67,12 +65,25 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _products = MutableStateFlow<List<ProductModel>>(emptyList())
     val products: StateFlow<List<ProductModel>> = _products.asStateFlow()
 
+    private val _productsOnSearch = MutableStateFlow<List<ProductModel>>(emptyList())
+    val productsOnSearch: StateFlow<List<ProductModel>> = _productsOnSearch.asStateFlow()
+
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
+    private var _searchString  = MutableStateFlow("")
+    var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
-    val search:MutableState<String> = mutableStateOf("")
-    val search2 = mutableStateOf("")
+    private var _historyList = MutableStateFlow<List<HistoryItem>>(emptyList())
+    var historyList:StateFlow<List<HistoryItem>> = _historyList.asStateFlow()
+    fun updateSearch(str:String){
+        _searchString.value = str
+    }
+    fun updateHistory(item: HistoryItem){
+        _historyList.value.plus(item)
+    }
+
+
 
     private val _isUserManager = MutableStateFlow(false)
     val isUserManager: StateFlow<Boolean> = _isUserManager.asStateFlow()
@@ -108,18 +119,19 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val shopItemsInCart: StateFlow<List<ShopItem>> = cartProducts.combine(currentCurrency) { cartItems, currency ->
-        cartItems.map { product ->
-            ShopItem(
-                productId = product.id,
-                imgOfProduct = product.images.firstOrNull(),
-                nameOfProduct = product.title,
-                priceOfProduct = formatPriceWithCurrency(product.price.toDouble(), currency),
-                quantity = 1,
-                isSelected = false
-            )
-        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val shopItemsInCart: StateFlow<List<ShopItem>> =
+        cartProducts.combine(currentCurrency) { cartItems, currency ->
+            cartItems.map { product ->
+                ShopItem(
+                    productId = product.id,
+                    imgOfProduct = product.images.firstOrNull(),
+                    nameOfProduct = product.title,
+                    priceOfProduct = formatPriceWithCurrency(product.price.toDouble(), currency),
+                    quantity = 1,
+                    isSelected = false
+                )
+            }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun toggleFavorite(productId: Int) {
         viewModelScope.launch {
@@ -128,7 +140,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 if (_favoriteProducts.value.contains(productId)) {
                     _favoriteProducts.value = _favoriteProducts.value.minus(productId)
                     deleteProduct(it)
-                    _savedProducts.value = _savedProducts.value?.filterNot { p -> p.id == productId }
+                    _savedProducts.value =
+                        _savedProducts.value?.filterNot { p -> p.id == productId }
                 } else {
                     _favoriteProducts.value = _favoriteProducts.value.plus(productId)
                     saveProduct(it)
@@ -259,11 +272,22 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadProductById(id:Int) {
+    fun loadProductById(id: Int) {
         viewModelScope.launch {
             try {
                 val productList = networkService.getProductByCategory(id)
                 _products.value = productList
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+
+    fun loadProductByName(name:String) {
+        viewModelScope.launch {
+            try {
+                val productList = networkService.productByName(name)
+                _productsOnSearch.value = productList
             } catch (e: Exception) {
                 TODO()
             }
@@ -296,18 +320,16 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun sortProductsByTitleDescending() {
         _products.value = _products.value.sortedByDescending { it.title }
     }
-    fun sortByName(){
-        _products.value = _products.value.sortedByDescending { it.title .startsWith("Classic") } }
+
+
+    data class AuthState(
+        val success: Boolean = false,
+        val error: String = ""
+    )
+
+    fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
+    enum class Currency {
+        USD, EUR, RUB
     }
-
-
-data class AuthState(
-    val success: Boolean = false,
-    val error: String = ""
-)
-
-fun Double.format(digits: Int) = "%.${digits}f".format(this)
-
-enum class Currency {
-    USD, EUR, RUB
 }
