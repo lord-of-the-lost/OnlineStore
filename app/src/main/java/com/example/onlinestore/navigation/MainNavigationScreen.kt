@@ -115,10 +115,10 @@ fun Navigation(
         composable(Screen.NavigationItem.Cart.tRoute) {
             CartScreen(viewModel)
         }
-        composable(Screen.NavigationItem.Camera.tRoute){
+        composable(Screen.NavigationItem.Camera.tRoute) {
             Camera(
                 viewModel,
-                onBackClick = {navController.navigate(Screen.BottomNavigation.Account.broute)}
+                onBackClick = { navController.navigate(Screen.BottomNavigation.Account.broute) }
             )
         }
     }

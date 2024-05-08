@@ -44,21 +44,21 @@ fun ChangePhotoDialog(
     toFindPhotoDir: () -> Unit,
     toDeletePhoto: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnClickOutside = true)
     ) {
-        Dialog(
-            onDismissRequest = onDismiss,
-            properties = DialogProperties(dismissOnClickOutside = true)
         Surface(
             modifier = Modifier
                 .width(328.dp)
                 .height(340.dp),
-                .padding(top = 32.dp, bottom = 20.dp)
-                    .fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 32.dp, bottom = 20.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Change your picture",
@@ -114,6 +114,7 @@ fun ChangePhotoDialog(
         }
     }
 }
+
 
 @Composable
 fun CustomButtonForDialog(

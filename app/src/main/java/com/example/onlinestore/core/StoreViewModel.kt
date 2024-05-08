@@ -72,7 +72,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
 
-    val search:MutableState<String> = mutableStateOf("")
+    val search: MutableState<String> = mutableStateOf("")
     val search2 = mutableStateOf("")
 
     private val _isUserManager = MutableStateFlow(false)
@@ -109,18 +109,19 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    val shopItemsInCart: StateFlow<List<ShopItem>> = cartProducts.combine(currentCurrency) { cartItems, currency ->
-        cartItems.map { product ->
-            ShopItem(
-                productId = product.id,
-                imgOfProduct = product.images.firstOrNull(),
-                nameOfProduct = product.title,
-                priceOfProduct = formatPriceWithCurrency(product.price.toDouble(), currency),
-                quantity = 1,
-                isSelected = false
-            )
-        }
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val shopItemsInCart: StateFlow<List<ShopItem>> =
+        cartProducts.combine(currentCurrency) { cartItems, currency ->
+            cartItems.map { product ->
+                ShopItem(
+                    productId = product.id,
+                    imgOfProduct = product.images.firstOrNull(),
+                    nameOfProduct = product.title,
+                    priceOfProduct = formatPriceWithCurrency(product.price.toDouble(), currency),
+                    quantity = 1,
+                    isSelected = false
+                )
+            }
+        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun toggleFavorite(productId: Int) {
         viewModelScope.launch {
@@ -129,7 +130,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 if (_favoriteProducts.value.contains(productId)) {
                     _favoriteProducts.value = _favoriteProducts.value.minus(productId)
                     deleteProduct(it)
-                    _savedProducts.value = _savedProducts.value?.filterNot { p -> p.id == productId }
+                    _savedProducts.value =
+                        _savedProducts.value?.filterNot { p -> p.id == productId }
                 } else {
                     _favoriteProducts.value = _favoriteProducts.value.plus(productId)
                     saveProduct(it)
@@ -260,7 +262,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadProductById(id:Int) {
+    fun loadProductById(id: Int) {
         viewModelScope.launch {
             try {
                 val productList = networkService.getProductByCategory(id)
@@ -298,8 +300,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         _products.value = _products.value.sortedByDescending { it.title }
     }
 
-    fun sortByName(){
-        _products.value = _products.value.sortedByDescending { it.title .startsWith("Classic") } }
+    fun sortByName() {
+        _products.value = _products.value.sortedByDescending { it.title.startsWith("Classic") }
     }
 
     //image switch
