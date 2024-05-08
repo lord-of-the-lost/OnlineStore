@@ -2,22 +2,28 @@ package com.example.onlinestore.core
 
 import android.app.Application
 import android.graphics.Bitmap
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.example.onlinestore.core.api.NetworkService
-import com.example.onlinestore.core.location.LocationUseCase
 import com.example.onlinestore.core.models.CategoryModel
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.repository.StoreRepository
 import com.example.onlinestore.core.storage.AppDatabase
 import com.example.onlinestore.core.storage.ProductDAO
 import com.example.onlinestore.core.storage.UserDAO
+import com.example.onlinestore.views.CartScreen.ShopItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -47,10 +53,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         StoreRepository(productDAO, userDAO)
     }
 
-    private val locationUseCase: LocationUseCase by lazy {
-        LocationUseCase(application)
-    }
-
     private val _savedProducts = MutableStateFlow<List<ProductModel>?>(null)
     val savedProducts: StateFlow<List<ProductModel>?> = _savedProducts.asStateFlow()
 
@@ -69,8 +71,15 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
+
+    val search:MutableState<String> = mutableStateOf("")
+    val search2 = mutableStateOf("")
+
     private val _isUserManager = MutableStateFlow(false)
     val isUserManager: StateFlow<Boolean> = _isUserManager.asStateFlow()
+
+    private val _cartProducts = MutableStateFlow<List<ProductModel>>(emptyList())
+    val cartProducts: StateFlow<List<ProductModel>> = _cartProducts.asStateFlow()
 
     init {
         loadProducts()
@@ -87,6 +96,31 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun setSelectedProduct(product: ProductModel) {
         _selectedProduct.value = product
     }
+
+    fun addToCart(product: ProductModel) {
+        _cartProducts.update { currentProducts ->
+            currentProducts + product
+        }
+    }
+
+    fun removeFromCart(productId: Int) {
+        _cartProducts.update { currentProducts ->
+            currentProducts.filterNot { it.id == productId }
+        }
+    }
+
+    val shopItemsInCart: StateFlow<List<ShopItem>> = cartProducts.combine(currentCurrency) { cartItems, currency ->
+        cartItems.map { product ->
+            ShopItem(
+                productId = product.id,
+                imgOfProduct = product.images.firstOrNull(),
+                nameOfProduct = product.title,
+                priceOfProduct = formatPriceWithCurrency(product.price.toDouble(), currency),
+                quantity = 1,
+                isSelected = false
+            )
+        }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun toggleFavorite(productId: Int) {
         viewModelScope.launch {
@@ -264,6 +298,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         _products.value = _products.value.sortedByDescending { it.title }
     }
 
+    fun sortByName(){
+        _products.value = _products.value.sortedByDescending { it.title .startsWith("Classic") } }
+    }
 
     //image switch
     private val _bitmap = mutableStateOf<Bitmap?>(null)

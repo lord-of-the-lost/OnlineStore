@@ -6,25 +6,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,14 +33,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.onlinestore.R
-import com.example.onlinestore.views.search_screen.HistoryItem
+import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.ui.theme.SFProText
+import com.example.onlinestore.ui.theme.inter
 
 @Composable
 fun TopNavigationBar(
@@ -47,6 +52,7 @@ fun TopNavigationBar(
     controller: NavController
 ) {
     val currentRoute = currentRoute(controller)
+    val model: StoreViewModel = viewModel()
     val title = allScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
     val icon = topScreens.firstOrNull { it.route == currentRoute }?.icon
     val action = topScreens.firstOrNull { it.route == currentRoute }?.actionIcon
@@ -55,7 +61,7 @@ fun TopNavigationBar(
     val navigationIcon: (@Composable () -> Unit) =
         {
             IconButton(onClick = { onBackClicked() }) {
-                icon?.let { Icon(it, "") }
+                icon?.let { Icon(it, "", tint = colorResource(R.color.Dark_Arsenic)) }
             }
         }
     val actionIcon: (@Composable () -> Unit) = {
@@ -64,22 +70,47 @@ fun TopNavigationBar(
                 ?.let { Icon(painter = it, "", tint = colorResource(R.color.Dark_Arsenic)) }
         }
     }
-    val text = remember {
-        mutableStateOf("")
-    }
     TopAppBar(
         title = {
             if (title == "Wishlist" || title == "SearchResult") {
-                SearchBar(text.value) { text.value = it }
+                SearchBar(model.search.value, model) { model.search.value = it }
             } else {
                 Row(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = if (title == "Your Cart") Arrangement.Start else Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        title, modifier = Modifier.padding(end = if (icon != null) 65.dp else 0.dp),
-                        color = Color.Black,
+                        text = when (title) {
+                            "Account" -> "Profile"
+                            "Manager" -> "Manager Screen"
+                            else -> title
+                        },
+                        style = if (title == "Details product" || title == "Your Cart")
+                            TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                lineHeight = 19.36.sp,
+                                color = Color(0xFF393F42),
+                                fontFamily = inter
+                            ) else
+                            TextStyle(
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                lineHeight = 26.sp,
+                                color = Color.Black,
+                                fontFamily = SFProText
+                            ),
+                        modifier = Modifier
+                            .padding(
+                                end =
+                                when (title) {
+                                    "Terms & Conditions" -> 68.dp
+                                    "Sign Up" -> 68.dp
+                                    "Details product" -> 18.dp
+                                    else -> 10.dp
+                                }
+                            )
                     )
                 }
             }
@@ -99,8 +130,10 @@ fun TopNavigationBar(
 @Composable
 fun SearchBar(
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit
-) {
+    model: StoreViewModel,
+    onSearchQueryChange: (String) -> Unit,
+
+    ) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = searchQuery,
@@ -113,6 +146,7 @@ fun SearchBar(
         textStyle = TextStyle(fontSize = 13.sp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = {
+            model.search2.value = searchQuery
         })
     ) {
         TextFieldDefaults.TextFieldDecorationBox(

@@ -141,7 +141,7 @@ fun RegistrationScreen(
                 isErrorConfirmPass
             )
             Spacer(Modifier.padding(bottom = 30.dp))
-            TextFieldDropDownMenu()
+            TextFieldDropDownMenu(authViewModel)
 
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column() {
@@ -277,7 +277,7 @@ fun CustomTextField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextFieldDropDownMenu() {
+fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
     val options = listOf("Manager", "User")
     var expanded by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
@@ -330,11 +330,11 @@ fun TextFieldDropDownMenu() {
 
     }
     if (text == "Manager")
-        AddCustomPasswordField()
+        AddCustomPasswordField(viewModel)
 }
 
 @Composable
-fun AddCustomPasswordField() {
+fun AddCustomPasswordField(viewModel: StoreViewModel) {
     var password = "0000"
     var inputPassword by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -366,8 +366,6 @@ fun AddCustomPasswordField() {
             } else {
                 Icon(Icons.Default.Check, "")
             }
-
-
         },
 
         visualTransformation = visibility,
@@ -385,11 +383,13 @@ fun AddCustomPasswordField() {
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(onDone = {
-            if (inputPassword != password) {
-                Error = true
+            if (inputPassword == password) {
+                viewModel.setUserManagerStatus(true)
+                focusManager.clearFocus()
+            } else {
                 inputPassword = ""
+                focusManager.clearFocus()
             }
-            focusManager.clearFocus()
         }),
         isError = Error
     )

@@ -24,16 +24,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.Favorite_Screen.FavoriteScreen
-import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.onboarding.OnboardingScreen
+import com.example.onlinestore.views.add_screen.AddProduct
+import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
+import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 import com.example.onlinestore.views.terms_conditions.Terms
@@ -109,7 +110,7 @@ fun Navigation(
             RegistrationScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.SearchResultScreen.tRoute) {
-            SearchScreen()
+            SearchScreen(navController)
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
             CartScreen(viewModel)
