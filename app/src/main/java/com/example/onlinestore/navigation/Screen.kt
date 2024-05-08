@@ -49,6 +49,14 @@ sealed class Screen(
             R.drawable.buy,
             true
         )
+        object Camera : NavigationItem(
+            "camera_open",
+            "",
+            null,
+            null,
+            false
+        )
+
     }
     sealed class BottomNavigation(
         val broute: String,
@@ -79,6 +87,7 @@ val topScreens = listOf(
     Screen.NavigationItem.Onboarding,
     Screen.NavigationItem.Registration,
     Screen.NavigationItem.TermsConditions,
+    Screen.NavigationItem.Camera
 )
 val bottomScreen = listOf(
     Screen.BottomNavigation.Home,

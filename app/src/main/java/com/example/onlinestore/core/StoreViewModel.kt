@@ -1,6 +1,7 @@
 package com.example.onlinestore.core
 
 import android.app.Application
+import android.graphics.Bitmap
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -296,10 +297,18 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun sortProductsByTitleDescending() {
         _products.value = _products.value.sortedByDescending { it.title }
     }
+
     fun sortByName(){
         _products.value = _products.value.sortedByDescending { it.title .startsWith("Classic") } }
     }
 
+    //image switch
+    private val _bitmap = mutableStateOf<Bitmap?>(null)
+    val bitmap = _bitmap
+    fun onTakePhoto(bitmap: Bitmap) {
+        _bitmap.value = bitmap
+    }
+}
 
 data class AuthState(
     val success: Boolean = false,
