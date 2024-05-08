@@ -29,8 +29,8 @@ import com.example.onlinestore.views.HomeScreen.ProductItem2
 fun SearchScreen(controller: NavController, model: StoreViewModel) {
     val input by model.searchSting.collectAsState()
     val productList by model.productsOnSearch.collectAsState()
-
     if (input != "") {
+        model.loadProductByName(input)
         ProductItem2(
             productList,
             model,

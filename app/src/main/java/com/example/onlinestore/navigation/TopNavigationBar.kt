@@ -74,8 +74,8 @@ fun TopNavigationBar(
     }
     TopAppBar(
         title = {
-            if (title == "SearchResult") {
-                SearchBar(model)
+            if (title == "SearchResult" || title == "Wishlist") {
+                SearchBar(model, title)
             } else {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -132,6 +132,7 @@ fun TopNavigationBar(
 @Composable
 fun SearchBar(
     model: StoreViewModel,
+    title: String
 ) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
     val input by model.searchSting.collectAsState()
@@ -140,7 +141,7 @@ fun SearchBar(
         value = text,
         onValueChange = {
             text = it
-            if(text == ""){
+            if (text == "") {
                 model.deleteSearch()
             }
         },
@@ -153,11 +154,13 @@ fun SearchBar(
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions {
             model.updateSearch(text)
-            if (text != "") {
-                val newItem = HistoryItem(
-                    name = text,
-                )
-                model.updateHistory(newItem)
+            if (title == "SearchResult") {
+                if (text != "") {
+                    val newItem = HistoryItem(
+                        name = text,
+                    )
+                    model.updateHistory(newItem)
+                }
             }
         }
     ) {
