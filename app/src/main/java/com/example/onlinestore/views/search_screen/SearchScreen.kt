@@ -38,6 +38,7 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
         )
     }
     else{
+         model.clearProductSearch()
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
