@@ -115,16 +115,14 @@ fun Camera(
                                 val matrix = Matrix().apply {
                                     preScale(1f, -1f)
                                     postRotate(image.imageInfo.rotationDegrees.toFloat())
-                                    postScale(1f,1f)
-
                                 }
 
                                 val rotatedBitmap = Bitmap.createBitmap(
                                     image.toBitmap(),
                                     0,
                                     0,
-                                    image.format * 10,
-                                    image.format * 10,
+                                    image.height,
+                                    image.height,
                                     matrix,
                                     true
                                 )
