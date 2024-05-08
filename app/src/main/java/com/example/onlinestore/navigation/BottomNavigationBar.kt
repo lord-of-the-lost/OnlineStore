@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -20,10 +21,15 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.ui.theme.inter
 
 @Composable
 fun BottomNavigationBar(navController: NavController, viewModel: StoreViewModel) {
@@ -48,7 +54,15 @@ fun BottomNavigationBar(navController: NavController, viewModel: StoreViewModel)
                                 contentDescription = null,
                                 colorFilter = if (isSelected) ColorFilter.tint(screen.color) else null
                             )
-                            Text(screen.bTitle)
+                            Text(
+                                modifier = Modifier.padding(top = 8.dp),
+                                text = screen.bTitle,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                lineHeight = 12.1.sp,
+                                color = if (isSelected) screen.color else Color(0xFF939393),
+                                fontFamily = inter
+                            )
                         }
                     },
                     selectedContentColor = screen.color,
