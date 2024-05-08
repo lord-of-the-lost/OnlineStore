@@ -54,6 +54,7 @@ android {
 
 dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.5.1")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.7")
     implementation("androidx.hilt:hilt-work:1.0.0")
     implementation("androidx.work:work-runtime-ktx:2.7.0")
     implementation("com.google.android.gms:play-services-location:21.2.0")

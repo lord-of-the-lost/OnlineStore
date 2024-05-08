@@ -110,7 +110,7 @@ fun Navigation(
             RegistrationScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.SearchResultScreen.tRoute) {
-            SearchScreen(navController)
+            SearchScreen(navController,viewModel)
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
             CartScreen(viewModel)
