@@ -37,6 +37,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +71,7 @@ data class ShopItem(
     val imgOfProduct: String?,
     val nameOfProduct: String,
     val priceOfProduct: String,
-    val quantity: Int,
+    var quantity: Int,
     var isSelected: Boolean = false
 )
 
@@ -79,11 +80,21 @@ data class ShopItem(
 @Composable
 fun CartScreen(viewModel: StoreViewModel) {
     val shopItemsInCart by viewModel.shopItemsInCart.collectAsState()
+    var totalPrice by remember { mutableStateOf(0.0) }
     var isAtLeastOneItemSelected by remember { mutableStateOf(false) }
 
-    val totalPrice = shopItemsInCart
-        .filter { it.isSelected }
-        .sumOf { parsePrice(it.priceOfProduct) }
+    LaunchedEffect(shopItemsInCart) {
+        totalPrice = shopItemsInCart.filter { it.isSelected }.sumOf {
+            parsePrice(it.priceOfProduct) * it.quantity
+        }
+        isAtLeastOneItemSelected = shopItemsInCart.any { it.isSelected }
+    }
+
+    fun updateTotalPrice() {
+        totalPrice = shopItemsInCart.filter { it.isSelected }.sumOf {
+            parsePrice(it.priceOfProduct) * it.quantity
+        }
+    }
 
     Column {
         DeliveryAddress()
@@ -105,8 +116,15 @@ fun CartScreen(viewModel: StoreViewModel) {
                     onDeleteItem = {
                         viewModel.removeFromCart(shopItem.productId)
                     },
-                    onItemSelectedChanged = {
+                    onItemSelectedChanged = { isSelected ->
+                        totalPrice = shopItemsInCart.filter { it.isSelected }.sumOf {
+                            parsePrice(it.priceOfProduct) * it.quantity
+                        }
                         isAtLeastOneItemSelected = shopItemsInCart.any { it.isSelected }
+                    },
+                    onQuantityChange = { newQuantity ->
+                        shopItem.quantity = newQuantity
+                        updateTotalPrice()
                     }
                 )
             }
@@ -230,18 +248,19 @@ fun ShoppingListItem(
     shopItem: ShopItem,
     viewModel: StoreViewModel,
     onDeleteItem: (ShopItem) -> Unit,
-    onItemSelectedChanged: (Boolean) -> Unit
+    onItemSelectedChanged: (Boolean) -> Unit,
+    onQuantityChange: (Int) -> Unit
 ) {
-    var isSelected by remember { mutableStateOf(false) }
-    isSelected = shopItem.isSelected
+    var isSelected by remember { mutableStateOf(shopItem.isSelected) }
+
+    LaunchedEffect(shopItem.isSelected) {
+        isSelected = shopItem.isSelected
+    }
 
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val price = parsePrice(shopItem.priceOfProduct)
     val formattedPrice = viewModel.formatPriceWithCurrency(price, currentCurrency)
 
-    if (isSelected) {
-        onItemSelectedChanged(true)
-    } else onItemSelectedChanged(false)
 
     Row(
         modifier = Modifier
@@ -252,13 +271,9 @@ fun ShoppingListItem(
         IconButton(modifier = Modifier
             .size(24.dp),
             onClick = {
-                if (!isSelected) {
-                    isSelected = true
-                    shopItem.isSelected = isSelected
-                } else {
-                    isSelected = false
-                    shopItem.isSelected = isSelected
-                }
+                isSelected = !isSelected
+                shopItem.isSelected = isSelected
+                onItemSelectedChanged(isSelected)
             }) {
             val iconTint = if (isSelected) Color(0xFF67C4A7) else Color(0xFFD9D9D9)
             Icon(
@@ -332,7 +347,7 @@ fun ShoppingListItem(
                         color = Color(0xFF393F42)
                     )
                 )
-                QuantityOfProduct(shopItem, onDeleteItem)
+                QuantityOfProduct(shopItem, onDeleteItem, onQuantityChange)
             }
         }
     }
@@ -341,7 +356,8 @@ fun ShoppingListItem(
 @Composable
 fun QuantityOfProduct(
     shopItem: ShopItem,
-    onDeleteItem: (ShopItem) -> Unit
+    onDeleteItem: (ShopItem) -> Unit,
+    onQuantityChange: (Int) -> Unit
 ) {
     var quantityOfProduct by remember { mutableStateOf(shopItem.quantity) }
     Row(
@@ -353,6 +369,7 @@ fun QuantityOfProduct(
             onClick = {
                 if (quantityOfProduct > 1) {
                     quantityOfProduct--
+                    onQuantityChange(quantityOfProduct)
                 }
             }) {
             Icon(
@@ -382,6 +399,7 @@ fun QuantityOfProduct(
                 .size(24.dp),
             onClick = {
                 quantityOfProduct++
+                onQuantityChange(quantityOfProduct)
             }) {
             Icon(
                 modifier = Modifier
@@ -395,7 +413,10 @@ fun QuantityOfProduct(
         IconButton(
             modifier = Modifier
                 .size(24.dp),
-            onClick = { onDeleteItem(shopItem) }) {
+            onClick = {
+                onDeleteItem(shopItem)
+                onQuantityChange(0)
+            }) {
             Icon(
                 modifier = Modifier
                     .size(24.dp),
@@ -407,6 +428,7 @@ fun QuantityOfProduct(
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrderSummary(
