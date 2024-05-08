@@ -139,7 +139,11 @@ fun CartScreen(viewModel: StoreViewModel) {
             modifier = Modifier
                 .padding(start = 20.dp, end = 20.dp)
         ) {
-            OrderSummary(totalPrice, isAtLeastOneItemSelected, viewModel)
+            OrderSummary(
+                totalPrice,
+                isAtLeastOneItemSelected,
+                viewModel,
+                shopItemsInCart.filter { it.isSelected == true })
         }
     }
 }
@@ -434,7 +438,8 @@ fun QuantityOfProduct(
 fun OrderSummary(
     totalPrice: Double,
     isAtLeastOneItemSelected: Boolean,
-    viewModel: StoreViewModel
+    viewModel: StoreViewModel,
+    selectedItems: List<ShopItem>
 ) {
 
     val sheetState = rememberModalBottomSheetState()
@@ -499,7 +504,14 @@ fun OrderSummary(
                             if (isAtLeastOneItemSelected) Color(0xFF67C4A7)
                             else Color(0xFFF0F2F1))
                 ),
-            onClick = { if (isAtLeastOneItemSelected) showBottomSheet = true }
+            onClick = {
+                if (isAtLeastOneItemSelected) {
+                    showBottomSheet = true
+                    selectedItems.forEach {
+                        viewModel.removeFromCart(it.productId)
+                    }
+                }
+            }
         )
         {
             Text(
@@ -529,8 +541,6 @@ fun OrderSummary(
             dragHandle = null
 
         ) {
-
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
