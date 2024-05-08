@@ -28,10 +28,9 @@ import com.example.onlinestore.views.HomeScreen.ProductItem2
 @Composable
 fun SearchScreen(controller: NavController, model: StoreViewModel) {
     val input by model.searchSting.collectAsState()
-    val sItems by model.historyList.collectAsState()
     val productList by model.productsOnSearch.collectAsState()
+
     if (input != "") {
-        model.loadProductByName(input)
         ProductItem2(
             productList,
             model,
@@ -60,7 +59,9 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
 
                 Text(
                     text = "Clear all",
-                    Modifier.clickable { },
+                    Modifier.clickable {
+                           model.deleteAllHistory()
+                    },
                     color = colorResource(id = R.color.red_search),
                     fontWeight = FontWeight(500),
                     fontSize = (16.sp)
@@ -68,10 +69,10 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
             }
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(sItems.reversed()) { item ->
+                items(model.historyList.reversed()) { item ->
                     HistoryListItem(item = item,
                         onDeleteClick = {
-
+                          model.deleteHistory(item)
                         })
                 }
             }

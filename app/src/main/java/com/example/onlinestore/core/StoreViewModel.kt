@@ -2,7 +2,7 @@ package com.example.onlinestore.core
 
 import android.app.Application
 import android.graphics.Bitmap
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -74,20 +74,28 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
     val categories: StateFlow<List<CategoryModel>> = _categories.asStateFlow()
 
-    private var _searchString  = MutableStateFlow("")
+    private var _searchString = MutableStateFlow("")
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
-    private var _historyList = MutableStateFlow<List<HistoryItem>>(emptyList())
-    var historyList:StateFlow<List<HistoryItem>> = _historyList.asStateFlow()
-    fun updateSearch(str:String){
+    private var _historyList = mutableStateListOf<HistoryItem>()
+    val historyList:List<HistoryItem>
+        get() = _historyList
+    fun updateSearch(str: String) {
         _searchString.value = str
     }
-    fun updateHistory(item: HistoryItem){
-        _historyList.value.plus(item)
+    fun deleteSearch(){
+        _searchString.value = ""
     }
 
-    val search: MutableState<String> = mutableStateOf("")
-    val search2 = mutableStateOf("")
+    fun updateHistory(item: HistoryItem) {
+        _historyList.add(item)
+    }
+    fun deleteHistory(item: HistoryItem){
+        _historyList.remove(item)
+    }
+    fun deleteAllHistory(){
+        _historyList.clear()
+    }
 
 
     private val _isUserManager = MutableStateFlow(false)
@@ -288,7 +296,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadProductByName(name:String) {
+    fun loadProductByName(name: String) {
         viewModelScope.launch {
             try {
                 val productList = networkService.productByName(name)
@@ -338,14 +346,13 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     }
 }
 
-    data class AuthState(
-        val success: Boolean = false,
-        val error: String = ""
-    )
+data class AuthState(
+    val success: Boolean = false,
+    val error: String = ""
+)
 
-    fun Double.format(digits: Int) = "%.${digits}f".format(this)
+fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
-    enum class Currency {
-        USD, EUR, RUB
-    }
+enum class Currency {
+    USD, EUR, RUB
 }
