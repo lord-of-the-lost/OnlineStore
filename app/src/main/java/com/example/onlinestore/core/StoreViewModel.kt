@@ -78,6 +78,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
     private var _historyList = mutableStateListOf<HistoryItem>()
+    fun clearProductSearch(){
+        _productsOnSearch.value = emptyList()
+    }
     val historyList:List<HistoryItem>
         get() = _historyList
     fun updateSearch(str: String) {
