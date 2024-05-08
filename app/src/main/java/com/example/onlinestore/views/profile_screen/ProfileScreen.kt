@@ -47,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -69,7 +68,6 @@ import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.ui.theme.CustomGrey2
 import com.example.onlinestore.views.change_picture.Camera
-import com.example.onlinestore.views.change_picture.CameraPreview
 import com.example.onlinestore.views.change_picture.ChangePhotoDialog
 import com.example.onlinestore.views.change_picture.ImageViewForProfile
 
@@ -78,19 +76,14 @@ import com.example.onlinestore.views.change_picture.ImageViewForProfile
 fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
     var showAlertDialog by remember { mutableStateOf(false) }
     var showChangePhotoDialog by remember { mutableStateOf(false) }
-
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
             imageUri = uri
         }
-    var bitmap by remember {
-        mutableStateOf<Bitmap?>(null)
-    }
-    var cameraIsOpen by remember {
-        mutableStateOf(false)
-    }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var cameraIsOpen by remember { mutableStateOf(false) }
 
     imageUri?.let {
         val sours = ImageDecoder.createSource(context.contentResolver, it)
@@ -194,7 +187,7 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
             onDismiss = { showChangePhotoDialog = false },
             toTakePhoto = {
                 showChangePhotoDialog = false
-                cameraIsOpen = true
+                navController.navigate(Screen.NavigationItem.Camera.tRoute)
             },
             toFindPhotoDir = {
                 showChangePhotoDialog = false
@@ -210,7 +203,9 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
         showChangePhotoDialog = false
         Camera(
             viewModel,
-            onBackClick = { cameraIsOpen = false },
+            onBackClick = {
+                cameraIsOpen = false
+            }
         )
     }
 }

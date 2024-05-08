@@ -3,6 +3,7 @@ package com.example.onlinestore.views.change_picture
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.Log
+import androidx.camera.core.CameraControl
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.navigation.Screen
 
 @Composable
 fun CameraPreview(
@@ -57,7 +59,7 @@ fun CameraPreview(
 @Composable
 fun Camera(
     viewModel: StoreViewModel,
-    onBackClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -113,23 +115,23 @@ fun Camera(
                                 val matrix = Matrix().apply {
                                     preScale(1f, -1f)
                                     postRotate(image.imageInfo.rotationDegrees.toFloat())
+                                    postScale(1f,1f)
+
                                 }
+
                                 val rotatedBitmap = Bitmap.createBitmap(
                                     image.toBitmap(),
                                     0,
                                     0,
-                                    image.width,
-                                    image.height,
+                                    image.format * 10,
+                                    image.format * 10,
                                     matrix,
-                                    true,
+                                    true
                                 )
-
-
 
                                 viewModel.bitmap.value = rotatedBitmap
 
                                 onBackClick()
-
                             }
 
                             override fun onError(exception: ImageCaptureException) {

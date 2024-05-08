@@ -1,12 +1,23 @@
+@file:Suppress("UNUSED_EXPRESSION")
+
 package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -20,6 +31,7 @@ import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.Favorite_Screen.FavoriteScreen
 import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.HomeScreen.MainScreen
+import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
@@ -27,6 +39,7 @@ import com.example.onlinestore.views.search_screen.SearchScreen
 import com.example.onlinestore.views.terms_conditions.Terms
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainNavigationScreen(viewModel: StoreViewModel) {
@@ -53,6 +66,7 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Navigation(
     navController: NavController,
@@ -99,6 +113,12 @@ fun Navigation(
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
             CartScreen(viewModel)
+        }
+        composable(Screen.NavigationItem.Camera.tRoute){
+            Camera(
+                viewModel,
+                onBackClick = {navController.navigate(Screen.BottomNavigation.Account.broute)}
+            )
         }
     }
 }
