@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
@@ -42,8 +43,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -79,7 +83,8 @@ fun MainScreen(
     viewModel: StoreViewModel
 ) {
     var expended by remember { mutableStateOf(false) }
-    val productFilter = listOf("price up", "price down", "title A", "title Z")
+    var showDialog by remember { mutableStateOf(false) }
+    val productFilter = listOf("price up", "price down", "title A", "title Z", "price range")
     val size by viewModel.cartSize.collectAsState()
     val productList by viewModel.products.collectAsState()
     val categoryList by viewModel.categories.collectAsState()
@@ -188,12 +193,18 @@ fun MainScreen(
                                 "price down" -> viewModel.sortProductsByPriceDescending()
                                 "title A" -> viewModel.sortProductsByTitleAscending()
                                 "title Z" -> viewModel.sortProductsByTitleDescending()
+                                "price range" -> showDialog = true
                             }
                             expended = false
                         })
                     }
 
                 }
+            }
+        }
+        if (showDialog) {
+            PriceRangeDialog(viewModel) {
+                showDialog = it
             }
         }
         ProductItem2(productList, viewModel, controller)
@@ -433,4 +444,46 @@ fun CartSize(size: Int) {
                 .padding(top = 8.dp, start = if(size >= 10) 0.dp else 4.dp)
         )
     }
+}
+
+@Composable
+fun PriceRangeDialog(viewModel: StoreViewModel, showDialog: (Boolean) -> Unit) {
+    val minPrice = viewModel.minPrice.collectAsState().value
+    val maxPrice = viewModel.maxPrice.collectAsState().value
+    val currency = viewModel.currentCurrency.collectAsState().value
+
+    val initialMin = viewModel.selectedMinPrice.collectAsState().value ?: minPrice
+    val initialMax = viewModel.selectedMaxPrice.collectAsState().value ?: maxPrice
+    val (range, setRange) = remember { mutableStateOf(initialMin..initialMax) }
+
+    AlertDialog(
+        onDismissRequest = { showDialog(false) },
+        title = { Text(text = "Select Price Range") },
+        text = {
+            Column {
+                val formattedMin = viewModel.formatPriceWithCurrency(range.start.toDouble(), currency)
+                val formattedMax = viewModel.formatPriceWithCurrency(range.endInclusive.toDouble(), currency)
+                Text("Current range: $formattedMin - $formattedMax")
+                RangeSlider(
+                    value = range,
+                    onValueChange = { newRange -> setRange(newRange) },
+                    valueRange = minPrice..maxPrice,
+                    steps = 0
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                viewModel.filterProductsByPriceRange(range.start, range.endInclusive)
+                showDialog(false)
+            }) {
+                Text("Apply")
+            }
+        },
+        dismissButton = {
+            Button(onClick = { showDialog(false) }) {
+                Text("Cancel")
+            }
+        }
+    )
 }

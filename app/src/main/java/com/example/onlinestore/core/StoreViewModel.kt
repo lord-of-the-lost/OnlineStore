@@ -65,8 +65,21 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _favoriteProducts = MutableStateFlow<Set<Int>>(setOf())
     val favoriteProducts: StateFlow<Set<Int>> = _favoriteProducts.asStateFlow()
 
+    private val _allProducts = MutableStateFlow<List<ProductModel>>(listOf())
     private val _products = MutableStateFlow<List<ProductModel>>(emptyList())
     val products: StateFlow<List<ProductModel>> = _products.asStateFlow()
+
+    private val _minPrice = MutableStateFlow(0f)
+    val minPrice: StateFlow<Float> = _minPrice.asStateFlow()
+
+    private val _maxPrice = MutableStateFlow(0f)
+    val maxPrice: StateFlow<Float> = _maxPrice.asStateFlow()
+
+    private val _selectedMinPrice = MutableStateFlow<Float?>(null)
+    val selectedMinPrice: StateFlow<Float?> = _selectedMinPrice.asStateFlow()
+
+    private val _selectedMaxPrice = MutableStateFlow<Float?>(null)
+    val selectedMaxPrice: StateFlow<Float?> = _selectedMaxPrice.asStateFlow()
 
     private val _productsOnSearch = MutableStateFlow<List<ProductModel>>(emptyList())
     val productsOnSearch: StateFlow<List<ProductModel>> = _productsOnSearch.asStateFlow()
@@ -157,7 +170,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun toggleFavorite(productId: Int) {
         viewModelScope.launch {
-            val product = _products.value.find { it.id == productId }
+            val product = _allProducts.value.find { it.id == productId }
             product?.let {
                 if (_favoriteProducts.value.contains(productId)) {
                     _favoriteProducts.value = _favoriteProducts.value.minus(productId)
@@ -288,6 +301,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val productList = networkService.getAllProduct()
                 _products.value = productList
+                _allProducts.value = productList
+                _minPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _maxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
             } catch (e: Exception) {
                 TODO()
             }
@@ -298,7 +314,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val productList = networkService.getProductByCategory(id)
-                _products.value = productList
+                _allProducts.value = productList
             } catch (e: Exception) {
                 TODO()
             }
@@ -343,8 +359,14 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         _products.value = _products.value.sortedByDescending { it.title }
     }
 
-    fun sortByName() {
-        _products.value = _products.value.sortedByDescending { it.title.startsWith("Classic") }
+    fun filterProductsByPriceRange(min: Float, max: Float) {
+        val filteredProducts = _allProducts.value.filter {
+            val price = it.price.toFloat()
+            price in min..max
+        }
+        _products.value = filteredProducts
+        _selectedMinPrice.value = min
+        _selectedMaxPrice.value = max
     }
 
     //image switch
