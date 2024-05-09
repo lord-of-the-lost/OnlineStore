@@ -95,7 +95,7 @@ fun CardItem(
                     .fillMaxWidth()
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = productItem.title, fontSize = 12.sp, maxLines = 1)
+                    Text(text = productItem.title.take(20)+"...", fontSize = 12.sp, maxLines = 1)
                     Text(
                         text = price,
                         color = colorResource(id = R.color.Dark_Arsenic),
@@ -111,7 +111,7 @@ fun CardItem(
                         shape = RoundedCornerShape(5.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(if (!addToCard) R.color.Green_Sheen else R.color.Red))
                     ) {
-                        Text(text = if(!addToCard)"Add to cart" else "remove from cart")
+                        Text(text = if(!addToCard)"Add to cart" else "Remove")
                     }
                 }
             }

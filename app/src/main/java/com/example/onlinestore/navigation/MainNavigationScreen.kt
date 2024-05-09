@@ -5,19 +5,12 @@ package com.example.onlinestore.navigation
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.VisibilityThreshold
-import androidx.compose.animation.slideIn
-import androidx.compose.animation.slideOut
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -29,9 +22,8 @@ import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.Favorite_Screen.FavoriteScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
-import com.example.onlinestore.views.change_picture.Camera
-import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.add_screen.AddProduct
+import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
@@ -77,7 +69,7 @@ fun Navigation(
     NavHost(
         navController = navController as NavHostController,
         startDestination = Screen.BottomNavigation.Home.route,
-        modifier = Modifier.padding(dp)
+        modifier = Modifier.padding(dp),
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {
             OnboardingScreen(Modifier, navController)
