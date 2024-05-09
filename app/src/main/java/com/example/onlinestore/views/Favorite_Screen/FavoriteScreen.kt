@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -54,6 +58,7 @@ fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
 
     val productList = viewModel.savedProducts.collectAsState().value
 
+
     productList?.let { list ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -73,13 +78,13 @@ fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
 fun FavoriteItem(
     navController: NavController,
     viewModel: StoreViewModel,
-    productItem: ProductModel)
-{
+    productItem: ProductModel
+) {
     val images = productItem.images.map { img ->
         if (img.startsWith("[")) img.substring(2, img.length - 2)
         else img
     }.filterNot { it.isBlank() }
-
+    var addToCard by rememberSaveable { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { images.size })
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val priceOfProduct =
@@ -110,7 +115,10 @@ fun FavoriteItem(
                             contentScale = ContentScale.Crop
                         )
                     } else {
-                        Image(painter = painterResource(id = R.drawable.maxresdefault), contentDescription = "Default image")
+                        Image(
+                            painter = painterResource(id = R.drawable.maxresdefault),
+                            contentDescription = "Default image"
+                        )
                     }
                 }
             }
@@ -128,7 +136,7 @@ fun FavoriteItem(
                         fontWeight = FontWeight.Bold
                     )
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        IconButton({ viewModel.toggleFavorite(productItem.id) }){
+                        IconButton({ viewModel.toggleFavorite(productItem.id) }) {
                             Icon(
                                 painterResource(R.drawable.ic_wishlist),
                                 contentDescription = "Favorite",
@@ -136,12 +144,25 @@ fun FavoriteItem(
                             )
                         }
                         Button(
-                            onClick = { viewModel.addToCart(productItem) },
-                            Modifier.fillMaxWidth().height(29.dp),
+                            onClick = {
+                                addToCard = !addToCard
+                                if (addToCard) viewModel.addToCart(productItem) else viewModel.removeFromCart(
+                                    productItem.id
+                                )
+                            },
+                            Modifier
+                                .fillMaxWidth()
+                                .height(29.dp),
                             shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.Green_Sheen))
+                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(if (!addToCard) R.color.Green_Sheen else R.color.Red)),
+                            contentPadding = PaddingValues(0.dp)
                         ) {
-                            Text(text = "Add to cart", fontSize = 12.sp, textAlign = TextAlign.Center)
+                            Text(
+                                text = if (!addToCard) "Add to cart" else "Remove",
+                                fontSize = 12.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
