@@ -195,7 +195,7 @@ fun DropDownExample() {
             textStyle = TextStyle(
                 fontFamily = inter,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 12.sp,
+                fontSize = 10.sp,
                 lineHeight = 16.94.sp,
                 color = Color(0xFF393F42),
                 textAlign = TextAlign.End
@@ -262,7 +262,6 @@ fun ShoppingListItem(
     val price = parsePrice(shopItem.priceOfProduct)
     val formattedPrice = viewModel.formatPriceWithCurrency(price, currentCurrency)
 
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -310,7 +309,7 @@ fun ShoppingListItem(
             {
                 Text(
                     modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
-                    text = shopItem.nameOfProduct.take(30) + if (shopItem.nameOfProduct.length >= 30) "..." else "",
+                    text = shopItem.nameOfProduct.take(20) + if (shopItem.nameOfProduct.length >= 20) "..." else "",
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.Medium,

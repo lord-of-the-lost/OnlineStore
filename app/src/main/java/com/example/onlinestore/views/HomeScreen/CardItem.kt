@@ -89,7 +89,7 @@ fun CardItem(
                     .fillMaxWidth()
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = productItem.title.take(20) + "...", fontSize = 12.sp, maxLines = 1)
+                    Text(text = productItem.title.take(15) + "...", fontSize = 12.sp, maxLines = 1)
                     Text(
                         text = price,
                         color = colorResource(id = R.color.Dark_Arsenic),
