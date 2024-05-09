@@ -1,7 +1,6 @@
 package com.example.onlinestore.views.HomeScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,15 +77,10 @@ fun CardItem(
                     HorizontalPager(state = pagerState) { page ->
                         AsyncImage(
                             model = images[page], contentDescription = "photo",
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Crop,
+                            error = painterResource(R.drawable.maxresdefault)
                         )
                     }
-                } else {
-                    Image(
-                        painter = painterResource(id = R.drawable.maxresdefault),
-                        contentDescription = "Default Image",
-                        modifier = Modifier.fillMaxSize()
-                    )
                 }
             }
             Box(
@@ -95,7 +89,7 @@ fun CardItem(
                     .fillMaxWidth()
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = productItem.title.take(20)+"...", fontSize = 12.sp, maxLines = 1)
+                    Text(text = productItem.title.take(20) + "...", fontSize = 12.sp, maxLines = 1)
                     Text(
                         text = price,
                         color = colorResource(id = R.color.Dark_Arsenic),
@@ -105,13 +99,15 @@ fun CardItem(
                     Button(
                         onClick = {
                             addToCard = !addToCard
-                            if (addToCard) viewModel.addToCart(productItem) else viewModel.removeFromCart(productItem.id)
+                            if (addToCard) viewModel.addToCart(productItem) else viewModel.removeFromCart(
+                                productItem.id
+                            )
                         },
                         Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = colorResource(if (!addToCard) R.color.Green_Sheen else R.color.Red))
                     ) {
-                        Text(text = if(!addToCard)"Add to cart" else "Remove")
+                        Text(text = if (!addToCard) "Add to cart" else "Remove")
                     }
                 }
             }

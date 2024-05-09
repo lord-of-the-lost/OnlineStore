@@ -1,7 +1,6 @@
 package com.example.onlinestore.views.CartScreen
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -56,7 +54,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
@@ -298,7 +295,7 @@ fun ShoppingListItem(
             modifier = Modifier
                 .size(82.dp, 76.dp)
                 .clip(RoundedCornerShape(4.dp)),
-            painter = rememberAsyncImagePainter(shopItem.imgOfProduct),
+            painter = rememberAsyncImagePainter(shopItem.imgOfProduct, error = painterResource(R.drawable.maxresdefault)),
             contentDescription = null,
             contentScale = ContentScale.Crop,
         )
@@ -313,7 +310,7 @@ fun ShoppingListItem(
             {
                 Text(
                     modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
-                    text = shopItem.nameOfProduct,
+                    text = shopItem.nameOfProduct.take(30) + if (shopItem.nameOfProduct.length >= 30) "..." else "",
                     style = TextStyle(
                         fontFamily = inter,
                         fontWeight = FontWeight.Medium,
