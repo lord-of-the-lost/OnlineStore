@@ -2,15 +2,18 @@ package com.example.onlinestore.navigation
 
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -55,6 +58,8 @@ fun TopNavigationBar(
 ) {
     val currentRoute = currentRoute(controller)
     val model: StoreViewModel = viewModel()
+    val size by model.cartSize.collectAsState()
+
     val title = allScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
     val icon = topScreens.firstOrNull { it.route == currentRoute }?.icon
     val action = topScreens.firstOrNull { it.route == currentRoute }?.actionIcon
@@ -67,10 +72,13 @@ fun TopNavigationBar(
             }
         }
     val actionIcon: (@Composable () -> Unit) = {
+
         IconButton(onClick = { controller.navigate(Screen.NavigationItem.Cart.route) }) {
             action?.let { painterResource(it) }
                 ?.let { Icon(painter = it, "", tint = colorResource(R.color.Dark_Arsenic)) }
+
         }
+
     }
     TopAppBar(
         title = {
@@ -122,7 +130,27 @@ fun TopNavigationBar(
         backgroundColor = Color.White,
         modifier = Modifier.height(80.dp),
         actions = {
-            if (action != null) actionIcon()
+            Box() {
+                if (action != null) {
+                    actionIcon()
+                    if (size > 0) {
+                        Image(
+                            painterResource(R.drawable.ellipse_5),
+                            "",
+                            modifier = Modifier
+                                .padding(top = 8.dp, start = 25.dp)
+                                .size(16.dp)
+                        )
+                        androidx.compose.material.Text(
+                            text = size.toString(),
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .padding(top = 8.dp, start = if (size >= 10) 26.dp else 29.dp)
+                        )
+                    }
+                }
+            }
         }
     )
 }

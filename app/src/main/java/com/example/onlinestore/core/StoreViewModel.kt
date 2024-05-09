@@ -77,6 +77,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private var _searchString = MutableStateFlow("")
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
+
     private var _historyList = mutableStateListOf<HistoryItem>()
     fun clearProductSearch(){
         _productsOnSearch.value = emptyList()
@@ -111,6 +112,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         loadProducts()
         loadCategories()
     }
+    private var _cartSize = MutableStateFlow(0)
+    val cartSize: StateFlow<Int> = _cartSize.asStateFlow()
+
 
     private val _selectedProduct = MutableStateFlow<ProductModel?>(null)
     val selectedProduct: StateFlow<ProductModel?> = _selectedProduct
@@ -127,12 +131,14 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         _cartProducts.update { currentProducts ->
             currentProducts + product
         }
+        _cartSize.value = _cartProducts.value.size
     }
 
     fun removeFromCart(productId: Int) {
         _cartProducts.update { currentProducts ->
             currentProducts.filterNot { it.id == productId }
         }
+        _cartSize.value = _cartProducts.value.size
     }
 
     val shopItemsInCart: StateFlow<List<ShopItem>> =
