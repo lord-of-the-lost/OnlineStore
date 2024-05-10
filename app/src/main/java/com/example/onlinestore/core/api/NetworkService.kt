@@ -31,6 +31,9 @@ interface NetworkService {
     @DELETE("products/{id}")
     suspend fun deleteProduct(@Path("id") id: Int)
 
+    @GET("products/{id}")
+    suspend fun getProductByID(@Path("id") id: Int): ProductModel
+
     @DELETE("category/{id}")
     suspend fun deleteCategory(@Path("id") id: Int)
 

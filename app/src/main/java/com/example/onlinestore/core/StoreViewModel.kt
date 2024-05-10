@@ -53,8 +53,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         StoreRepository(productDAO, userDAO)
     }
 
-    private val _savedProducts = MutableStateFlow<List<ProductModel>?>(null)
-    val savedProducts: StateFlow<List<ProductModel>?> = _savedProducts.asStateFlow()
+    private val _savedProducts = MutableStateFlow<Set<ProductModel>?>(null)
+    val savedProducts: StateFlow<Set<ProductModel>?> = _savedProducts.asStateFlow()
 
     private val _currentCurrency = MutableStateFlow<Currency>(Currency.USD)
     val currentCurrency: StateFlow<Currency> = _currentCurrency.asStateFlow()
@@ -175,8 +175,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 if (_favoriteProducts.value.contains(productId)) {
                     _favoriteProducts.value = _favoriteProducts.value.minus(productId)
                     deleteProduct(it)
-                    _savedProducts.value =
-                        _savedProducts.value?.filterNot { p -> p.id == productId }
+                    _savedProducts.value = _savedProducts.value?.minus(it)
                 } else {
                     _favoriteProducts.value = _favoriteProducts.value.plus(productId)
                     saveProduct(it)
@@ -185,6 +184,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
 
     // Location VM logic
     fun formatPriceWithCurrency(price: Double, currency: Currency): String {
@@ -223,7 +223,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun getProductsFromDB() {
         viewModelScope.launch {
             val products = repository.getAllProducts()
-            _savedProducts.value = products
+            _savedProducts.value = products?.toSet()
         }
     }
 
@@ -231,6 +231,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.deleteProduct(product)
         }
+    }
+
+    suspend fun loadProductById(id: Int): ProductModel {
+        return networkService.getProductByID(id)
     }
 
     //Auth VM logic
@@ -310,7 +314,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadProductById(id: Int) {
+    fun loadProductsByCategoryId(id: Int) {
         viewModelScope.launch {
             try {
                 val productList = networkService.getProductByCategory(id)
