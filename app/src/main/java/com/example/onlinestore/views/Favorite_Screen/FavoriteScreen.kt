@@ -55,8 +55,13 @@ fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
     LaunchedEffect(key1 = true) {
         viewModel.getProductsFromDB()
     }
+    val text by viewModel.searchSting.collectAsState()
+
 
     val productList = viewModel.savedProducts.collectAsState().value
+
+
+
 
 
     productList?.let { list ->
@@ -65,7 +70,7 @@ fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
             state = rememberLazyGridState(),
             modifier = Modifier.padding(20.dp)
         ) {
-            items(list) { product ->
+            items(list.filter { productModel -> productModel.title.lowercase().contains(text.lowercase())} ) { product ->
                 FavoriteItem(navController, viewModel, product)
             }
         }
