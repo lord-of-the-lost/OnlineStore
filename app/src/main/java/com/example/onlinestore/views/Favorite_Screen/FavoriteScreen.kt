@@ -55,17 +55,19 @@ fun FavoriteScreen(navController: NavController, viewModel: StoreViewModel) {
     LaunchedEffect(key1 = true) {
         viewModel.getProductsFromDB()
     }
-
     val productList = viewModel.savedProducts.collectAsState().value
 
-
-    productList?.let { list ->
+    if (productList.isNullOrEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("No favorite products found")
+        }
+    } else {
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             state = rememberLazyGridState(),
             modifier = Modifier.padding(20.dp)
         ) {
-            items(list) { product ->
+            items(productList.toList()) { product ->
                 FavoriteItem(navController, viewModel, product)
             }
         }
