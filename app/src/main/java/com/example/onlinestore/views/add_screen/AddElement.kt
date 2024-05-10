@@ -32,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
+import com.example.onlinestore.core.models.CategoryModel
 
 @Composable
 fun Element(
@@ -84,10 +86,8 @@ fun Element(
 
 @Composable
 fun ElementDropDown(
-    text1: String,
-    text2: String,
-    text3: String,
-    text4: String,
+    category: List<CategoryModel>,
+    viewModel: StoreViewModel
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -142,41 +142,27 @@ fun ElementDropDown(
                     fontWeight = FontWeight.W700,
                     color = colorResource(id = R.color.gray_search)
                 )
-                Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null) //изменить дропдаун меню
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = null
+                ) //изменить дропдаун меню
 
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
                     Modifier.width(200.dp)
                 ) {
-                    DropdownMenuItem(
-                        onClick = {
-                            textMenu = text1
-                            expanded = false
-                        },
-                        text = { Text(text1) }
-                    )
-                    DropdownMenuItem(
-                        onClick = {
-                            textMenu = text2
-                            expanded = false
-                        },
-                        text = { Text(text2) }
-                    )
-                    DropdownMenuItem(
-                        onClick = {
-                            textMenu = text3
-                            expanded = false
-                        },
-                        text = { Text(text3) }
-                    )
-                    DropdownMenuItem(
-                        onClick = {
-                            textMenu = text4
-                            expanded = false
-                        },
-                        text = { Text(text4) }
-                    )
+                    category.forEach {item ->
+                        DropdownMenuItem(
+                            text = { Text(item.name) },
+                            onClick = {
+                                textMenu = item.name
+                                expanded = false
+                                viewModel.updateCategoryID(item.id)
+                            }
+
+                        )
+                    }
                 }
             }
         }
