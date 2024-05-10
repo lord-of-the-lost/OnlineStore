@@ -46,14 +46,12 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -244,7 +242,7 @@ fun CategoryButtonItem(
                 .size(60.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable {
-                    viewModel.loadProductById(category.id)
+                    viewModel.loadProductsByCategoryId(category.id)
                 },
         )
         Text(category.name, fontSize = 10.sp)
@@ -276,7 +274,7 @@ fun AllCategoryButton(
                 expended = false
             }) {
             list2.distinctBy { it.name }.forEach { item ->
-                DropdownMenuItem(text = { Text(item.name) }, { viewModel.loadProductById(item.id) })
+                DropdownMenuItem(text = { Text(item.name) }, { viewModel.loadProductsByCategoryId(item.id) })
             }
         }
     }
