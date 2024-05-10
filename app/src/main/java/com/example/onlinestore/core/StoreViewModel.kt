@@ -2,8 +2,11 @@ package com.example.onlinestore.core
 
 import android.app.Application
 import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -353,7 +356,26 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun onTakePhoto(bitmap: Bitmap) {
         _bitmap.value = bitmap
     }
-}
+
+
+    var name by mutableStateOf("Dev p")
+    var mail by mutableStateOf("dev@gmail.com")
+    var password by mutableStateOf("1111")
+    var isSheetOpen: Boolean by mutableStateOf(false)
+    fun onNameChange(newString: String){
+        name = newString
+    }
+    fun onMailChange(newString: String){
+        mail = newString
+    }
+    fun onPasswordChange(newString: String){
+        password = newString
+    }
+    fun onIsSheetOpenChange (newBoolean: Boolean){
+        isSheetOpen = newBoolean
+    }
+
+
 
 data class AuthState(
     val success: Boolean = false,
@@ -364,4 +386,5 @@ fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
 enum class Currency {
     USD, EUR, RUB
+    }
 }

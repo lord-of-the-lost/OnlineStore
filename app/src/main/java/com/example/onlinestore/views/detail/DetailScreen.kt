@@ -24,7 +24,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.Text
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberBottomSheetState
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,6 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -96,7 +102,7 @@ fun DetailScreen(viewModel: StoreViewModel) {
                 .fillMaxWidth()
                 .size(0.dp, 1.dp)
         )
-        Buttons(viewModel,product)
+        Buttons(viewModel, product)
     }
 }
 
@@ -256,7 +262,7 @@ fun Buttons(viewModel: StoreViewModel, product: ProductModel?) {
         Arrangement.Center
     )
     {
-        AddToCardButton(viewModel,product)
+        AddToCardButton(viewModel, product)
         Spacer(modifier = Modifier.width(15.dp))
         BuyNowButton()
     }
@@ -288,7 +294,8 @@ fun AddToCardButton(viewModel: StoreViewModel, product: ProductModel?) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BuyNowButton() {
 
@@ -305,8 +312,8 @@ fun BuyNowButton() {
                 containerColor = Color(0xFFF0F2F1)
             ),
         border = BorderStroke(1.dp, Color(0xFFD9D9D9)),
-        onClick = { showBottomSheet = true })
-    {
+        onClick = { showBottomSheet = true }
+    ) {
         Text(
             text = "Buy Now",
             style = TextStyle(
@@ -324,16 +331,9 @@ fun BuyNowButton() {
                 showBottomSheet = false
             },
             sheetState = sheetState,
-
-            modifier = Modifier
-                .fillMaxHeight(0.5f)
-                .navigationBarsPadding(),
             containerColor = Color.White,
-            dragHandle = null
 
-        ) {
-
-
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -365,14 +365,16 @@ fun BuyNowButton() {
                         )
                     }
                 }
+
                 Image(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier = Modifier,
                     painter = painterResource(id = R.drawable.payment_success),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                 )
-                Spacer(modifier = Modifier.height(37.dp))
+
+
+                Spacer(modifier = Modifier.height(300.dp))
                 Column {
                     Button(
                         modifier = Modifier
