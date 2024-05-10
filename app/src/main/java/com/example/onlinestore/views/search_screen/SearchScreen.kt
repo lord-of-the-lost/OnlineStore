@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,7 +28,11 @@ import com.example.onlinestore.views.HomeScreen.ProductItem2
 
 @Composable
 fun SearchScreen(controller: NavController, model: StoreViewModel) {
+
     val input by model.searchSting.collectAsState()
+    LaunchedEffect(model) {
+        model.deleteSearch()
+    }
     val productList by model.productsOnSearch.collectAsState()
     if (input != "") {
         model.loadProductByName(input)
@@ -36,9 +41,8 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
             model,
             controller
         )
-    }
-    else{
-         model.clearProductSearch()
+    } else {
+        model.clearProductSearch()
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -61,7 +65,7 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
                 Text(
                     text = "Clear all",
                     Modifier.clickable {
-                           model.deleteAllHistory()
+                        model.deleteAllHistory()
                     },
                     color = colorResource(id = R.color.red_search),
                     fontWeight = FontWeight(500),
@@ -71,10 +75,12 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(model.historyList.reversed()) { item ->
-                    HistoryListItem(item = item,
+                    HistoryListItem(
+                        item = item,
                         onDeleteClick = {
-                          model.deleteHistory(item)
-                        })
+                            model.deleteHistory(item)
+                        }, model
+                    )
                 }
             }
         }
