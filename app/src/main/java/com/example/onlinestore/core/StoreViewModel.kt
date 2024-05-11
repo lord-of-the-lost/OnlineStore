@@ -337,6 +337,15 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+    fun updateProduct(id:Int,product: PostProductModel){
+        viewModelScope.launch {
+            try {
+                networkService.updateProduct(id,product)
+            }catch (e:Exception){
+                TODO()
+            }
+        }
+    }
 
     fun loadProductByName(name: String) {
         viewModelScope.launch {

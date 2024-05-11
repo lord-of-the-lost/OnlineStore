@@ -1,21 +1,28 @@
-package com.example.onlinestore.views.add_screen
+package com.example.onlinestore.views.update_Screen
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -26,14 +33,20 @@ import androidx.compose.ui.unit.sp
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.core.models.PostProductModel
+import com.example.onlinestore.views.add_screen.Element
+import com.example.onlinestore.views.add_screen.ElementDropDown
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddProduct(
-    viewModel: StoreViewModel
-) {
-    val categoryList by viewModel.categories.collectAsState()
-    val categoryId by viewModel.categoryId.collectAsState()
+fun UpdateScreen(viewModel: StoreViewModel) {
 
+    val categoryList by viewModel.categories.collectAsState()
+    val productList by viewModel.products.collectAsState()
+    val categoryId by viewModel.categoryId.collectAsState()
+    var searchQueryState by remember { mutableStateOf("") }
+    var isActive by remember { mutableStateOf(false) }
+    var itemId by remember { mutableStateOf(0) }
 
     var title by remember {
         mutableStateOf("")
@@ -51,6 +64,46 @@ fun AddProduct(
         Modifier
             .fillMaxSize()
     ) {
+        SearchBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            query = searchQueryState,
+            onQueryChange = { text ->
+                searchQueryState = text
+            },
+            placeholder = { Text("Search...") },
+            active = isActive,
+            onActiveChange = {
+                isActive = it
+            },
+            onSearch = { text ->
+                isActive = false
+
+            },
+        ) {
+            LazyColumn {
+                items(productList.filter {it.title.lowercase().startsWith(searchQueryState.lowercase()) }) { item ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp).
+                        clickable {
+                            searchQueryState = item.title
+                            itemId = item.id
+                            isActive = false
+                        },
+                        contentAlignment = Alignment.Center,
+
+                    ){
+                        Text(item.title)
+                    }
+
+                }
+
+            }
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         Element(text = "Title", value = title, onValueChanged = { title = it }, 17)
@@ -77,23 +130,22 @@ fun AddProduct(
 
         if (price != "" && title != "" && description != "" && images != "") {
             Spacer(modifier = Modifier.padding(top = 40.dp))
-            PostButton(title, price.toInt(), description, categoryId, images, viewModel)
+            PostButtonUpdate(title, price.toInt(), description, categoryId, images, viewModel,itemId)
 
         }
 
     }
 
-
 }
-
 @Composable
-fun PostButton(
+fun PostButtonUpdate(
     title: String,
     price: Int,
     description: String,
     categoryId: Int,
     images:String,
-    viewModel: StoreViewModel
+    viewModel: StoreViewModel,
+    itemId:Int
 ) {
     val context = LocalContext.current
     val image: List<String> by remember { mutableStateOf( images.split(" "))}
@@ -112,8 +164,8 @@ fun PostButton(
     Button(
         onClick =
         {
-            viewModel.postNewProduct(product)
-            Toast.makeText(context,"Success Added",Toast.LENGTH_LONG).show()
+            viewModel.updateProduct(itemId,product)
+            Toast.makeText(context,"Success Update", Toast.LENGTH_LONG).show()
         },
         modifier = Modifier
             .height(56.dp)
@@ -125,3 +177,8 @@ fun PostButton(
         Text("Send", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     }
 }
+
+
+
+
+

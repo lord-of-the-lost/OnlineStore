@@ -36,7 +36,7 @@ fun ManagerScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AddButtons("Add new product") { controller.navigate(Screen.NavigationItem.AddProduct.route) }
-            AddButtons("Update product") { }
+            AddButtons("Update product") { controller.navigate(Screen.NavigationItem.UpdateProduct.route)}
             AddButtons("Delete product") { }
             AddButtons("Create category") { }
             AddButtons("Update category") { }

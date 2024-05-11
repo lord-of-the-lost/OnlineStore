@@ -8,6 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -35,6 +36,9 @@ interface NetworkService {
 
     @DELETE("products/{id}")
     suspend fun deleteProduct(@Path("id") id: Int)
+    @PUT("products/{id}")
+    suspend fun updateProduct(@Path("id") id:Int,
+                              @Body postRequest: PostProductModel):Response<ProductModel>
 
     @GET("products/{id}")
     suspend fun getProductByID(@Path("id") id: Int): ProductModel
