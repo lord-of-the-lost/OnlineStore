@@ -30,6 +30,7 @@ import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 import com.example.onlinestore.views.terms_conditions.Terms
+import com.example.onlinestore.views.update_Screen.UpdateScreen
 
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -81,13 +82,13 @@ fun Navigation(
             MainScreen(navController, viewModel)
         }
         composable(Screen.BottomNavigation.Manager.broute) {
-            ManagerScreen()
+            ManagerScreen(Modifier,navController)
         }
         composable(Screen.BottomNavigation.Account.broute) {
             ProfileScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.AddProduct.tRoute) {
-            AddProduct()
+            AddProduct(viewModel)
         }
         composable(Screen.NavigationItem.TermsConditions.route) {
             Terms()
@@ -106,6 +107,9 @@ fun Navigation(
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
             CartScreen(viewModel)
+        }
+        composable(Screen.NavigationItem.UpdateProduct.route){
+            UpdateScreen(viewModel)
         }
         composable(Screen.NavigationItem.Camera.tRoute) {
             Camera(
