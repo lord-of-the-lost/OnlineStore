@@ -1,4 +1,4 @@
-package com.example.onlinestore.views.update_Screen
+package com.example.onlinestore.views.manager_screen.update_Screen
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.sp
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.core.models.PostProductModel
-import com.example.onlinestore.views.add_screen.Element
-import com.example.onlinestore.views.add_screen.ElementDropDown
+import com.example.onlinestore.views.manager_screen.add_screen.Element
+import com.example.onlinestore.views.manager_screen.add_screen.ElementDropDown
 
 
 @OptIn(ExperimentalMaterial3Api::class)

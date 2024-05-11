@@ -22,15 +22,16 @@ import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
 import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.Favorite_Screen.FavoriteScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
-import com.example.onlinestore.views.add_screen.AddProduct
 import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
+import com.example.onlinestore.views.manager_screen.add_screen.AddProduct
+import com.example.onlinestore.views.manager_screen.deleteScreen.DeleteScreen
+import com.example.onlinestore.views.manager_screen.update_Screen.UpdateScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 import com.example.onlinestore.views.terms_conditions.Terms
-import com.example.onlinestore.views.update_Screen.UpdateScreen
 
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -110,6 +111,9 @@ fun Navigation(
         }
         composable(Screen.NavigationItem.UpdateProduct.route){
             UpdateScreen(viewModel)
+        }
+        composable(Screen.NavigationItem.DeleteProduct.route){
+            DeleteScreen(viewModel)
         }
         composable(Screen.NavigationItem.Camera.tRoute) {
             Camera(
