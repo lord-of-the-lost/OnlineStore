@@ -1,7 +1,10 @@
 package com.example.onlinestore.core.api
 
 import com.example.onlinestore.core.models.CategoryModel
+import com.example.onlinestore.core.models.PostProductModel
 import com.example.onlinestore.core.models.ProductModel
+import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -27,6 +30,8 @@ interface NetworkService {
 
     @POST("categories/")
     suspend fun createCategory()
+    @POST("products")
+    suspend fun createProduct(@Body postRequest:PostProductModel):Response<ProductModel>
 
     @DELETE("products/{id}")
     suspend fun deleteProduct(@Path("id") id: Int)

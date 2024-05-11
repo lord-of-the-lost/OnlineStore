@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.example.onlinestore.core.api.NetworkService
 import com.example.onlinestore.core.models.CategoryModel
+import com.example.onlinestore.core.models.PostProductModel
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.repository.StoreRepository
 import com.example.onlinestore.core.storage.AppDatabase
@@ -90,27 +91,39 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private var _searchString = MutableStateFlow("")
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
+    private var _categoryId = MutableStateFlow(1)
+    var categoryId:StateFlow<Int> = _categoryId.asStateFlow()
+
+    fun updateCategoryID(id:Int){
+        _categoryId.value = id
+    }
+
 
     private var _historyList = mutableStateListOf<HistoryItem>()
-    fun clearProductSearch(){
+    fun clearProductSearch() {
         _productsOnSearch.value = emptyList()
     }
-    val historyList:List<HistoryItem>
+
+    val historyList: List<HistoryItem>
         get() = _historyList
+
     fun updateSearch(str: String) {
         _searchString.value = str
     }
-    fun deleteSearch(){
+
+    fun deleteSearch() {
         _searchString.value = ""
     }
 
     fun updateHistory(item: HistoryItem) {
         _historyList.add(item)
     }
-    fun deleteHistory(item: HistoryItem){
+
+    fun deleteHistory(item: HistoryItem) {
         _historyList.remove(item)
     }
-    fun deleteAllHistory(){
+
+    fun deleteAllHistory() {
         _historyList.clear()
     }
 
@@ -125,6 +138,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         loadProducts()
         loadCategories()
     }
+
     private var _cartSize = MutableStateFlow(0)
     val cartSize: StateFlow<Int> = _cartSize.asStateFlow()
 
@@ -184,7 +198,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
-
 
     // Location VM logic
     fun formatPriceWithCurrency(price: Double, currency: Currency): String {
@@ -345,6 +358,17 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 TODO()
             }
         }
+    }
+
+    fun postNewProduct(product: PostProductModel) {
+        viewModelScope.launch {
+            try {
+                networkService.createProduct(product)
+            } catch (e: Exception) {
+                println(e.message)
+            }
+        }
+
     }
 
     fun sortProductsByPriceAscending() {
