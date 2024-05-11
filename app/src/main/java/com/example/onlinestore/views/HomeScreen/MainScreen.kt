@@ -46,6 +46,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -80,6 +81,10 @@ fun MainScreen(
     controller: NavController,
     viewModel: StoreViewModel
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.fetchAPIData()
+    }
+
     var expended by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     val productFilter = listOf("price up", "price down", "title A", "title Z", "price range")

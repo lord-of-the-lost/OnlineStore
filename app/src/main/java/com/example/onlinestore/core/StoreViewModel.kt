@@ -138,16 +138,19 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     val cartProducts: StateFlow<List<ProductModel>> = _cartProducts.asStateFlow()
 
     init {
-        loadProducts()
-        loadCategories()
+        fetchAPIData()
     }
 
     private var _cartSize = MutableStateFlow(0)
     val cartSize: StateFlow<Int> = _cartSize.asStateFlow()
 
-
     private val _selectedProduct = MutableStateFlow<ProductModel?>(null)
     val selectedProduct: StateFlow<ProductModel?> = _selectedProduct
+
+    fun fetchAPIData() {
+        loadProducts()
+        loadCategories()
+    }
 
     fun setUserManagerStatus(isManager: Boolean) {
         _isUserManager.value = isManager
@@ -324,6 +327,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 _allProducts.value = productList
                 _minPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
                 _maxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMinPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMaxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
             } catch (e: Exception) {
                 TODO()
             }
@@ -334,7 +339,12 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val productList = networkService.getProductByCategory(id)
+                _products.value = productList
                 _allProducts.value = productList
+                _minPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _maxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMinPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMaxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
             } catch (e: Exception) {
                 TODO()
             }
