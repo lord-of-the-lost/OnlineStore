@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.profile_screen
 
+import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -62,10 +63,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
@@ -279,6 +282,7 @@ fun ActionButton(title: String, painterResource: Int, action: () -> Unit) {
             .padding(start = 20.dp, end = 20.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
+        elevation = ButtonDefaults.elevation(0.dp),
         colors = ButtonDefaults.buttonColors(Color(0xFFF3F4F6))
     ) {
         Row(
@@ -461,4 +465,16 @@ fun AlertDialogTypeAccount(
         },
         containerColor = Color.White
     )
+}
+@Preview(showBackground = true)
+@Composable
+fun AlertDialogTypeAccountPreview() {
+    AlertDialogTypeAccount({}, {},
+    "Select type of account", "123")
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    ActionButton(title = "Type of Account", painterResource = R.drawable.ic_arrow, {})
 }
