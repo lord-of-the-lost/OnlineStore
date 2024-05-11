@@ -1,6 +1,13 @@
 package com.example.onlinestore.views.profile_screen
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,10 +44,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.times
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -57,20 +66,46 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.navigation.Screen
 import com.example.onlinestore.ui.theme.CustomGrey2
+import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.change_picture.ChangePhotoDialog
+import com.example.onlinestore.views.change_picture.ImageViewForProfile
+import kotlinx.coroutines.launch
+import kotlin.time.times
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
+
+    val scope = rememberCoroutineScope()
     var showAlertDialog by remember { mutableStateOf(false) }
     var showChangePhotoDialog by remember { mutableStateOf(false) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val context = LocalContext.current
+    val launcher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri: Uri? ->
+            imageUri = uri
+        }
+    var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var cameraIsOpen by remember { mutableStateOf(false) }
+    var passwordViews by remember { mutableStateOf(false) }
+
+    imageUri?.let {
+        val sours = ImageDecoder.createSource(context.contentResolver, it)
+        bitmap = ImageDecoder.decodeBitmap(sours)
+        viewModel.onTakePhoto(bitmap!!)
+    }
+
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(if (showChangePhotoDialog) Modifier.blur(30.dp) else Modifier),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
@@ -82,15 +117,9 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                     .size(102.dp),
                 contentAlignment = Alignment.BottomEnd
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.avatar),
-                    contentDescription = "profile picture",
-                    Modifier
-                        .width(140.dp)
-                        .height(120.dp)
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(100))
-                )
+
+                ImageViewForProfile(bitmap = viewModel.bitmap.value)
+
                 Image(
                     painter = painterResource(id = R.drawable.ic_edit),
                     contentDescription = null,
@@ -111,7 +140,18 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(
-                        text = "Dev P",
+                        modifier = Modifier.clickable {
+                            scope.launch {
+                                viewModel.isSheetOpen = true
+                            }
+                        },
+                        text = if (viewModel.name.isEmpty() ||
+                            viewModel.name == " ".repeat(viewModel.name.length)
+                        ) {
+                            "Dev p"
+                        } else {
+                            viewModel.name
+                        },
                         style = TextStyle(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.W600,
@@ -121,7 +161,18 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                         textAlign = TextAlign.Start,
                     )
                     Text(
-                        text = "dev@gmail.com",
+                        modifier = Modifier.clickable {
+                            scope.launch {
+                                viewModel.onIsSheetOpenChange(true)
+                            }
+                        },
+                        text = if (viewModel.mail.isEmpty() ||
+                            viewModel.mail == " ".repeat(viewModel.mail.length)
+                        ) {
+                            "dev@gmail.com"
+                        } else {
+                            viewModel.mail
+                        },
                         style = TextStyle(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.W400,
@@ -131,14 +182,33 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                             textAlign = TextAlign.Start,
                         )
                     )
-                    Row {
+                    Row(modifier = Modifier.clickable {
+                        passwordViews = if (passwordViews) {
+                            false
+                        } else {
+                            true
+                        }
+
+                    }) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_eye),
                             contentDescription = null,
-                            modifier = Modifier.clickable { }
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "***********", style = TextStyle(color = CustomGrey2))
+                        Text(
+                            text = if (viewModel.password.isEmpty() ||
+                                viewModel.password == " ".repeat(viewModel.password.length)
+                            ) {
+                                "Пароль не может быть пустым"
+                            } else {
+                                if (passwordViews) {
+                                    viewModel.password
+                                } else {
+                                    "*".repeat(viewModel.password.length)
+                                }
+                            },
+                            style = TextStyle(color = CustomGrey2)
+                        )
                     }
                 }
             }
@@ -172,13 +242,33 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
             onDismiss = { showChangePhotoDialog = false },
             toTakePhoto = {
                 showChangePhotoDialog = false
+                navController.navigate(Screen.NavigationItem.Camera.tRoute)
             },
             toFindPhotoDir = {
                 showChangePhotoDialog = false
+                launcher.launch("image/*")
             },
             toDeletePhoto = {
                 showChangePhotoDialog = false
+                viewModel.bitmap.value = null
+            },
+        )
+    }
+    if (cameraIsOpen) {
+        showChangePhotoDialog = false
+        Camera(
+            viewModel,
+            onBackClick = {
+                cameraIsOpen = false
             }
+        )
+    }
+    if (viewModel.isSheetOpen) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                viewModel.onIsSheetOpenChange(false)
+            },
+            viewModel = viewModel
         )
     }
 }

@@ -1,7 +1,5 @@
 package com.example.onlinestore.views.search_screen
 
-import com.example.onlinestore.R
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -18,11 +16,14 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.onlinestore.R
+import com.example.onlinestore.core.StoreViewModel
 
 @Composable
 fun HistoryListItem(
     item: HistoryItem,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    viewModel:StoreViewModel
 ) {
     Row(
         modifier = Modifier
@@ -45,7 +46,10 @@ fun HistoryListItem(
                 text = item.name,
                 fontSize = (19.sp),
                 fontWeight = FontWeight(400),
-                color = colorResource(id = R.color.gray_search)
+                color = colorResource(id = R.color.gray_search),
+                modifier = Modifier.clickable {
+                  viewModel.updateSearch(item.name)
+                }
             )
             Icon(
                 modifier = Modifier

@@ -2,6 +2,7 @@ package com.example.onlinestore.navigation
 
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,7 +27,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,7 +41,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,6 +49,7 @@ import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.ui.theme.SFProText
 import com.example.onlinestore.ui.theme.inter
+import com.example.onlinestore.views.search_screen.HistoryItem
 
 @Composable
 fun TopNavigationBar(
@@ -53,6 +58,8 @@ fun TopNavigationBar(
 ) {
     val currentRoute = currentRoute(controller)
     val model: StoreViewModel = viewModel()
+    val size by model.cartSize.collectAsState()
+
     val title = allScreen.firstOrNull() { it.route == currentRoute }?.title ?: "Unknown"
     val icon = topScreens.firstOrNull { it.route == currentRoute }?.icon
     val action = topScreens.firstOrNull { it.route == currentRoute }?.actionIcon
@@ -65,15 +72,18 @@ fun TopNavigationBar(
             }
         }
     val actionIcon: (@Composable () -> Unit) = {
+
         IconButton(onClick = { controller.navigate(Screen.NavigationItem.Cart.route) }) {
             action?.let { painterResource(it) }
                 ?.let { Icon(painter = it, "", tint = colorResource(R.color.Dark_Arsenic)) }
+
         }
+
     }
     TopAppBar(
         title = {
-            if (title == "Wishlist" || title == "SearchResult") {
-                SearchBar(model.search.value, model) { model.search.value = it }
+            if (title == "SearchResult" || title == "Wishlist") {
+                SearchBar(model, title)
             } else {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -120,7 +130,27 @@ fun TopNavigationBar(
         backgroundColor = Color.White,
         modifier = Modifier.height(80.dp),
         actions = {
-            if (action != null) actionIcon()
+            Box() {
+                if (action != null) {
+                    actionIcon()
+                    if (size > 0) {
+                        Image(
+                            painterResource(R.drawable.ellipse_5),
+                            "",
+                            modifier = Modifier
+                                .padding(top = 8.dp, start = 25.dp)
+                                .size(16.dp)
+                        )
+                        androidx.compose.material.Text(
+                            text = size.toString(),
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .padding(top = 8.dp, start = if (size >= 10) 26.dp else 29.dp)
+                        )
+                    }
+                }
+            }
         }
     )
 }
@@ -129,15 +159,20 @@ fun TopNavigationBar(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SearchBar(
-    searchQuery: String,
     model: StoreViewModel,
-    onSearchQueryChange: (String) -> Unit,
-
-    ) {
+    title: String
+) {
     val interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }
+    val input by model.searchSting.collectAsState()
+    var text by remember { mutableStateOf(input) }
     BasicTextField(
-        value = searchQuery,
-        onValueChange = { onSearchQueryChange(it) },
+        value = text,
+        onValueChange = {
+            text = it
+            if (text == "") {
+                model.deleteSearch()
+            }
+        },
         modifier = Modifier
             .background(Color.White)
             .fillMaxWidth()
@@ -145,9 +180,17 @@ fun SearchBar(
             .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp)),
         textStyle = TextStyle(fontSize = 13.sp),
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = {
-            model.search2.value = searchQuery
-        })
+        keyboardActions = KeyboardActions {
+            model.updateSearch(text)
+            if (title == "SearchResult") {
+                if (text != "") {
+                    val newItem = HistoryItem(
+                        name = text,
+                    )
+                    model.updateHistory(newItem)
+                }
+            }
+        }
     ) {
         TextFieldDefaults.TextFieldDecorationBox(
             value = "",
@@ -157,7 +200,7 @@ fun SearchBar(
             interactionSource = interactionSource,
             visualTransformation = VisualTransformation.None,
             placeholder = {
-                if (searchQuery == "")
+                if (text == "")
                     Text("Search here...", color = colorResource(R.color.Grey), fontSize = 13.sp)
             },
             leadingIcon = {
@@ -168,9 +211,10 @@ fun SearchBar(
                 )
             },
             trailingIcon = {
-                if (searchQuery != "")
+                if (text != "")
                     IconButton({
-                        onSearchQueryChange("")
+                        text = ""
+                        model.deleteSearch()
                     }) {
                         Icon(Icons.Default.Clear, "", tint = Color.Gray)
                     }

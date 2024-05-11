@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
@@ -41,14 +43,15 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,8 +81,9 @@ fun MainScreen(
     viewModel: StoreViewModel
 ) {
     var expended by remember { mutableStateOf(false) }
-    val productFilter = listOf("price up", "price down", "title A", "title Z")
-
+    var showDialog by remember { mutableStateOf(false) }
+    val productFilter = listOf("price up", "price down", "title A", "title Z", "price range")
+    val size by viewModel.cartSize.collectAsState()
     val productList by viewModel.products.collectAsState()
     val categoryList by viewModel.categories.collectAsState()
 
@@ -107,12 +111,27 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 IconButton({
                     controller.navigate(Screen.NavigationItem.Cart.route)
                 }) {
-                    Icon(painter = painterResource(R.drawable.buy), "", tint = colorResource(R.color.Dark_Arsenic))
+                    Icon(
+                        painter = painterResource(R.drawable.buy),
+                        "",
+                        tint = colorResource(R.color.Dark_Arsenic)
+                    )
+                    Box(modifier = Modifier.padding(bottom = 25.dp, start = 15.dp)) {
+                        CartSize(size)
+                    }
+
                 }
-                Icon(painter = painterResource(R.drawable.notification), "", tint = colorResource(R.color.Dark_Arsenic))
+
+
+                Icon(
+                    painter = painterResource(R.drawable.notification),
+                    "",
+                    tint = colorResource(R.color.Dark_Arsenic)
+                )
             }
 
         }
@@ -125,9 +144,9 @@ fun MainScreen(
                 .padding(top = 30.dp)
         ) {
             categoryList.take(4).forEach { category ->
-                CategoryButtonItem(category, Modifier.weight(1f),viewModel)
+                CategoryButtonItem(category, Modifier.weight(1f), viewModel)
             }
-            AllCategoryButton(categoryList, Modifier.weight(1f),viewModel)
+            AllCategoryButton(categoryList, Modifier.weight(1f), viewModel)
         }
         Row(
             Modifier
@@ -172,12 +191,18 @@ fun MainScreen(
                                 "price down" -> viewModel.sortProductsByPriceDescending()
                                 "title A" -> viewModel.sortProductsByTitleAscending()
                                 "title Z" -> viewModel.sortProductsByTitleDescending()
+                                "price range" -> showDialog = true
                             }
                             expended = false
                         })
                     }
 
                 }
+            }
+        }
+        if (showDialog) {
+            PriceRangeDialog(viewModel) {
+                showDialog = it
             }
         }
         ProductItem2(productList, viewModel, controller)
@@ -200,7 +225,11 @@ fun ProductItem2(
 }
 
 @Composable
-fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier,viewModel: StoreViewModel) {
+fun CategoryButtonItem(
+    category: CategoryModel,
+    modifier: Modifier = Modifier,
+    viewModel: StoreViewModel
+) {
     Column(
         modifier = modifier
             .padding(end = 18.dp),
@@ -213,15 +242,19 @@ fun CategoryButtonItem(category: CategoryModel, modifier: Modifier = Modifier,vi
                 .size(60.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable {
-                    viewModel.loadProductById(category.id)
-                           },
+                    viewModel.loadProductsByCategoryId(category.id)
+                },
         )
         Text(category.name, fontSize = 10.sp)
     }
 }
 
 @Composable
-fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier,viewModel: StoreViewModel)  {
+fun AllCategoryButton(
+    list2: List<CategoryModel>,
+    modifier: Modifier = Modifier,
+    viewModel: StoreViewModel
+) {
     var expended by remember { mutableStateOf(false) }
     IconButton({
         expended = !expended
@@ -241,7 +274,7 @@ fun AllCategoryButton(list2: List<CategoryModel>, modifier: Modifier = Modifier,
                 expended = false
             }) {
             list2.distinctBy { it.name }.forEach { item ->
-                DropdownMenuItem(text = { Text(item.name) }, {viewModel.loadProductById(item.id)})
+                DropdownMenuItem(text = { Text(item.name) }, { viewModel.loadProductsByCategoryId(item.id) })
             }
         }
     }
@@ -389,4 +422,66 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
             }
         }
     }
+}
+
+@Composable
+fun CartSize(size: Int) {
+    if (size > 0) {
+        Image(
+            painterResource(R.drawable.ellipse_5),
+            "",
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .size(16.dp)
+        )
+        Text(
+            text = size.toString(),
+            color = Color.White,
+            fontSize = 12.sp,
+            modifier = Modifier
+                .padding(top = 8.dp, start = if(size >= 10) 0.dp else 4.dp)
+        )
+    }
+}
+
+@Composable
+fun PriceRangeDialog(viewModel: StoreViewModel, showDialog: (Boolean) -> Unit) {
+    val minPrice = viewModel.minPrice.collectAsState().value
+    val maxPrice = viewModel.maxPrice.collectAsState().value
+    val currency = viewModel.currentCurrency.collectAsState().value
+
+    val initialMin = viewModel.selectedMinPrice.collectAsState().value ?: minPrice
+    val initialMax = viewModel.selectedMaxPrice.collectAsState().value ?: maxPrice
+    val (range, setRange) = remember { mutableStateOf(initialMin..initialMax) }
+
+    AlertDialog(
+        onDismissRequest = { showDialog(false) },
+        title = { Text(text = "Select Price Range") },
+        text = {
+            Column {
+                val formattedMin = viewModel.formatPriceWithCurrency(range.start.toDouble(), currency)
+                val formattedMax = viewModel.formatPriceWithCurrency(range.endInclusive.toDouble(), currency)
+                Text("Current range: $formattedMin - $formattedMax")
+                RangeSlider(
+                    value = range,
+                    onValueChange = { newRange -> setRange(newRange) },
+                    valueRange = minPrice..maxPrice,
+                    steps = 0
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                viewModel.filterProductsByPriceRange(range.start, range.endInclusive)
+                showDialog(false)
+            }) {
+                Text("Apply")
+            }
+        },
+        dismissButton = {
+            Button(onClick = { showDialog(false) }) {
+                Text("Cancel")
+            }
+        }
+    )
 }

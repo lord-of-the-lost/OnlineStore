@@ -37,11 +37,19 @@ sealed class Screen(
                 R.drawable.buy,
                 true
             )
+        object UpdateProduct:
+                NavigationItem(
+                    "update_product",
+                    "Update Product",
+                    Icons.Default.ArrowBack,
+                    null,
+                    true
+                )
 
         object TermsConditions :
             NavigationItem("terms_conditions", "Terms & Conditions", Icons.Default.ArrowBack,null,true)
 
-        object AddProduct : NavigationItem("add_product", "Add new product", null, null,true)
+        object AddProduct : NavigationItem("add_product", "Add new product", Icons.Default.ArrowBack, null,true)
         object Cart : NavigationItem(
             "your_cart",
             "Your Cart",
@@ -49,6 +57,14 @@ sealed class Screen(
             R.drawable.buy,
             true
         )
+        object Camera : NavigationItem(
+            "camera_open",
+            "",
+            null,
+            null,
+            false
+        )
+
     }
     sealed class BottomNavigation(
         val broute: String,
@@ -79,6 +95,8 @@ val topScreens = listOf(
     Screen.NavigationItem.Onboarding,
     Screen.NavigationItem.Registration,
     Screen.NavigationItem.TermsConditions,
+    Screen.NavigationItem.Camera,
+    Screen.NavigationItem.UpdateProduct
 )
 val bottomScreen = listOf(
     Screen.BottomNavigation.Home,

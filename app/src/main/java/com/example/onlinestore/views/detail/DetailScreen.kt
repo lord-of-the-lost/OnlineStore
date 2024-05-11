@@ -15,18 +15,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.Text
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberBottomSheetState
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,6 +54,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -62,24 +66,25 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun DetailScreen(viewModel: StoreViewModel) {
-    val product = viewModel.selectedProduct.collectAsState()
+    val product by viewModel.selectedProduct.collectAsState()
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val priceOfProduct =
-        product.value?.price?.let {
+        product?.price?.let {
             viewModel.formatPriceWithCurrency(
                 it.toDouble(),
                 currentCurrency
             )
         }
             ?: "0"
-    val descriptionOfProductContent = product.value?.description ?: "Empty description"
+    val descriptionOfProductContent = product?.description ?: "Empty description"
+
 
 
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        product.value?.let {
+        product?.let {
             ImgOfProduct(it)
             NameWithPriceOfProduct(it, viewModel, priceOfProduct)
         }
@@ -97,7 +102,7 @@ fun DetailScreen(viewModel: StoreViewModel) {
                 .fillMaxWidth()
                 .size(0.dp, 1.dp)
         )
-        Buttons()
+        Buttons(viewModel, product)
     }
 }
 
@@ -125,7 +130,8 @@ fun ImgOfProduct(product: ProductModel) {
                 modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.Crop,
                 model = image,
-                contentDescription = "Photo"
+                contentDescription = "Photo",
+                error = painterResource(R.drawable.maxresdefault)
             )
         }
 
@@ -159,15 +165,14 @@ fun NameWithPriceOfProduct(
     val favoriteProducts by viewModel.favoriteProducts.collectAsState()
     val isFavorite = favoriteProducts.contains(product.id)
 
-    Row(
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 20.dp, top = 9.dp, end = 20.dp)
             .size(0.dp, 47.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column {
+        Row() {
             Text(
                 text = product.title,
                 style = TextStyle(
@@ -176,37 +181,39 @@ fun NameWithPriceOfProduct(
                     fontSize = 16.sp,
                     lineHeight = 19.36.sp,
                     color = Color(0xFF393F42)
-                )
-            )
-            Text(
-                modifier = Modifier
-                    .padding(top = 5.dp),
-                text = priceOfProduct.toString(),
-                style = TextStyle(
-                    fontFamily = inter,
-                    fontWeight = FontWeight(500),
-                    fontSize = 18.sp,
-                    lineHeight = 21.78.sp,
-                    color = Color(0xFF393F42)
-                )
-            )
-        }
-        IconButton(
-            modifier = Modifier
-                .size(46.dp),
-            onClick = { viewModel.toggleFavorite(product.id) }) {
-            Icon(
-                imageVector = ImageVector.vectorResource(
-                    if (isFavorite) R.drawable.heart_fill
-                    else
-                        R.drawable.heart
                 ),
-                tint = Color(0xFF939393),
-                contentDescription = null
+                modifier = Modifier.weight(1f)
             )
+            IconButton(
+                modifier = Modifier
+                    .size(46.dp),
+                onClick = { viewModel.toggleFavorite(product.id) }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(
+                        if (isFavorite) R.drawable.heart_fill
+                        else
+                            R.drawable.heart
+                    ),
+                    tint = Color(0xFF939393),
+                    contentDescription = null
+                )
+            }
         }
+        Text(
+            modifier = Modifier
+                .padding(top = 5.dp),
+            text = priceOfProduct.toString(),
+            style = TextStyle(
+                fontFamily = inter,
+                fontWeight = FontWeight(500),
+                fontSize = 18.sp,
+                lineHeight = 21.78.sp,
+                color = Color(0xFF393F42)
+            )
+        )
     }
 }
+
 
 @Composable
 fun DescriptionOfProductHead(
@@ -247,7 +254,7 @@ fun DescriptionOfProductContent(
 }
 
 @Composable
-fun Buttons() {
+fun Buttons(viewModel: StoreViewModel, product: ProductModel?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -255,14 +262,15 @@ fun Buttons() {
         Arrangement.Center
     )
     {
-        AddToCardButton()
+        AddToCardButton(viewModel, product)
         Spacer(modifier = Modifier.width(15.dp))
         BuyNowButton()
     }
 }
 
 @Composable
-fun AddToCardButton() {
+fun AddToCardButton(viewModel: StoreViewModel, product: ProductModel?) {
+
     Button(
         modifier = Modifier
             .size(167.dp, 45.dp),
@@ -271,7 +279,7 @@ fun AddToCardButton() {
             .buttonColors(
                 containerColor = Color(0xFF67C4A7)
             ),
-        onClick = { })
+        onClick = { product?.let { viewModel.addToCart(it) } })
     {
         Text(
             text = "Add to Cart",
@@ -286,7 +294,8 @@ fun AddToCardButton() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BuyNowButton() {
 
@@ -303,8 +312,8 @@ fun BuyNowButton() {
                 containerColor = Color(0xFFF0F2F1)
             ),
         border = BorderStroke(1.dp, Color(0xFFD9D9D9)),
-        onClick = { showBottomSheet = true })
-    {
+        onClick = { showBottomSheet = true }
+    ) {
         Text(
             text = "Buy Now",
             style = TextStyle(
@@ -322,16 +331,9 @@ fun BuyNowButton() {
                 showBottomSheet = false
             },
             sheetState = sheetState,
-
-            modifier = Modifier
-                .fillMaxHeight(0.5f)
-                .navigationBarsPadding(),
             containerColor = Color.White,
-            dragHandle = null
 
-        ) {
-
-
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -363,14 +365,16 @@ fun BuyNowButton() {
                         )
                     }
                 }
+
                 Image(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier = Modifier,
                     painter = painterResource(id = R.drawable.payment_success),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                 )
-                Spacer(modifier = Modifier.height(37.dp))
+
+
+                Spacer(modifier = Modifier.height(300.dp))
                 Column {
                     Button(
                         modifier = Modifier

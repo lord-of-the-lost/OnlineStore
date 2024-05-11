@@ -1,6 +1,10 @@
+@file:Suppress("UNUSED_EXPRESSION")
+
 package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -19,14 +23,17 @@ import com.example.onlinestore.views.CartScreen.CartScreen
 import com.example.onlinestore.views.Favorite_Screen.FavoriteScreen
 import com.example.onlinestore.views.HomeScreen.MainScreen
 import com.example.onlinestore.views.add_screen.AddProduct
+import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
 import com.example.onlinestore.views.terms_conditions.Terms
+import com.example.onlinestore.views.update_Screen.UpdateScreen
 
 
+@RequiresApi(Build.VERSION_CODES.P)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainNavigationScreen(viewModel: StoreViewModel) {
@@ -53,6 +60,7 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun Navigation(
     navController: NavController,
@@ -62,7 +70,7 @@ fun Navigation(
     NavHost(
         navController = navController as NavHostController,
         startDestination = Screen.BottomNavigation.Home.route,
-        modifier = Modifier.padding(dp)
+        modifier = Modifier.padding(dp),
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {
             OnboardingScreen(Modifier, navController)
@@ -74,13 +82,13 @@ fun Navigation(
             MainScreen(navController, viewModel)
         }
         composable(Screen.BottomNavigation.Manager.broute) {
-            ManagerScreen()
+            ManagerScreen(Modifier,navController)
         }
         composable(Screen.BottomNavigation.Account.broute) {
             ProfileScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.AddProduct.tRoute) {
-            AddProduct()
+            AddProduct(viewModel)
         }
         composable(Screen.NavigationItem.TermsConditions.route) {
             Terms()
@@ -95,10 +103,19 @@ fun Navigation(
             RegistrationScreen(navController, viewModel)
         }
         composable(Screen.NavigationItem.SearchResultScreen.tRoute) {
-            SearchScreen(navController)
+            SearchScreen(navController,viewModel)
         }
         composable(Screen.NavigationItem.Cart.tRoute) {
             CartScreen(viewModel)
+        }
+        composable(Screen.NavigationItem.UpdateProduct.route){
+            UpdateScreen(viewModel)
+        }
+        composable(Screen.NavigationItem.Camera.tRoute) {
+            Camera(
+                viewModel,
+                onBackClick = { navController.navigate(Screen.BottomNavigation.Account.broute) }
+            )
         }
     }
 }
