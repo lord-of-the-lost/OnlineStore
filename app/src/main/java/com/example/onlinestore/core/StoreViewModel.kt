@@ -11,8 +11,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.example.onlinestore.core.api.NetworkService
 import com.example.onlinestore.core.models.CategoryModel
-import com.example.onlinestore.core.models.PostProductModel
 import com.example.onlinestore.core.models.ProductModel
+import com.example.onlinestore.core.models.RequestModel.PostCategoryModel
+import com.example.onlinestore.core.models.RequestModel.PostProductModel
 import com.example.onlinestore.core.repository.StoreRepository
 import com.example.onlinestore.core.storage.AppDatabase
 import com.example.onlinestore.core.storage.ProductDAO
@@ -94,9 +95,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
     private var _categoryId = MutableStateFlow(1)
-    var categoryId:StateFlow<Int> = _categoryId.asStateFlow()
+    var categoryId: StateFlow<Int> = _categoryId.asStateFlow()
 
-    fun updateCategoryID(id:Int){
+    fun updateCategoryID(id: Int) {
         _categoryId.value = id
     }
 
@@ -323,8 +324,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 _allProducts.value = productList
                 _minPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
                 _maxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
-                _selectedMinPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
-                _selectedMaxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMinPrice.value =
+                    productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMaxPrice.value =
+                    productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
             } catch (e: Exception) {
                 TODO()
             }
@@ -339,18 +342,21 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 _allProducts.value = productList
                 _minPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
                 _maxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
-                _selectedMinPrice.value = productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
-                _selectedMaxPrice.value = productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMinPrice.value =
+                    productList.minByOrNull { it.price }?.price?.toFloat() ?: 0f
+                _selectedMaxPrice.value =
+                    productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
             } catch (e: Exception) {
                 TODO()
             }
         }
     }
-    fun updateProduct(id:Int,product: PostProductModel){
+
+    fun updateProduct(id: Int, product: PostProductModel) {
         viewModelScope.launch {
             try {
-                networkService.updateProduct(id,product)
-            }catch (e:Exception){
+                networkService.updateProduct(id, product)
+            } catch (e: Exception) {
                 TODO()
             }
         }
@@ -387,6 +393,36 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+    }
+
+    fun postNewCategory(category: PostCategoryModel) {
+        viewModelScope.launch {
+            try {
+                networkService.createCategory(category)
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+
+    fun updateCategory(id: Int) {
+        viewModelScope.launch {
+            try {
+                networkService.updateCategory(id)
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
+    }
+
+    fun deleteCategory(id: Int) {
+        viewModelScope.launch {
+            try {
+                networkService.deleteCategory(id)
+            } catch (e: Exception) {
+                TODO()
+            }
+        }
     }
 
     fun sortProductsByPriceAscending() {
@@ -427,29 +463,31 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     var mail by mutableStateOf("dev@gmail.com")
     var password by mutableStateOf("1111")
     var isSheetOpen: Boolean by mutableStateOf(false)
-    fun onNameChange(newString: String){
+    fun onNameChange(newString: String) {
         name = newString
     }
-    fun onMailChange(newString: String){
+
+    fun onMailChange(newString: String) {
         mail = newString
     }
-    fun onPasswordChange(newString: String){
+
+    fun onPasswordChange(newString: String) {
         password = newString
     }
-    fun onIsSheetOpenChange (newBoolean: Boolean){
+
+    fun onIsSheetOpenChange(newBoolean: Boolean) {
         isSheetOpen = newBoolean
     }
 
 
+    data class AuthState(
+        val success: Boolean = false,
+        val error: String = ""
+    )
 
-data class AuthState(
-    val success: Boolean = false,
-    val error: String = ""
-)
+    fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
-fun Double.format(digits: Int) = "%.${digits}f".format(this)
-
-enum class Currency {
-    USD, EUR, RUB
+    enum class Currency {
+        USD, EUR, RUB
     }
 }

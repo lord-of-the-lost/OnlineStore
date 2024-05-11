@@ -26,8 +26,11 @@ import com.example.onlinestore.views.change_picture.Camera
 import com.example.onlinestore.views.detail.DetailScreen
 import com.example.onlinestore.views.manager_screen.ManagerScreen
 import com.example.onlinestore.views.manager_screen.add_screen.AddProduct
+import com.example.onlinestore.views.manager_screen.create_category.CreateCategory
 import com.example.onlinestore.views.manager_screen.deleteScreen.DeleteScreen
+import com.example.onlinestore.views.manager_screen.delete_category.DeleteCategory
 import com.example.onlinestore.views.manager_screen.update_Screen.UpdateScreen
+import com.example.onlinestore.views.manager_screen.update_category.UpdateCategory
 import com.example.onlinestore.views.onboarding.OnboardingScreen
 import com.example.onlinestore.views.profile_screen.ProfileScreen
 import com.example.onlinestore.views.search_screen.SearchScreen
@@ -114,6 +117,15 @@ fun Navigation(
         }
         composable(Screen.NavigationItem.DeleteProduct.route){
             DeleteScreen(viewModel)
+        }
+        composable(Screen.NavigationItem.CreateCategory.route){
+            CreateCategory(viewModel)
+        }
+        composable(Screen.NavigationItem.UpdateCategory.route){
+            UpdateCategory(viewModel)
+        }
+        composable(Screen.NavigationItem.DeleteCategory.route){
+            DeleteCategory(viewModel)
         }
         composable(Screen.NavigationItem.Camera.tRoute) {
             Camera(

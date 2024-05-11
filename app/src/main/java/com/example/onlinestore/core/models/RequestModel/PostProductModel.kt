@@ -1,4 +1,4 @@
-package com.example.onlinestore.core.models
+package com.example.onlinestore.core.models.RequestModel
 
 import com.google.gson.annotations.SerializedName
 
@@ -14,6 +14,4 @@ data class PostProductModel(
     val categoryId: Int,
     @SerializedName("images")
     val images: List<String>,
-
-
     )
