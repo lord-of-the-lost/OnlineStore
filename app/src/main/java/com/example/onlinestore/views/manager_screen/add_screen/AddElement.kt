@@ -1,4 +1,4 @@
-package com.example.onlinestore.views.add_screen
+package com.example.onlinestore.views.manager_screen.add_screen
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

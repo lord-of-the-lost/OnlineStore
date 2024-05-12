@@ -3,7 +3,9 @@ package com.example.onlinestore.core.api
 import com.example.onlinestore.core.models.CategoryModel
 import com.example.onlinestore.core.models.PostProductModel
 import com.example.onlinestore.core.models.ProductModel
+import com.example.onlinestore.core.models.ResponseData
 import retrofit2.Response
+
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -32,18 +34,18 @@ interface NetworkService {
     @POST("categories/")
     suspend fun createCategory()
     @POST("products")
-    suspend fun createProduct(@Body postRequest:PostProductModel):Response<ProductModel>
+    suspend fun createProduct(@Body postRequest:PostProductModel): Response<ProductModel>
 
     @DELETE("products/{id}")
     suspend fun deleteProduct(@Path("id") id: Int)
     @PUT("products/{id}")
     suspend fun updateProduct(@Path("id") id:Int,
-                              @Body postRequest: PostProductModel):Response<ProductModel>
+                              @Body postRequest: PostProductModel): Response<ProductModel>
 
     @GET("products/{id}")
     suspend fun getProductByID(@Path("id") id: Int): ProductModel
 
     @DELETE("category/{id}")
-    suspend fun deleteCategory(@Path("id") id: Int)
+    suspend fun deleteCategory(@Path("id") id: Int):Response<ResponseData>
 
 }

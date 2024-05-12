@@ -1,4 +1,4 @@
-package com.example.onlinestore.views.add_screen
+package com.example.onlinestore.views.manager_screen.add_screen
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column

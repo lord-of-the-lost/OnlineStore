@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -252,9 +251,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun loadProductById(id: Int): ProductModel {
-        return networkService.getProductByID(id)
-    }
 
     //Auth VM logic
     private val _authStateState = MutableStateFlow<AuthState>(AuthState())
