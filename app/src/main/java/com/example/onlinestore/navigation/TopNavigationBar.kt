@@ -127,6 +127,13 @@ fun TopNavigationBar(
                                     "Terms & Conditions" -> 68.dp
                                     "Sign Up" -> 68.dp
                                     "Details product" -> 18.dp
+                                    "Add new product" -> 68.dp
+                                    "Update product" -> 68.dp
+                                    "Delete product" -> 68.dp
+                                    "Create category" -> 68.dp
+                                    "Update category" -> 68.dp
+                                    "Delete category" -> 68.dp
+
                                     else -> 10.dp
                                 }
                             )
