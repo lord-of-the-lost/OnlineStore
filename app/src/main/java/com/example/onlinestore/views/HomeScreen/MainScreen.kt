@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -236,8 +237,7 @@ fun CategoryButtonItem(
     viewModel: StoreViewModel
 ) {
     Column(
-        modifier = modifier
-            .padding(end = 18.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AsyncImage(
@@ -245,10 +245,11 @@ fun CategoryButtonItem(
             contentDescription = "",
             modifier = Modifier
                 .size(60.dp)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .clickable {
                     viewModel.loadProductsByCategoryId(category.id)
                 },
+            contentScale = ContentScale.Crop
         )
         Text(category.name, fontSize = 10.sp)
     }
@@ -256,7 +257,7 @@ fun CategoryButtonItem(
 
 @Composable
 fun AllCategoryButton(
-    list2: List<CategoryModel>,
+    list: List<CategoryModel>,
     modifier: Modifier = Modifier,
     viewModel: StoreViewModel
 ) {
@@ -264,7 +265,7 @@ fun AllCategoryButton(
     IconButton({
         expended = !expended
     }) {
-        Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier.padding(start = 9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painterResource(R.drawable.group_8__3_),
                 "",
@@ -278,7 +279,7 @@ fun AllCategoryButton(
             onDismissRequest = {
                 expended = false
             }) {
-            list2.distinctBy { it.name }.forEach { item ->
+            list.distinctBy { it.name }.forEach { item ->
                 DropdownMenuItem(text = { Text(item.name) }, { viewModel.loadProductsByCategoryId(item.id) })
             }
         }

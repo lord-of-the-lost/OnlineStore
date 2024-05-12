@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -43,6 +45,12 @@ import com.example.onlinestore.views.terms_conditions.Terms
 fun MainNavigationScreen(viewModel: StoreViewModel) {
     val controller: NavController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
+    val currentUser by viewModel.currentUser.collectAsState()
+    val startDestination = if (currentUser != null) {
+        Screen.BottomNavigation.Home.route
+    } else {
+        Screen.NavigationItem.Onboarding.route
+    }
     val route = currentRoute(controller)
     val screenWithScaffold = allScreen.firstOrNull { it.route == route }?.withScaffold
 
@@ -60,7 +68,7 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
             }
         }
     ) {
-        Navigation(controller, viewModel, it)
+        Navigation(controller, viewModel, startDestination, it)
     }
 }
 
@@ -69,11 +77,12 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
 fun Navigation(
     navController: NavController,
     viewModel: StoreViewModel,
+    startDestination: String,
     dp: PaddingValues
 ) {
     NavHost(
         navController = navController as NavHostController,
-        startDestination = Screen.BottomNavigation.Home.route,
+        startDestination = startDestination,
         modifier = Modifier.padding(dp),
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {

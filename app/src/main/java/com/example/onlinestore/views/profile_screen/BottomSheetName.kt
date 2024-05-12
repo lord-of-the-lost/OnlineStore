@@ -72,7 +72,7 @@ fun ModalBottomSheet(
 
             TextField(
                 value = viewModel.mail,
-                onValueChanged = { viewModel.onMailChange(it) },
+                onValueChanged = { viewModel.updateUserEmail(it) },
                 maxLines = 1,
                 keyboardType = KeyboardType.Email
             )
@@ -89,7 +89,7 @@ fun ModalBottomSheet(
 
             TextField(
                 value = viewModel.password,
-                onValueChanged = { viewModel.onPasswordChange(it) },
+                onValueChanged = { viewModel.updateUserPassword(it) },
                 maxLines = 1,
                 keyboardType = KeyboardType.Email
             )

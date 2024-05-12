@@ -1,8 +1,11 @@
 package com.example.onlinestore.core.models
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.ByteArrayOutputStream
 
 class Converters {
     private val gson = Gson()
@@ -49,5 +52,18 @@ class Converters {
     fun stringToProductList(data: String): List<ProductModel> {
         val type = object : TypeToken<List<ProductModel>>() {}.type
         return gson.fromJson(data, type)
+    }
+
+    @TypeConverter
+    fun fromByteArray(value: ByteArray): Bitmap {
+        return BitmapFactory.decodeByteArray(value, 0, value.size)
+    }
+
+    @TypeConverter
+    fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
+        ByteArrayOutputStream().apply {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, this)
+            return toByteArray()
+        }
     }
 }

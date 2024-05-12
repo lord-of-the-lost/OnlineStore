@@ -5,13 +5,13 @@ import com.google.gson.annotations.SerializedName
 
 data class PostProductModel(
     @SerializedName("title")
-    val title: String,
+    val title: String? = null,
     @SerializedName("price")
-    val price: Int,
+    val price: Int? = null,
     @SerializedName("description")
-    val description: String,
+    val description: String? = null,
     @SerializedName("categoryId")
-    val categoryId: Int,
+    val categoryId: Int?=null,
     @SerializedName("images")
-    val images: List<String>,
-    )
+    val images: List<String>? = null,
+)

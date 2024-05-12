@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +66,6 @@ fun RegistrationScreen(
             .verticalScroll(state = ScrollState(0)),
         color = Color.White
     ) {
-
         var firstName by remember { mutableStateOf("") }
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
@@ -75,6 +75,7 @@ fun RegistrationScreen(
         var isErrorEmail by remember { mutableStateOf(false) }
         var isErrorPassword by remember { mutableStateOf(false) }
         var isErrorConfirmPass by remember { mutableStateOf(false) }
+        var isManager: MutableState<Boolean> = remember { mutableStateOf(false) }
         val context = LocalContext.current
         val inputDataCheck =
             if (!isValidLogin(firstName) && !isValidEmail(email) && !isValidPassword(password) && password == confirmPass) true else false
@@ -141,12 +142,12 @@ fun RegistrationScreen(
                 isErrorConfirmPass
             )
             Spacer(Modifier.padding(bottom = 30.dp))
-            TextFieldDropDownMenu(authViewModel)
+            TextFieldDropDownMenu(isManager)
 
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column() {
                     CustomButton("Sign Up", inputDataCheck) {
-                        authViewModel.register(firstName, email, password, confirmPass)
+                        authViewModel.register(firstName, email, password, confirmPass, isManager.value)
                     }
                     when {
                         authState.error.isNotBlank() -> {
@@ -277,7 +278,7 @@ fun CustomTextField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
+fun TextFieldDropDownMenu(isManager: MutableState<Boolean>) {
     val options = listOf("Manager", "User")
     var expanded by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
@@ -322,6 +323,11 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
                         text = option
                         expanded = false
                         focusManager.clearFocus()
+                        if (option == "Manager") {
+                            isManager.value = true
+                        } else {
+                            isManager.value = false
+                        }
                     },
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
@@ -330,24 +336,24 @@ fun TextFieldDropDownMenu(viewModel: StoreViewModel) {
 
     }
     if (text == "Manager")
-        AddCustomPasswordField(viewModel)
+        AddCustomPasswordField(isManager)
 }
 
 @Composable
-fun AddCustomPasswordField(viewModel: StoreViewModel) {
+fun AddCustomPasswordField(isManager: MutableState<Boolean>) {
     var password = "0000"
     var inputPassword by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
     val visibility =
         if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation()
-    var Error by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     androidx.compose.material.OutlinedTextField(
         enabled = if (password == inputPassword) false else true,
         value = inputPassword,
         onValueChange = {
             inputPassword = it
-            if (inputPassword != "") Error = false
+            if (inputPassword != "") error = false
         },
         placeholder = {
             androidx.compose.material.Text(
@@ -383,17 +389,12 @@ fun AddCustomPasswordField(viewModel: StoreViewModel) {
             imeAction = ImeAction.Done
         ),
         keyboardActions = KeyboardActions(onDone = {
-            if (inputPassword == password) {
-                viewModel.setUserManagerStatus(true)
-                focusManager.clearFocus()
-            } else {
-                inputPassword = ""
-                focusManager.clearFocus()
-            }
+            focusManager.clearFocus()
+            isManager.value = (inputPassword == "0000")
         }),
-        isError = Error
+        isError = error
     )
-    if (Error) {
+    if (error) {
         Text("invalid password", color = Color.Red)
     }
 }

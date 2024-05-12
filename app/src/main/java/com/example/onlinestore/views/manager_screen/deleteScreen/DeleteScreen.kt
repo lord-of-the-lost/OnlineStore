@@ -1,6 +1,5 @@
 package com.example.onlinestore.views.manager_screen.deleteScreen
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -91,12 +90,9 @@ fun DeleteScreen(viewModel: StoreViewModel) {
                 ),
                 onClick = {
                     if(itemId != 0) {
-                        viewModel.deleteProductById(itemId)
-                        Toast.makeText(context, "Success delete", Toast.LENGTH_LONG).show()
+                        viewModel.deleteProductById(itemId,context)
                         searchQueryState = ""
-                    }else {
-                        Toast.makeText(context, "The product will not be found", Toast.LENGTH_LONG)
-                            .show()
+                        itemId = 0
                     }
                 },
             ) {

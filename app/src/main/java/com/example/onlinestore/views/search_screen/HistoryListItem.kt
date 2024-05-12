@@ -21,7 +21,7 @@ import com.example.onlinestore.core.StoreViewModel
 
 @Composable
 fun HistoryListItem(
-    item: HistoryItem,
+    item: String,
     onDeleteClick: () -> Unit,
     viewModel:StoreViewModel
 ) {
@@ -43,12 +43,12 @@ fun HistoryListItem(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = item.name,
+                text = item,
                 fontSize = (19.sp),
                 fontWeight = FontWeight(400),
                 color = colorResource(id = R.color.gray_search),
                 modifier = Modifier.clickable {
-                  viewModel.updateSearch(item.name)
+                  viewModel.updateSearch(item)
                 }
             )
             Icon(
