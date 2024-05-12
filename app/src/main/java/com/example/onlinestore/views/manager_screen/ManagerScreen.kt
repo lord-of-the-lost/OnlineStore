@@ -36,11 +36,11 @@ fun ManagerScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AddButtons("Add new product") { controller.navigate(Screen.NavigationItem.AddProduct.route) }
-            AddButtons("Update product") { controller.navigate(Screen.NavigationItem.UpdateProduct.route)}
-            AddButtons("Delete product") { controller.navigate(Screen.NavigationItem.DeleteProduct.route)}
-            AddButtons("Create category") { }
-            AddButtons("Update category") { }
-            AddButtons("Delete category") { }
+            AddButtons("Update product") { controller.navigate(Screen.NavigationItem.UpdateProduct.route) }
+            AddButtons("Delete product") { controller.navigate(Screen.NavigationItem.DeleteProduct.route) }
+            AddButtons("Create category") { controller.navigate(Screen.NavigationItem.CreateCategory.route) }
+            AddButtons("Update category") { controller.navigate(Screen.NavigationItem.UpdateCategory.route) }
+            AddButtons("Delete category") { controller.navigate(Screen.NavigationItem.DeleteCategory.route) }
         }
     }
 }

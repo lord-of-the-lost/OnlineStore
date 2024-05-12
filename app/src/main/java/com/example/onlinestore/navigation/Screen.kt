@@ -64,6 +64,15 @@ sealed class Screen(
         object DeleteProduct :
             NavigationItem("delete_product", "Delete product", Icons.Default.ArrowBack, null, true)
 
+        object CreateCategory :
+            NavigationItem("create_category", "Create Category", Icons.Default.ArrowBack, null, true)
+
+        object UpdateCategory :
+            NavigationItem("update_category", "Update Category", Icons.Default.ArrowBack, null, true)
+
+        object DeleteCategory :
+            NavigationItem("delete_category", "Delete category", Icons.Default.ArrowBack, null, true)
+
         object Cart : NavigationItem(
             "your_cart",
             "Your Cart",
@@ -143,7 +152,10 @@ val topScreens = listOf(
     Screen.NavigationItem.TermsConditions,
     Screen.NavigationItem.Camera,
     Screen.NavigationItem.UpdateProduct,
-    Screen.NavigationItem.DeleteProduct
+    Screen.NavigationItem.DeleteProduct,
+    Screen.NavigationItem.CreateCategory,
+    Screen.NavigationItem.UpdateCategory,
+    Screen.NavigationItem.DeleteCategory,
 )
 val bottomScreen = listOf(
     Screen.BottomNavigation.Home,

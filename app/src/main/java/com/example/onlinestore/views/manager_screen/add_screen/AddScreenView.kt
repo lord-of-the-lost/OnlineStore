@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
-import com.example.onlinestore.core.models.PostProductModel
+import com.example.onlinestore.core.models.RequestModel.PostProductModel
 
 @Composable
 fun AddProduct(
