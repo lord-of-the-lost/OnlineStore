@@ -5,10 +5,9 @@ data class UserModel(
     val name: String,
     val email: String,
     val password: String,
-    val avatar: String,
+    val avatar: ByteArray,
     val wishList: List<ProductModel>,
     val cartList: List<CartItemModel>,
     val country: String,
     val isManager: Boolean,
-    val isLogin: Boolean,
 )

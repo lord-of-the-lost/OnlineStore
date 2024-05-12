@@ -49,7 +49,6 @@ import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.ui.theme.SFProText
 import com.example.onlinestore.ui.theme.inter
-import com.example.onlinestore.views.search_screen.HistoryItem
 
 @Composable
 fun TopNavigationBar(
@@ -184,9 +183,7 @@ fun SearchBar(
             model.updateSearch(text)
             if (title == "SearchResult") {
                 if (text != "") {
-                    val newItem = HistoryItem(
-                        name = text,
-                    )
+                    val newItem = text
                     model.updateHistory(newItem)
                 }
             }

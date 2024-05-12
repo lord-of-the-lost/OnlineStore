@@ -1,25 +1,26 @@
 package com.example.onlinestore.core
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
 import com.example.onlinestore.core.api.NetworkService
+import com.example.onlinestore.core.models.CartItemModel
 import com.example.onlinestore.core.models.CategoryModel
 import com.example.onlinestore.core.models.ProductModel
 import com.example.onlinestore.core.models.RequestModel.PostCategoryModel
 import com.example.onlinestore.core.models.RequestModel.PostProductModel
 import com.example.onlinestore.core.repository.StoreRepository
 import com.example.onlinestore.core.storage.AppDatabase
-import com.example.onlinestore.core.storage.ProductDAO
 import com.example.onlinestore.core.storage.UserDAO
+import com.example.onlinestore.core.storage.UserObject
 import com.example.onlinestore.views.CartScreen.ShopItem
-import com.example.onlinestore.views.search_screen.HistoryItem
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -27,10 +28,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.ByteArrayOutputStream
 
 class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val retrofit = Retrofit.Builder()
@@ -38,12 +39,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    private val productDAO: ProductDAO by lazy {
-        Room.databaseBuilder(
-            application,
-            AppDatabase::class.java, "products.db"
-        ).build().productDao()
-    }
     private val userDAO: UserDAO by lazy {
         Room.databaseBuilder(
             application,
@@ -54,8 +49,11 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val networkService = retrofit.create(NetworkService::class.java)
 
     private val repository: StoreRepository by lazy {
-        StoreRepository(productDAO, userDAO)
+        StoreRepository(userDAO)
     }
+
+    private val _currentUser = MutableStateFlow<UserObject?>(null)
+    val currentUser: StateFlow<UserObject?> = _currentUser.asStateFlow()
 
     private val _savedProducts = MutableStateFlow<Set<ProductModel>?>(null)
     val savedProducts: StateFlow<Set<ProductModel>?> = _savedProducts.asStateFlow()
@@ -101,14 +99,12 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         _categoryId.value = id
     }
 
+    private var _historyList = MutableStateFlow<List<String>>(emptyList())
+    val historyList: StateFlow<List<String>> = _historyList.asStateFlow()
 
-    private var _historyList = mutableStateListOf<HistoryItem>()
     fun clearProductSearch() {
         _productsOnSearch.value = emptyList()
     }
-
-    val historyList: List<HistoryItem>
-        get() = _historyList
 
     fun updateSearch(str: String) {
         _searchString.value = str
@@ -118,18 +114,39 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         _searchString.value = ""
     }
 
-    fun updateHistory(item: HistoryItem) {
-        _historyList.add(item)
-    }
-
-    fun deleteHistory(item: HistoryItem) {
-        _historyList.remove(item)
+    fun deleteHistory(item: String) {
+        viewModelScope.launch {
+            val currentUser = _currentUser.value
+            currentUser?.let { user ->
+                val updatedSearchHistory = user.searchHistory.filter { it != item }
+                val updatedUser = user.copy(searchHistory = updatedSearchHistory)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _historyList.value = updatedSearchHistory
+            }
+        }
     }
 
     fun deleteAllHistory() {
-        _historyList.clear()
+        viewModelScope.launch {
+            val currentUser = _currentUser.value
+            currentUser?.let { user ->
+                val updatedUser = user.copy(searchHistory = emptyList())
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _historyList.value = emptyList()
+            }
+        }
     }
 
+    fun initializeSearchHistory() {
+        viewModelScope.launch {
+            _currentUser.value?.let { user ->
+                _historyList.value = user.searchHistory
+                _searchString.value = ""
+            }
+        }
+    }
 
     private val _isUserManager = MutableStateFlow(false)
     val isUserManager: StateFlow<Boolean> = _isUserManager.asStateFlow()
@@ -138,6 +155,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     val cartProducts: StateFlow<List<ProductModel>> = _cartProducts.asStateFlow()
 
     init {
+        initializeUser()
         fetchAPIData()
     }
 
@@ -146,6 +164,29 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedProduct = MutableStateFlow<ProductModel?>(null)
     val selectedProduct: StateFlow<ProductModel?> = _selectedProduct
+
+    private fun initializeUser() {
+        val sharedPref = getApplication<Application>().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val userEmail = sharedPref.getString("userEmail", null)
+        viewModelScope.launch {
+            userEmail?.let { email ->
+                repository.getUserByEmail(email)?.let { user ->
+                    _currentUser.value = user
+                    _historyList.value = user.searchHistory
+                    updateWishList(user.wishList)
+                    updateCartList(user.cartList)
+
+                    user.avatar?.let { avatar ->
+                        if (avatar.isNotEmpty()) {
+                            val bitmap = BitmapFactory.decodeByteArray(avatar, 0, avatar.size)
+                            _bitmap.value = bitmap
+                        }
+                    }
+                    setSelectedCountry(user.country)
+                }
+            }
+        }
+    }
 
     fun fetchAPIData() {
         loadProducts()
@@ -161,17 +202,21 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun addToCart(product: ProductModel) {
-        _cartProducts.update { currentProducts ->
-            currentProducts + product
+        viewModelScope.launch {
+            val currentCartList = _currentUser.value?.cartList ?: listOf()
+            val newCartItemId = (currentCartList.maxByOrNull { it.id }?.id ?: 0) + 1
+            val newCartItem = CartItemModel(id = newCartItemId, product = product, quantity = 1)
+            val updatedCartList = currentCartList + newCartItem
+            updateCartList(updatedCartList)
         }
-        _cartSize.value = _cartProducts.value.size
     }
 
     fun removeFromCart(productId: Int) {
-        _cartProducts.update { currentProducts ->
-            currentProducts.filterNot { it.id == productId }
+        viewModelScope.launch {
+            val currentCartList = _currentUser.value?.cartList ?: listOf()
+            val updatedCartList = currentCartList.filterNot { it.product.id == productId }
+            updateCartList(updatedCartList)
         }
-        _cartSize.value = _cartProducts.value.size
     }
 
     val shopItemsInCart: StateFlow<List<ShopItem>> =
@@ -218,6 +263,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     fun setSelectedCountry(country: String) {
         if (_selectedCountry.value != country) {
             _selectedCountry.value = country
+            updateCountry(country)
         }
 
         val newCurrency = when (country) {
@@ -235,29 +281,47 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     //Storage Product VM logic
     fun saveProduct(product: ProductModel) {
         viewModelScope.launch {
-            repository.saveProduct(product)
+            _currentUser.value?.let { currentUser ->
+                val updatedWishList = currentUser.wishList.toMutableList().apply { add(product) }
+                val updatedUser = currentUser.copy(wishList = updatedWishList)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _savedProducts.value = updatedWishList.toSet()
+            }
         }
     }
 
     fun getProductsFromDB() {
         viewModelScope.launch {
-            val products = repository.getAllProducts()
-            _savedProducts.value = products?.toSet()
+            _currentUser.value?.wishList?.let {
+                _savedProducts.value = it.toSet()
+            }
         }
     }
 
     fun deleteProduct(product: ProductModel) {
         viewModelScope.launch {
-            repository.deleteProduct(product)
+            _currentUser.value?.let { currentUser ->
+                val updatedWishList = currentUser.wishList.filterNot { it.id == product.id }
+                val updatedUser = currentUser.copy(wishList = updatedWishList)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _savedProducts.value = updatedWishList.toSet()
+            }
         }
     }
-
 
     //Auth VM logic
     private val _authStateState = MutableStateFlow<AuthState>(AuthState())
     val authState: StateFlow<AuthState> = _authStateState
 
-    fun register(firstName: String, email: String, password: String, confirmPass: String) {
+    fun register(
+        name: String,
+        email: String,
+        password: String,
+        confirmPass: String,
+        isManager: Boolean
+    ) {
         if (password != confirmPass) {
             _authStateState.value = AuthState(error = "Passwords do not match")
             return
@@ -267,7 +331,22 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            _authStateState.value = AuthState(success = true)
+                            viewModelScope.launch {
+                                val newUser = UserObject(
+                                    id = task.result?.user?.uid.hashCode(),
+                                    name = name,
+                                    email = email,
+                                    password = password,
+                                    avatar = ByteArray(0),
+                                    wishList = listOf(),
+                                    cartList = listOf(),
+                                    searchHistory = listOf(),
+                                    country = "America",
+                                    isManager = isManager,
+                                )
+                                repository.saveUser(newUser)
+                                _authStateState.value = AuthState(success = true)
+                            }
                         } else {
                             _authStateState.value = AuthState(
                                 error = task.exception?.message ?: "Registration failed"
@@ -287,7 +366,16 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            _authStateState.value = AuthState(success = true)
+                            viewModelScope.launch {
+                                repository.getUserByEmail(email)?.let { user ->
+                                    saveUserEmail(email)
+                                    _currentUser.value = user
+                                    _authStateState.value = AuthState(success = true)
+                                } ?: run {
+                                    _authStateState.value =
+                                        AuthState(error = "User not found in local database")
+                                }
+                            }
                         } else {
                             _authStateState.value = AuthState(
                                 error = task.exception?.message ?: "Login failed"
@@ -299,6 +387,27 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                     AuthState(error = e.message ?: "Login failed")
             }
         }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            FirebaseAuth.getInstance().signOut()
+            _currentUser.value = null
+            clearUserEmail()
+            _authStateState.value = AuthState(success = false)
+        }
+    }
+
+    fun saveUserEmail(email: String) {
+        val sharedPref =
+            getApplication<Application>().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        sharedPref.edit().putString("userEmail", email).apply()
+    }
+
+    fun clearUserEmail() {
+        val sharedPref =
+            getApplication<Application>().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        sharedPref.edit().remove("userEmail").apply()
     }
 
     fun resetAuthState() {
@@ -405,10 +514,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateCategory(id: Int,category: PostCategoryModel) {
+    fun updateCategory(id: Int, category: PostCategoryModel) {
         viewModelScope.launch {
             try {
-                networkService.updateCategory(id,category)
+                networkService.updateCategory(id, category)
             } catch (e: Exception) {
                 TODO()
             }
@@ -455,39 +564,140 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private val _bitmap = mutableStateOf<Bitmap?>(null)
     val bitmap = _bitmap
     fun onTakePhoto(bitmap: Bitmap) {
-        _bitmap.value = bitmap
+        viewModelScope.launch {
+            val avatarBytes = bitmapToByteArray(bitmap)
+            _currentUser.value?.let { user ->
+                val updatedUser = user.copy(avatar = avatarBytes)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _bitmap.value = bitmap
+            }
+        }
     }
 
+    fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
+        ByteArrayOutputStream().apply {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, this)
+            return toByteArray()
+        }
+    }
 
     var name by mutableStateOf("Dev p")
     var mail by mutableStateOf("dev@gmail.com")
     var password by mutableStateOf("1111")
     var isSheetOpen: Boolean by mutableStateOf(false)
-    fun onNameChange(newString: String) {
-        name = newString
+    fun onNameChange(newName: String) {
+        viewModelScope.launch {
+            _currentUser.value?.let { currentUser ->
+                val updatedUser = currentUser.copy(name = newName)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+            }
+        }
     }
 
-    fun onMailChange(newString: String) {
-        mail = newString
+    fun updateUserEmail(newEmail: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            it.updateEmail(newEmail).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    viewModelScope.launch {
+                        _currentUser.value?.let { currentUser ->
+                            val updatedUser = currentUser.copy(email = newEmail)
+                            repository.saveUser(updatedUser)
+                            _currentUser.value = updatedUser
+                        }
+                    }
+                } else {
+                    _authStateState.value =
+                        AuthState(error = task.exception?.message ?: "Failed to update email")
+                }
+            }
+        }
     }
 
-    fun onPasswordChange(newString: String) {
-        password = newString
+    fun updateUserPassword(newPassword: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            it.updatePassword(newPassword).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    viewModelScope.launch {
+                        _currentUser.value?.let { currentUser ->
+                            val updatedUser = currentUser.copy(password = newPassword)
+                            repository.saveUser(updatedUser)
+                            _currentUser.value = updatedUser
+                        }
+                    }
+                } else {
+                    _authStateState.value =
+                        AuthState(error = task.exception?.message ?: "Failed to update password")
+                }
+            }
+        }
     }
 
     fun onIsSheetOpenChange(newBoolean: Boolean) {
         isSheetOpen = newBoolean
     }
 
+    fun updateWishList(newWishList: List<ProductModel>) {
+        viewModelScope.launch {
+            _currentUser.value?.let { currentUser ->
+                val updatedUser = currentUser.copy(wishList = newWishList)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _favoriteProducts.value = newWishList.map { it.id }.toSet()
+            }
+        }
+    }
 
-    data class AuthState(
-        val success: Boolean = false,
-        val error: String = ""
-    )
+    fun updateCartList(newCartList: List<CartItemModel>) {
+        viewModelScope.launch {
+            _currentUser.value?.let { currentUser ->
+                val updatedUser = currentUser.copy(cartList = newCartList)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _cartProducts.value = newCartList.map { it.product }
+                _cartSize.value = newCartList.sumOf { it.quantity }
+            }
+        }
+    }
 
-    fun Double.format(digits: Int) = "%.${digits}f".format(this)
+    fun updateHistory(newSearchItem: String) {
+        viewModelScope.launch {
+            val currentUser = _currentUser.value
+            currentUser?.let { user ->
+                val updatedSearchHistory = user.searchHistory.toMutableList().apply {
+                    add(newSearchItem)
+                }
+                val updatedUser = user.copy(searchHistory = updatedSearchHistory)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                _historyList.value = updatedSearchHistory
+            }
+        }
+    }
 
-    enum class Currency {
-        USD, EUR, RUB
+    fun updateCountry(newCountry: String) {
+        viewModelScope.launch {
+            _currentUser.value?.let { currentUser ->
+                val updatedUser = currentUser.copy(country = newCountry)
+                repository.saveUser(updatedUser)
+                _currentUser.value = updatedUser
+                setSelectedCountry(newCountry)
+            }
+        }
     }
 }
+
+data class AuthState(
+    val success: Boolean = false,
+    val error: String = ""
+)
+
+fun Double.format(digits: Int) = "%.${digits}f".format(this)
+
+enum class Currency {
+    USD, EUR, RUB
+}
+
