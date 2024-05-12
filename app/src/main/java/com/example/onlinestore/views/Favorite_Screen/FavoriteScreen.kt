@@ -92,7 +92,6 @@ fun FavoriteItem(
         if (img.startsWith("[")) img.substring(2, img.length - 2)
         else img
     }.filterNot { it.isBlank() }
-    var addToCard by rememberSaveable { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { images.size })
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val priceOfProduct =
@@ -154,20 +153,17 @@ fun FavoriteItem(
                         }
                         Button(
                             onClick = {
-                                addToCard = !addToCard
-                                if (addToCard) viewModel.addToCart(productItem) else viewModel.removeFromCart(
-                                    productItem.id
-                                )
+                                viewModel.addToCart(productItem)
                             },
                             Modifier
                                 .fillMaxWidth()
                                 .height(29.dp),
                             shape = RoundedCornerShape(5.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(if (!addToCard) R.color.Green_Sheen else R.color.Red)),
+                            colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.Green_Sheen)),
                             contentPadding = PaddingValues(0.dp)
                         ) {
                             Text(
-                                text = if (!addToCard) "Add to cart" else "Remove",
+                                text = "Add to cart",
                                 fontSize = 12.sp,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
