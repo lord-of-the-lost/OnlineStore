@@ -40,72 +40,68 @@ fun ModalBottomSheet(
     onDismissRequest: () -> Unit,
     viewModel: StoreViewModel
 ) {
+    val name = remember { mutableStateOf(viewModel.currentUser.value?.name ?: "Anonymous") }
+    val email = remember { mutableStateOf(viewModel.currentUser.value?.email ?: "anonymous@xyz.io") }
+    val password = remember { mutableStateOf(viewModel.currentUser.value?.password ?: "vzlom_zhopbl") }
+
     ModalBottomSheet(
         onDismissRequest = { onDismissRequest() },
         containerColor = Color.White
     ) {
-        var name by remember {
-            mutableStateOf(viewModel.name)
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
             TextField(
-                value = viewModel.name,
-                onValueChanged = { viewModel.onNameChange(it) },
+                value = name.value,
+                onValueChanged = { name.value = it },
                 maxLines = 1,
-                keyboardType = KeyboardType.Text
+                keyboardType = KeyboardType.Text,
+                placeholder = "Enter your name"
             )
             Text(
-                text = if (viewModel.name.length == 0) {
-                    "Имя не может быть пустым"
-                } else {
-                    ""
-                },
+                text = if (name.value.isEmpty()) "Имя не может быть пустым" else "",
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
             )
             Spacer(Modifier.height(16.dp))
 
             TextField(
-                value = viewModel.mail,
-                onValueChanged = { viewModel.updateUserEmail(it) },
+                value = email.value,
+                onValueChanged = { email.value = it },
                 maxLines = 1,
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Email,
+                placeholder = "Enter your email"
             )
             Text(
-                text = if (viewModel.mail.length == 0) {
-                    "Почта не может быть пустой"
-                } else {
-                    ""
-                },
+                text = if (email.value.isEmpty()) "Почта не может быть пустой" else "",
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
             )
             Spacer(Modifier.height(16.dp))
 
             TextField(
-                value = viewModel.password,
-                onValueChanged = { viewModel.updateUserPassword(it) },
+                value = password.value,
+                onValueChanged = { password.value = it },
                 maxLines = 1,
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Password,
+                placeholder = "Enter your password"
             )
             Text(
-                text = if (viewModel.password.length == 0) {
-                    "Пароль не может быть пустым"
-                } else {
-                    ""
-                },
+                text = if (password.value.isEmpty()) "Пароль не может быть пустым" else "",
                 color = Color.Red,
                 modifier = Modifier.padding(start = 8.dp)
             )
             Spacer(Modifier.height(25.dp))
 
             OutlinedButton(
-                onClick = { onDismissRequest() },
+                onClick = {
+                    viewModel.onNameChange(name.value)
+                    viewModel.updateUserEmail(email.value)
+                    viewModel.updateUserPassword(password.value)
+                    onDismissRequest()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 8.dp, end = 8.dp),
@@ -113,7 +109,7 @@ fun ModalBottomSheet(
                 border = BorderStroke(1.dp, color = colorResource(id = R.color.Green_Sheen))
             ) {
                 Text(
-                    text = "Enter",
+                    text = "Save",
                     color = colorResource(id = R.color.Green_Sheen)
                 )
             }
@@ -126,12 +122,14 @@ fun TextField(
     value: String,
     onValueChanged: (String) -> Unit,
     maxLines: Int,
+    placeholder: String,
     keyboardType: KeyboardType,
 ) {
     OutlinedTextField(
         maxLines = maxLines,
         value = value,
         onValueChange = onValueChanged,
+        placeholder = { Text(placeholder)},
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier
             .fillMaxWidth()

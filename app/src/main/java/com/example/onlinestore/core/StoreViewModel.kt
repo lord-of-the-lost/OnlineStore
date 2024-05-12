@@ -186,6 +186,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
                     setSelectedCountry(user.country)
+                    _isUserManager.value = user.isManager
                 }
                 _isUserLoaded.value = true
             }
@@ -595,9 +596,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    var name by mutableStateOf("Dev p")
-    var mail by mutableStateOf("dev@gmail.com")
-    var password by mutableStateOf("1111")
     var isSheetOpen: Boolean by mutableStateOf(false)
     fun onNameChange(newName: String) {
         viewModelScope.launch {
