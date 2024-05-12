@@ -42,7 +42,7 @@ fun Element(
     text: String,
     value: String,
     onValueChanged: (String) -> Unit,
-    textSize: Int
+    textSize: Int,
 ) {
 
     Row(
@@ -73,7 +73,7 @@ fun Element(
                 fontSize = textSize.sp,
                 fontWeight = FontWeight.W700
             ),
-            keyboardOptions = if(text == "Price") KeyboardOptions(keyboardType = KeyboardType.Number)
+            keyboardOptions = if (text == "Price") KeyboardOptions(keyboardType = KeyboardType.Number)
             else KeyboardOptions.Default,
             shape = RoundedCornerShape(11.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -156,7 +156,7 @@ fun ElementDropDown(
                     onDismissRequest = { expanded = false },
                     Modifier.width(200.dp)
                 ) {
-                    category.forEach {item ->
+                    category.forEach { item ->
                         DropdownMenuItem(
                             text = { Text(item.name) },
                             onClick = {
