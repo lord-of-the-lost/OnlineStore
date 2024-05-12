@@ -1,6 +1,7 @@
 package com.example.onlinestore.views.manager_screen.update_Screen
 
 import android.widget.Toast
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +73,12 @@ fun UpdateScreen(viewModel: StoreViewModel) {
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(20.dp)
+                .border(
+                    width = 1.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    color = colorResource(R.color.custom_grey)
+                ),
             query = searchQueryState,
             onQueryChange = { text ->
                 searchQueryState = text
@@ -82,6 +92,19 @@ fun UpdateScreen(viewModel: StoreViewModel) {
                 isActive = false
 
             },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(R.drawable.search),
+                    "search",
+                    tint = colorResource(R.color.Grey)
+                )
+            },
+            shape = RoundedCornerShape(8.dp),
+            colors = SearchBarDefaults.colors(
+                containerColor = Color.White,
+                dividerColor = colorResource(R.color.gray_search)
+            )
+
         ) {
             LazyColumn {
                 items(productList.filter {
@@ -138,13 +161,15 @@ fun UpdateScreen(viewModel: StoreViewModel) {
         Button(
             onClick =
             {
-                viewModel.updateProduct(itemId,  PostProductModel(
-                    if (title == "") null else title,
-                    if (price == "") null else price.toInt(),
-                    if (description == "") null else description,
-                    if (categoryId == 0) null else categoryId,
-                    if (image[0] == "") null else image
-                ))
+                viewModel.updateProduct(
+                    itemId, PostProductModel(
+                        if (title == "") null else title,
+                        if (price == "") null else price.toInt(),
+                        if (description == "") null else description,
+                        if (categoryId == 0) null else categoryId,
+                        if (image[0] == "") null else image
+                    )
+                )
                 Toast.makeText(context, "Success Update", Toast.LENGTH_LONG).show()
             },
             modifier = Modifier
@@ -154,7 +179,12 @@ fun UpdateScreen(viewModel: StoreViewModel) {
                 containerColor = colorResource(R.color.Green_Sheen),
             )
         ) {
-            Text("Update Product", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "Update Product",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
