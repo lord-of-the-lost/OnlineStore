@@ -43,7 +43,7 @@ sealed class Screen(
         object UpdateProduct :
             NavigationItem(
                 "update_product",
-                "Update Product",
+                "Update product",
                 Icons.Default.ArrowBack,
                 null,
                 true
@@ -65,10 +65,10 @@ sealed class Screen(
             NavigationItem("delete_product", "Delete product", Icons.Default.ArrowBack, null, true)
 
         object CreateCategory :
-            NavigationItem("create_category", "Create Category", Icons.Default.ArrowBack, null, true)
+            NavigationItem("create_category", "Create category", Icons.Default.ArrowBack, null, true)
 
         object UpdateCategory :
-            NavigationItem("update_category", "Update Category", Icons.Default.ArrowBack, null, true)
+            NavigationItem("update_category", "Update category", Icons.Default.ArrowBack, null, true)
 
         object DeleteCategory :
             NavigationItem("delete_category", "Delete category", Icons.Default.ArrowBack, null, true)
