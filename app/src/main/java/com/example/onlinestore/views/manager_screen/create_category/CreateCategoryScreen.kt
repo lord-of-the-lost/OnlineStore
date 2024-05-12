@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.manager_screen.create_category
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.core.models.RequestModel.PostCategoryModel
 import com.example.onlinestore.views.manager_screen.add_screen.Element
+import com.example.onlinestore.views.manager_screen.update_category.isValidUrl
 
 @Composable
 fun CreateCategory(viewModel: StoreViewModel) {
@@ -55,9 +57,13 @@ fun CreateCategory(viewModel: StoreViewModel) {
                     containerColor = colorResource(R.color.Green_Sheen)
                 ),
                 onClick = {
-                    viewModel.postNewCategory(category,context)
-                    name = ""
-                    image = ""
+                    if(!isValidUrl(image)){
+                        Toast.makeText(context,"Invalid image address",Toast.LENGTH_LONG).show()
+                    }else {
+                        viewModel.postNewCategory(category, context)
+                        name = ""
+                        image = ""
+                    }
                 },
                 enabled = isActive
             ) {

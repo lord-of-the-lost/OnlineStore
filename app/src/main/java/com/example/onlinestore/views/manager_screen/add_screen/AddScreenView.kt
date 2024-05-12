@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.manager_screen.add_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.core.models.RequestModel.PostProductModel
+import com.example.onlinestore.views.manager_screen.update_category.isValidUrl
 
 @Composable
 fun AddProduct(
@@ -32,6 +34,7 @@ fun AddProduct(
 ) {
     val categoryList by viewModel.categories.collectAsState()
     val categoryId by viewModel.categoryId.collectAsState()
+    val clear by remember { mutableStateOf(false) }
 
 
     var title by remember {
@@ -76,9 +79,9 @@ fun AddProduct(
 
         if (price != "" && title != "" && description != "" && images != "") {
             Spacer(modifier = Modifier.padding(top = 40.dp))
-            PostButton(title, price.toInt(), description, categoryId, images, viewModel)
-
+            PostButton(title, price.toInt(), description, categoryId, images, viewModel,)
         }
+
 
     }
 
@@ -91,11 +94,11 @@ fun PostButton(
     price: Int,
     description: String,
     categoryId: Int,
-    images:String,
-    viewModel: StoreViewModel
+    images: String,
+    viewModel: StoreViewModel,
 ) {
     val context = LocalContext.current
-    val image: List<String> by remember { mutableStateOf( images.split(" "))}
+    val image: List<String> = images.split(" ")
     val product by remember {
         mutableStateOf(
             PostProductModel(
@@ -111,7 +114,11 @@ fun PostButton(
     Button(
         onClick =
         {
-            viewModel.postNewProduct(product,context)
+            if (!isValidListUrl(image)) {
+                Toast.makeText(context, "Invalid url image", Toast.LENGTH_LONG).show()
+            } else {
+                viewModel.postNewProduct(product, context)
+            }
         },
         modifier = Modifier
             .height(56.dp)
@@ -122,4 +129,13 @@ fun PostButton(
     ) {
         Text("Create product", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     }
+}
+
+fun isValidListUrl(images: List<String>): Boolean {
+    images.forEach {
+        if (isValidUrl(it)) {
+            return true
+        }
+    }
+    return false
 }
