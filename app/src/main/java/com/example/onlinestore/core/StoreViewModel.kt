@@ -1,7 +1,9 @@
 package com.example.onlinestore.core
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -94,7 +96,8 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     private var _searchString = MutableStateFlow("")
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
 
-    private var _categoryId = MutableStateFlow(1)
+
+    private var _categoryId = MutableStateFlow(0)
     var categoryId: StateFlow<Int> = _categoryId.asStateFlow()
 
     fun updateCategoryID(id: Int) {
@@ -306,12 +309,13 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     //Network VM logic
-    fun deleteProductById(productId: Int) {
+    fun deleteProductById(productId: Int, context: Context) {
         viewModelScope.launch {
             try {
                 networkService.deleteProduct(productId)
+                Toast.makeText(context, "Product not found", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                TODO()
+                Toast.makeText(context, "Success deleted", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -347,7 +351,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 _selectedMaxPrice.value =
                     productList.maxByOrNull { it.price }?.price?.toFloat() ?: 0f
             } catch (e: Exception) {
-                TODO()
+
             }
         }
     }
@@ -357,7 +361,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 networkService.updateProduct(id, product)
             } catch (e: Exception) {
-                TODO()
             }
         }
     }
@@ -368,7 +371,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 val productList = networkService.productByName(name)
                 _productsOnSearch.value = productList
             } catch (e: Exception) {
-                TODO()
+
             }
         }
     }
@@ -379,48 +382,53 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                 val categoryList = networkService.getAllCategories()
                 _categories.value = categoryList
             } catch (e: Exception) {
-                TODO()
             }
         }
     }
 
-    fun postNewProduct(product: PostProductModel) {
+    fun postNewProduct(product: PostProductModel, context: Context) {
         viewModelScope.launch {
             try {
                 networkService.createProduct(product)
+                Toast.makeText(context,"Success Added",Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                println(e.message)
+                Toast.makeText(context,"Error",Toast.LENGTH_LONG).show()
             }
         }
 
     }
 
-    fun postNewCategory(category: PostCategoryModel) {
+    fun postNewCategory(category: PostCategoryModel,context: Context) {
         viewModelScope.launch {
             try {
                 networkService.createCategory(category)
+                Toast.makeText(context,"Success Added",Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                TODO()
+                Toast.makeText(context,"Error",Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    fun updateCategory(id: Int,category: PostCategoryModel) {
+    fun updateCategory(id: Int, category: PostCategoryModel,context: Context) {
         viewModelScope.launch {
             try {
-                networkService.updateCategory(id,category)
+                networkService.updateCategory(id, category)
+                Toast.makeText(context, "Success updated", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                TODO()
+                Toast.makeText(context, "Error", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    fun deleteCategory(id: Int) {
+
+    fun deleteCategory(id: Int, context: Context) {
         viewModelScope.launch {
             try {
                 networkService.deleteCategory(id)
-            } catch (e: Exception) {
+                Toast.makeText(context, "Category must Be empty", Toast.LENGTH_LONG).show()
 
+            } catch (e: Exception) {
+                Toast.makeText(context, "Success deleted", Toast.LENGTH_LONG).show()
             }
         }
     }
