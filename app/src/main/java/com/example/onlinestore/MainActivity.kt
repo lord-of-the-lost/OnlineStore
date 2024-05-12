@@ -1,6 +1,7 @@
 package com.example.onlinestore
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -57,5 +58,10 @@ class MainActivity : ComponentActivity() {
         private val CAMERA_PERMISSION = arrayOf(
             Manifest.permission.CAMERA
         )
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        finish()
     }
 }

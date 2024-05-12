@@ -4,9 +4,13 @@ package com.example.onlinestore.navigation
 
 import android.annotation.SuppressLint
 import android.os.Build
+import androidx.navigation.compose.composable
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -15,9 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.AuthentificationScreen.LoginScreen
 import com.example.onlinestore.views.AuthentificationScreen.RegistrationScreen
@@ -46,29 +52,34 @@ fun MainNavigationScreen(viewModel: StoreViewModel) {
     val controller: NavController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
     val currentUser by viewModel.currentUser.collectAsState()
-    val startDestination = if (currentUser != null) {
-        Screen.BottomNavigation.Home.route
-    } else {
-        Screen.NavigationItem.Onboarding.route
-    }
-    val route = currentRoute(controller)
-    val screenWithScaffold = allScreen.firstOrNull { it.route == route }?.withScaffold
-
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            if (screenWithScaffold == true) {
-                TopNavigationBar({ controller.navigateUp() }, controller)
-            }
-        },
-        bottomBar = {
-            bottomScreen.forEach { screen ->
-                if (currentRoute(controller) == screen.broute)
-                    BottomNavigationBar(controller, viewModel)
-            }
+    val isUserLoaded by viewModel.isUserLoaded.collectAsState()
+    if (isUserLoaded) {
+        val startDestination = if (currentUser != null) {
+            Screen.BottomNavigation.Home.route
+        } else {
+            Screen.NavigationItem.Onboarding.route
         }
-    ) {
-        Navigation(controller, viewModel, startDestination, it)
+        val route = currentRoute(controller)
+        val screenWithScaffold = allScreen.firstOrNull { it.route == route }?.withScaffold
+
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                if (screenWithScaffold == true) {
+                    TopNavigationBar({ controller.navigateUp() }, controller)
+                }
+            },
+            bottomBar = {
+                bottomScreen.forEach { screen ->
+                    if (currentRoute(controller) == screen.broute)
+                        BottomNavigationBar(controller, viewModel)
+                }
+            }
+        ) {
+            Navigation(controller, viewModel, startDestination, it)
+        }
+    } else {
+        CircularProgressIndicator()
     }
 }
 
@@ -84,6 +95,10 @@ fun Navigation(
         navController = navController as NavHostController,
         startDestination = startDestination,
         modifier = Modifier.padding(dp),
+        enterTransition = { fadeIn(animationSpec = tween(1)) },
+        exitTransition = { fadeOut(animationSpec = tween(1)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(1)) },
+        popExitTransition = { fadeOut(animationSpec = tween(1)) }
     ) {
         composable(Screen.NavigationItem.Onboarding.route) {
             OnboardingScreen(Modifier, navController)

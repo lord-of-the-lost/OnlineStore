@@ -49,8 +49,6 @@ fun CardItem(
     }.filter { it.isNotEmpty() }
 
     val pagerState = rememberPagerState(pageCount = { images.size })
-    var addToCard by rememberSaveable { mutableStateOf(false) }
-
     val currentCurrency by viewModel.currentCurrency.collectAsState()
     val price = productItem.price?.let {
         viewModel.formatPriceWithCurrency(it.toDouble(), currentCurrency)
@@ -98,16 +96,13 @@ fun CardItem(
                     )
                     Button(
                         onClick = {
-                            addToCard = !addToCard
-                            if (addToCard) viewModel.addToCart(productItem) else viewModel.removeFromCart(
-                                productItem.id
-                            )
+                          viewModel.addToCart(productItem)
                         },
                         Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(5.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(if (!addToCard) R.color.Green_Sheen else R.color.Red))
+                        colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.Green_Sheen))
                     ) {
-                        Text(text = if (!addToCard) "Add to cart" else "Remove")
+                        Text(text = "Add to cart")
                     }
                 }
             }

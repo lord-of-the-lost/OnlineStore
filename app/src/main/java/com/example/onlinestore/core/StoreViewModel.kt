@@ -53,6 +53,9 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         StoreRepository(userDAO)
     }
 
+    private val _isUserLoaded = MutableStateFlow(false)
+    val isUserLoaded: StateFlow<Boolean> = _isUserLoaded.asStateFlow()
+
     private val _currentUser = MutableStateFlow<UserObject?>(null)
     val currentUser: StateFlow<UserObject?> = _currentUser.asStateFlow()
 
@@ -92,7 +95,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     private var _searchString = MutableStateFlow("")
     var searchSting: StateFlow<String> = _searchString.asStateFlow()
-
 
     private var _categoryId = MutableStateFlow(0)
     var categoryId: StateFlow<Int> = _categoryId.asStateFlow()
@@ -177,7 +179,6 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                     _historyList.value = user.searchHistory
                     updateWishList(user.wishList)
                     updateCartList(user.cartList)
-
                     user.avatar?.let { avatar ->
                         if (avatar.isNotEmpty()) {
                             val bitmap = BitmapFactory.decodeByteArray(avatar, 0, avatar.size)
@@ -186,6 +187,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     setSelectedCountry(user.country)
                 }
+                _isUserLoaded.value = true
             }
         }
     }
@@ -205,11 +207,15 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addToCart(product: ProductModel) {
         viewModelScope.launch {
-            val currentCartList = _currentUser.value?.cartList ?: listOf()
-            val newCartItemId = (currentCartList.maxByOrNull { it.id }?.id ?: 0) + 1
-            val newCartItem = CartItemModel(id = newCartItemId, product = product, quantity = 1)
-            val updatedCartList = currentCartList + newCartItem
-            updateCartList(updatedCartList)
+            val currentCartList = _currentUser.value?.cartList?.toMutableList() ?: mutableListOf()
+            val existsInCart = currentCartList.any { it.product.id == product.id }
+
+            if (!existsInCart) {
+                val newCartItemId = (currentCartList.maxByOrNull { it.id }?.id ?: 0) + 1
+                val newCartItem = CartItemModel(id = newCartItemId, product = product, quantity = 1)
+                currentCartList.add(newCartItem)
+                updateCartList(currentCartList)
+            }
         }
     }
 
