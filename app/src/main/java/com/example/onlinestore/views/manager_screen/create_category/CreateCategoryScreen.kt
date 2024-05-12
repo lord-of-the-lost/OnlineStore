@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.example.onlinestore.R
@@ -30,6 +31,7 @@ fun CreateCategory(viewModel: StoreViewModel) {
     var image by remember { mutableStateOf("") }
     var isActive by remember { mutableStateOf(false) }
     val category by remember { mutableStateOf(PostCategoryModel("", "")) }
+    val context = LocalContext.current
 
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -53,7 +55,7 @@ fun CreateCategory(viewModel: StoreViewModel) {
                     containerColor = colorResource(R.color.Green_Sheen)
                 ),
                 onClick = {
-                    viewModel.postNewCategory(category)
+                    viewModel.postNewCategory(category,context)
                     name = ""
                     image = ""
                 },

@@ -48,6 +48,7 @@ fun UpdateScreen(viewModel: StoreViewModel) {
     var isActive by remember { mutableStateOf(false) }
     var itemId by remember { mutableStateOf(0) }
 
+
     var title by remember {
         mutableStateOf("")
     }
@@ -83,19 +84,21 @@ fun UpdateScreen(viewModel: StoreViewModel) {
             },
         ) {
             LazyColumn {
-                items(productList.filter {it.title.lowercase().startsWith(searchQueryState.lowercase()) }) { item ->
+                items(productList.filter {
+                    it.title.lowercase().startsWith(searchQueryState.lowercase())
+                }) { item ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(10.dp).
-                        clickable {
-                            searchQueryState = item.title
-                            itemId = item.id
-                            isActive = false
-                        },
+                            .padding(10.dp)
+                            .clickable {
+                                searchQueryState = item.title
+                                itemId = item.id
+                                isActive = false
+                            },
                         contentAlignment = Alignment.Center,
 
-                    ){
+                        ) {
                         Text(item.title)
                     }
 
@@ -128,55 +131,34 @@ fun UpdateScreen(viewModel: StoreViewModel) {
         Element(text = "Images", value = images, onValueChanged = { images = it }, 16)
 
 
-        if (price != "" && title != "" && description != "" && images != "") {
-            Spacer(modifier = Modifier.padding(top = 40.dp))
-            PostButtonUpdate(title, price.toInt(), description, categoryId, images, viewModel,itemId)
+        val context = LocalContext.current
+        val image: List<String> = images.split(" ")
+        Spacer(modifier = Modifier.padding(top = 40.dp))
 
-        }
-
-    }
-
-}
-@Composable
-fun PostButtonUpdate(
-    title: String,
-    price: Int,
-    description: String,
-    categoryId: Int,
-    images:String,
-    viewModel: StoreViewModel,
-    itemId:Int
-) {
-    val context = LocalContext.current
-    val image: List<String> by remember { mutableStateOf( images.split(" "))}
-    val product by remember {
-        mutableStateOf(
-            PostProductModel(
-                title,
-                price,
-                description,
-                categoryId,
-                image
+        Button(
+            onClick =
+            {
+                viewModel.updateProduct(itemId,  PostProductModel(
+                    if (title == "") null else title,
+                    if (price == "") null else price.toInt(),
+                    if (description == "") null else description,
+                    if (categoryId == 0) null else categoryId,
+                    if (image[0] == "") null else image
+                ))
+                Toast.makeText(context, "Success Update", Toast.LENGTH_LONG).show()
+            },
+            modifier = Modifier
+                .height(56.dp)
+                .fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorResource(R.color.Green_Sheen),
             )
-        )
-    }
-
-    Button(
-        onClick =
-        {
-            viewModel.updateProduct(itemId,product)
-            Toast.makeText(context,"Success Update", Toast.LENGTH_LONG).show()
-        },
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(R.color.Green_Sheen),
-        )
-    ) {
-        Text("Send", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        ) {
+            Text("Update Product", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
     }
 }
+
 
 
 

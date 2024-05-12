@@ -1,6 +1,5 @@
 package com.example.onlinestore.views.manager_screen.update_category
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,12 +38,13 @@ import com.example.onlinestore.views.manager_screen.add_screen.Element
 @Composable
 fun UpdateCategory(viewModel: StoreViewModel) {
     val categories by viewModel.categories.collectAsState()
+    var name by remember { mutableStateOf("") }
     var newName by remember { mutableStateOf("") }
     var isActive by remember { mutableStateOf(false) }
     var isActiveButton by remember { mutableStateOf(false) }
     var itemId by remember { mutableStateOf(0) }
     var image by remember { mutableStateOf("") }
-    val category by remember { mutableStateOf(PostCategoryModel("", "")) }
+    val category by remember { mutableStateOf(PostCategoryModel()) }
     val context = LocalContext.current
 
     Column(
@@ -91,20 +91,20 @@ fun UpdateCategory(viewModel: StoreViewModel) {
 
             }
         }
-        Element(value = newName, onValueChanged = { newName = it }, text = "Name", textSize = 17)
+        Element(value = name, onValueChanged = { name = it }, text = "Name", textSize = 17)
         Spacer(modifier = Modifier.height(32.dp))
         Element(value = image, onValueChanged = { image = it }, text = "Image", textSize = 17)
         Spacer(modifier = Modifier.height(32.dp))
-        if(itemId != 0 && newName !="" && image != ""){
+        if (itemId != 0) {
             isActiveButton = true
-            category.name = newName
-            category.image = image
+            category.name = if(name == "") null else name
+            category.image = if(image == "") null else if(!isValidUrl(image)) null else image
         }
+
         Button(
             onClick =
             {
-                viewModel.updateCategory(itemId,category)
-                Toast.makeText(context,"Success Update", Toast.LENGTH_LONG).show()
+                viewModel.updateCategory(itemId, category,context)
             },
             modifier = Modifier
                 .height(56.dp)
@@ -114,7 +114,16 @@ fun UpdateCategory(viewModel: StoreViewModel) {
             ),
             enabled = isActiveButton
         ) {
-            Text("Update Category", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                "Update Category",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
+}
+fun isValidUrl(url: String): Boolean {
+    val regex = Regex("https?://\\S+")
+    return regex.matches(url)
 }

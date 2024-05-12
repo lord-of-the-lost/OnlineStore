@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.onlinestore.R
@@ -71,6 +73,8 @@ fun Element(
                 fontSize = textSize.sp,
                 fontWeight = FontWeight.W700
             ),
+            keyboardOptions = if(text == "Price") KeyboardOptions(keyboardType = KeyboardType.Number)
+            else KeyboardOptions.Default,
             shape = RoundedCornerShape(11.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = colorResource(id = R.color.gray_border),
@@ -94,7 +98,7 @@ fun ElementDropDown(
     }
 
     var textMenu by remember {
-        mutableStateOf("Category")
+        mutableStateOf("")
     }
 
     Row(

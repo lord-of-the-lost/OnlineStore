@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
@@ -188,15 +189,21 @@ fun NameWithPriceOfProduct(
                 modifier = Modifier
                     .size(46.dp),
                 onClick = { viewModel.toggleFavorite(product.id) }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(
-                        if (isFavorite) R.drawable.heart_fill
-                        else
-                            R.drawable.heart
-                    ),
-                    tint = Color(0xFF939393),
-                    contentDescription = null
-                )
+
+
+                if (isFavorite){
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.heart_fill),
+                        contentDescription = null,
+                        tint = colorResource(id = R.color.Green_Sheen)
+                    )
+                } else {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.heart),
+                        contentDescription = null,
+                        tint = Color(0xFF939393)
+                    )
+                }
             }
         }
         Text(
