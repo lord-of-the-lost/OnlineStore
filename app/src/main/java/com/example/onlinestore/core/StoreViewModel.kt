@@ -405,10 +405,10 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateCategory(id: Int) {
+    fun updateCategory(id: Int,category: PostCategoryModel) {
         viewModelScope.launch {
             try {
-                networkService.updateCategory(id)
+                networkService.updateCategory(id,category)
             } catch (e: Exception) {
                 TODO()
             }
@@ -420,7 +420,7 @@ class StoreViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 networkService.deleteCategory(id)
             } catch (e: Exception) {
-                TODO()
+
             }
         }
     }

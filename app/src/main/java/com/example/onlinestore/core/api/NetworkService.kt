@@ -32,26 +32,31 @@ interface NetworkService {
     @GET("categories/{id}/products")
     suspend fun getProductByCategory(@Path("id") id: Int): List<ProductModel>
 
-//    @GET("products/{id}")
+    //    @GET("products/{id}")
 //    suspend fun getProductByID(@Path("id") id: Int): ProductModel
     @POST("categories")
     suspend fun createCategory(@Body request: PostCategoryModel): Response<CategoryModel>
+
     @POST("products")
     suspend fun createProduct(@Body postRequest: PostProductModel): Response<ProductModel>
+
     @PUT("categories/{id}")
-    suspend fun updateCategory(@Path("id") id:Int):Response<CategoryModel>
+    suspend fun updateCategory(
+        @Path("id") id: Int,
+        @Body request: PostCategoryModel
+    ): Response<CategoryModel>
+
     @PUT("products/{id}")
     suspend fun updateProduct(
         @Path("id") id: Int,
         @Body postRequest: PostProductModel
     ): Response<ProductModel>
-    @DELETE("category/{id}")
+
+    @DELETE("categories/{id}")
     suspend fun deleteCategory(@Path("id") id: Int): Response<ResponseData>
+
     @DELETE("products/{id}")
-    suspend fun deleteProduct(@Path("id") id: Int)
-
-
-
+    suspend fun deleteProduct(@Path("id") id: Int):Response<ResponseData>
 
 
 }
