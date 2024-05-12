@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class PostCategoryModel(
     @SerializedName("name")
-    var name: String,
+    var name: String? = null,
     @SerializedName("image")
-    var image: String
+    var image: String? =null
 )

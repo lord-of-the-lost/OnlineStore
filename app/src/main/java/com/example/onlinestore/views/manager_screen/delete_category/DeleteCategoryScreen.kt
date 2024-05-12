@@ -1,6 +1,5 @@
 package com.example.onlinestore.views.manager_screen.delete_category
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,12 +30,16 @@ import com.example.onlinestore.core.StoreViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeleteCategory(viewModel: StoreViewModel){
+fun DeleteCategory(viewModel: StoreViewModel) {
+
     val categories by viewModel.categories.collectAsState()
     var searchQueryState by remember { mutableStateOf("") }
     var isActive by remember { mutableStateOf(false) }
+    var isActiveButton by remember { mutableStateOf(false) }
     var itemId by remember { mutableStateOf(0) }
     val context = LocalContext.current
+
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column() {
             SearchBar(
@@ -80,6 +83,9 @@ fun DeleteCategory(viewModel: StoreViewModel){
 
                 }
             }
+            if (itemId != 0) {
+                isActiveButton = true
+            }
 
             Button(
                 modifier = Modifier
@@ -89,16 +95,13 @@ fun DeleteCategory(viewModel: StoreViewModel){
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(R.color.Green_Sheen)
                 ),
+                enabled = isActiveButton,
                 onClick = {
-                    if(itemId != 0) {
-                        viewModel.deleteCategory(itemId)
-                        Toast.makeText(context, "Success delete", Toast.LENGTH_LONG).show()
-                        searchQueryState = ""
-                    }else {
-                        Toast.makeText(context, "The category will not be found", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                },
+                    viewModel.deleteCategory(itemId,context)
+                    searchQueryState = ""
+                    itemId = 0
+                    isActiveButton = false
+                          },
             ) {
                 Text("Delete product")
             }

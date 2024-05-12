@@ -1,6 +1,5 @@
 package com.example.onlinestore.views.manager_screen.add_screen
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -112,8 +111,7 @@ fun PostButton(
     Button(
         onClick =
         {
-            viewModel.postNewProduct(product)
-            Toast.makeText(context,"Success Added",Toast.LENGTH_LONG).show()
+            viewModel.postNewProduct(product,context)
         },
         modifier = Modifier
             .height(56.dp)
@@ -122,6 +120,6 @@ fun PostButton(
             containerColor = colorResource(R.color.Green_Sheen),
         )
     ) {
-        Text("Send", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        Text("Create product", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
     }
 }
