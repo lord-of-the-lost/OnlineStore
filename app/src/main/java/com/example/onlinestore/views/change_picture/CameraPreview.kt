@@ -41,9 +41,7 @@ fun CameraPreview(
     controller: LifecycleCameraController,
     modifier: Modifier = Modifier,
 ) {
-
     val lifecycleOwner = LocalLifecycleOwner.current
-
     AndroidView(
         factory = {
             PreviewView(it).apply {
@@ -61,7 +59,6 @@ fun Camera(
     viewModel: StoreViewModel,
     onBackClick: () -> Unit
 ) {
-
     val context = LocalContext.current
     val controller = remember {
         LifecycleCameraController(context).apply {
@@ -70,8 +67,6 @@ fun Camera(
             )
         }
     }
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -127,7 +122,7 @@ fun Camera(
                                     true
                                 )
 
-                                viewModel.bitmap.value = rotatedBitmap
+                                viewModel.onTakePhoto(rotatedBitmap)
 
                                 onBackClick()
                             }

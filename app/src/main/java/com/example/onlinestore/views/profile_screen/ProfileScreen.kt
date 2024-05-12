@@ -41,6 +41,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,7 +83,7 @@ import kotlin.time.times
 @RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
-
+    val user by viewModel.currentUser.collectAsState()
     val scope = rememberCoroutineScope()
     var showAlertDialog by remember { mutableStateOf(false) }
     var showChangePhotoDialog by remember { mutableStateOf(false) }
@@ -118,8 +119,9 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                 contentAlignment = Alignment.BottomEnd
             ) {
 
-                ImageViewForProfile(bitmap = viewModel.bitmap.value)
-
+                user?.let {
+                    ImageViewForProfile(bitmap = viewModel.bitmap.value)
+                }
                 Image(
                     painter = painterResource(id = R.drawable.ic_edit),
                     contentDescription = null,
@@ -139,77 +141,52 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(
-                        modifier = Modifier.clickable {
-                            scope.launch {
-                                viewModel.isSheetOpen = true
-                            }
-                        },
-                        text = if (viewModel.name.isEmpty() ||
-                            viewModel.name == " ".repeat(viewModel.name.length)
-                        ) {
-                            "Dev p"
-                        } else {
-                            viewModel.name
-                        },
-                        style = TextStyle(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.W600,
-                            lineHeight = 24.sp,
-                            color = Color.Black
-                        ),
-                        textAlign = TextAlign.Start,
-                    )
-                    Text(
-                        modifier = Modifier.clickable {
-                            scope.launch {
-                                viewModel.onIsSheetOpenChange(true)
-                            }
-                        },
-                        text = if (viewModel.mail.isEmpty() ||
-                            viewModel.mail == " ".repeat(viewModel.mail.length)
-                        ) {
-                            "dev@gmail.com"
-                        } else {
-                            viewModel.mail
-                        },
-                        style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.W400,
-                            lineHeight = 24.sp,
-                            color = CustomGrey2,
-                            textDecoration = TextDecoration.Underline,
-                            textAlign = TextAlign.Start,
-                        )
-                    )
-                    Row(modifier = Modifier.clickable {
-                        passwordViews = if (passwordViews) {
-                            false
-                        } else {
-                            true
-                        }
-
-                    }) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_eye),
-                            contentDescription = null,
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                    user?.let { currentUser ->
                         Text(
-                            text = if (viewModel.password.isEmpty() ||
-                                viewModel.password == " ".repeat(viewModel.password.length)
-                            ) {
-                                "Пароль не может быть пустым"
-                            } else {
-                                if (passwordViews) {
-                                    viewModel.password
-                                } else {
-                                    "*".repeat(viewModel.password.length)
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    viewModel.isSheetOpen = true
                                 }
                             },
-                            style = TextStyle(color = CustomGrey2)
+                            text = currentUser.name.ifBlank { "Dev p" },
+                            style = TextStyle(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.W600,
+                                lineHeight = 24.sp,
+                                color = Color.Black
+                            ),
+                            textAlign = TextAlign.Start,
                         )
-                    }
+                        Text(
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    viewModel.onIsSheetOpenChange(true)
+                                }
+                            },
+                            text = currentUser.email.ifBlank { "dev@gmail.com" },
+                            style = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W400,
+                                lineHeight = 24.sp,
+                                color = CustomGrey2,
+                                textDecoration = TextDecoration.Underline,
+                                textAlign = TextAlign.Start,
+                            )
+                        )
+                        Row(modifier = Modifier.clickable {
+                            passwordViews = !passwordViews
+                        }) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_eye),
+                                contentDescription = null,
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (passwordViews) currentUser.password else "*".repeat(currentUser.password.length),
+                                style = TextStyle(color = CustomGrey2)
+                            )
+                        }
+                    } ?: Text("Пожалуйста, войдите в систему")
                 }
             }
         }
@@ -224,6 +201,7 @@ fun ProfileScreen(navController: NavController, viewModel: StoreViewModel) {
         Spacer(Modifier.height(22.dp))
         ActionButton(title = "Sign Out", painterResource = R.drawable.ic_signout) {
             navController.navigate(Screen.NavigationItem.Onboarding.route)
+            viewModel.logout()
         }
         Spacer(Modifier.height(33.dp))
     }
@@ -427,8 +405,6 @@ fun AlertDialogTypeAccount(
                             } else {
                                 Icon(Icons.Default.Check, "")
                             }
-
-
                         },
 
                         visualTransformation = visibility,
@@ -454,14 +430,11 @@ fun AlertDialogTypeAccount(
                         }),
                         isError = Error
                     )
-
                 }
                 if (Error) {
                     Text("invalid password", color = Color.Red)
                 }
             }
-
-
         },
         containerColor = Color.White
     )

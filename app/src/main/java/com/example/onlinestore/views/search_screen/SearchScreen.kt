@@ -1,5 +1,6 @@
 package com.example.onlinestore.views.search_screen
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,22 +26,26 @@ import com.example.onlinestore.R
 import com.example.onlinestore.core.StoreViewModel
 import com.example.onlinestore.views.HomeScreen.ProductItem2
 
-
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun SearchScreen(controller: NavController, model: StoreViewModel) {
-
+    val items by model.historyList.collectAsState()
     val input by model.searchSting.collectAsState()
-    LaunchedEffect(model) {
-        model.deleteSearch()
-    }
     val productList by model.productsOnSearch.collectAsState()
-    if (input != "") {
-        model.loadProductByName(input)
-        ProductItem2(
-            productList,
-            model,
-            controller
-        )
+
+    LaunchedEffect(key1 = true) {
+        model.initializeSearchHistory()
+    }
+
+    if (input.isNotEmpty()) {
+        LaunchedEffect(key1 = input) {
+            model.loadProductByName(input)
+        }
+        if (productList.isNotEmpty()) {
+            ProductItem2(productList, model, controller)
+        } else {
+            Text("По вашему запросу ничего не найдено", modifier = Modifier.padding(16.dp))
+        }
     } else {
         model.clearProductSearch()
         Column(
@@ -56,31 +61,37 @@ fun SearchScreen(controller: NavController, model: StoreViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Last search",
+                    text = "История поиска",
                     fontWeight = FontWeight(500),
-                    fontSize = (21.sp),
+                    fontSize = 21.sp,
                     color = colorResource(id = R.color.gray_search)
                 )
 
-                Text(
-                    text = "Clear all",
-                    Modifier.clickable {
-                        model.deleteAllHistory()
-                    },
-                    color = colorResource(id = R.color.red_search),
-                    fontWeight = FontWeight(500),
-                    fontSize = (16.sp)
-                )
+                if (items.isNotEmpty()) {
+                    Text(
+                        text = "Очистить всё",
+                        Modifier.clickable {
+                            model.deleteAllHistory()
+                        },
+                        color = colorResource(id = R.color.red_search),
+                        fontWeight = FontWeight(500),
+                        fontSize = 16.sp
+                    )
+                }
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(model.historyList.reversed()) { item ->
-                    HistoryListItem(
-                        item = item,
-                        onDeleteClick = {
-                            model.deleteHistory(item)
-                        }, model
-                    )
+            if (items.isEmpty()) {
+                Text("Нет истории поиска", modifier = Modifier.padding(16.dp))
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(items.reversed()) { item ->
+                        HistoryListItem(
+                            item = item,
+                            onDeleteClick = {
+                                model.deleteHistory(item)
+                            }, model
+                        )
+                    }
                 }
             }
         }

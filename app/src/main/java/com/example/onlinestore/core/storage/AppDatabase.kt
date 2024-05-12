@@ -6,12 +6,11 @@ import androidx.room.TypeConverters
 import com.example.onlinestore.core.models.Converters
 
 @Database(
-    entities = [ProductObject::class, UserObject::class],
+    entities = [UserObject::class],
     version = 1,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun productDao(): ProductDAO
     abstract fun userDao(): UserDAO
 }
