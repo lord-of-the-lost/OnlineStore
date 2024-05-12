@@ -145,7 +145,7 @@ fun ElementDropDown(
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = null
-                ) //изменить дропдаун меню
+                )
 
                 DropdownMenu(
                     expanded = expanded,
